@@ -23,10 +23,13 @@ public class User {
     private String Password;
     private String email;
     private String fullName;
+    private String mobile;
     private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
     @OneToMany
     private Set<Address> addresses = new HashSet<>();
     @ManyToMany
     @JsonIgnore
     private Set<Coupon> usedCoupons = new HashSet<>();
+
+
 }

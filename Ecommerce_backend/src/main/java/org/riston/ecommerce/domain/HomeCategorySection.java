@@ -1,4 +1,4 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.domain;
 
 public enum HomeCategorySection {
     ELECTRIC_CATEGORIES,

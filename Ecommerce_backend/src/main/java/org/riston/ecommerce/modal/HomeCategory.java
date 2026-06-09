@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
+import org.riston.ecommerce.domain.HomeCategorySection;
 
 @Entity
 @Getter
@@ -23,5 +24,5 @@ public class HomeCategory {
 
     private String categoryId;
 
-    private  HomeCategorySection section;
+    private HomeCategorySection section;
 }

@@ -3,6 +3,8 @@ package org.riston.ecommerce.modal;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -22,4 +24,6 @@ public class VerificationCode {
 
     @OneToOne
     private Seller seller;
+
+    private LocalDateTime expiryDate;
 }

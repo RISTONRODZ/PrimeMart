@@ -38,7 +38,7 @@ public class Order {
 
     private Integer discount;
 
-    private OrderStatus orderStatus;
+    private PaymentStatus.OrderStatus orderStatus;
 
     private int totalItem;
 
