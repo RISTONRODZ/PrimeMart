@@ -6,6 +6,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,7 +19,9 @@ import lombok.NonNull;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.util.List;
+
 @RequiredArgsConstructor
+@Slf4j
 public class JwtTokenValidator extends OncePerRequestFilter {
 
     private final SecretKey key;
@@ -29,6 +32,7 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
+            log.info("JWT received by validator: {}", token);
             try {
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
@@ -43,7 +47,8 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auth);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-               throw new BadCredentialsException("Invalid JWT token");
+                log.error("JWT validation failed", e);
+                throw new BadCredentialsException("Invalid JWT token");
             }
         }
         filterChain.doFilter(request, response);

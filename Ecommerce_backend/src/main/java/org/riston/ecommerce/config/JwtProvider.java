@@ -3,6 +3,7 @@ package org.riston.ecommerce.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class JwtProvider {
 
     private final SecretKey key;
@@ -21,13 +23,15 @@ public class JwtProvider {
     public String generateToken(Authentication auth) {
         String roles = populateAuthorities(auth.getAuthorities());
 
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 86400000))
                 .claim("email", auth.getName())
                 .claim("authorities", roles)
                 .signWith(key)
                 .compact();
+        log.info("Generated JWT: {}",token);
+        return token;
     }
     @SuppressWarnings("unused")
     public String getEmailFromJwtToken(String jwt) {
