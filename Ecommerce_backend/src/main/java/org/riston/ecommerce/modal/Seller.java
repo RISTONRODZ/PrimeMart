@@ -8,14 +8,13 @@ import org.riston.ecommerce.domain.USER_ROLE;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String selerName;
+    private String sellerName;
 
     private String mobile;
     @Column(unique = true,nullable = false)
@@ -35,7 +34,7 @@ public class Seller {
 
     private USER_ROLE role=USER_ROLE.ROLE_SELLER;
 
-    private boolean isEmailVerified = false;
+    private Boolean emailVerified = false;
 
     private AccountStatus accountStatus = AccountStatus.PENDING_VERIFICATION;
 }

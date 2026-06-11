@@ -2,12 +2,12 @@ package org.riston.ecommerce.service.impl;
 
 import io.github.bucket4j.Bucket;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.USER_ROLE;
-import org.riston.ecommerce.modal.Cart;
-import org.riston.ecommerce.modal.SignupRequest;
-import org.riston.ecommerce.modal.User;
-import org.riston.ecommerce.modal.VerificationCode;
+import org.riston.ecommerce.exception.SellerNotFoundException;
+import org.riston.ecommerce.modal.*;
+import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.AuthResponse;
 import org.riston.ecommerce.repository.CartRepository;
@@ -24,7 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import util.OtpUtil;
+import org.riston.ecommerce.util.OtpUtil;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -44,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
     private final CustomUserServiceImpl customUserService;
-
+    private final SellerRepository sellerRepository;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     private Bucket createNewBucket() {
@@ -54,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void sendVerificationOtp(String email) {
+    public void sendVerificationOtp(String email, USER_ROLE role) {
         Bucket bucket = cache.computeIfAbsent(email, k -> createNewBucket());
 
         if (!bucket.tryConsume(1)) {
@@ -64,9 +65,17 @@ public class AuthServiceImpl implements AuthService {
         String SIGNIN_PREFIX = "signin_";
         if (email.startsWith(SIGNIN_PREFIX)) {
             email = email.substring(SIGNIN_PREFIX.length());
-            User user = userRepository.findByEmail(email);
-            if (user == null) {
-                throw new IllegalArgumentException("User doesn't exist for the provided email");
+            if (role.equals(USER_ROLE.ROLE_SELLER)) {
+                Seller seller = sellerRepository.findByEmail(email);
+                if (seller == null) {
+                    throw new SellerNotFoundException("seller not found with the provided email");
+                }
+            } else {
+                log.info("email: {}", email);
+                User user = userRepository.findByEmail(email);
+                if (user == null) {
+                    throw new IllegalArgumentException("User doesn't exist for the provided email");
+                }
             }
         }
         VerificationCode exists = verificationCodeRepository.findByEmail(email);
@@ -77,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setOtp(otp);
         verificationCode.setEmail(email);
-        verificationCode.setExpiryDate(LocalDateTime.now().plusMinutes(5));
+        verificationCode.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         verificationCodeRepository.save(verificationCode);
 
         String subject = "PrimeMart Verification Code";
@@ -165,7 +174,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             userDetails = customUserService.loadUserByUsername(email);
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
-            throw new BadCredentialsException("wrong otp");
+            throw new BadCredentialsException("DEBUG: Account matching identifier '" + email + "' was not found.");
         }
 
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(
@@ -185,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("wrong otp");
         }
 
-        verificationCodeRepository.delete(verificationCode);
+//        verificationCodeRepository.delete(verificationCode);
 
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }

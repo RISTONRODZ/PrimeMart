@@ -3,7 +3,7 @@ package org.riston.ecommerce.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.modal.SignupRequest;
-import org.riston.ecommerce.modal.VerificationCode;
+import org.riston.ecommerce.request.LoginOtpRequest;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.ApiResponse;
 import org.riston.ecommerce.response.AuthResponse;
@@ -32,9 +32,9 @@ public class AuthController {
     }
 
     @PostMapping("/send-otp")
-    public ResponseEntity<ApiResponse> sendOtpHandler(@RequestBody VerificationCode request) {
+    public ResponseEntity<ApiResponse> sendOtpHandler(@RequestBody LoginOtpRequest request) {
         log.info("Processing OTP request for email: {}", request.getEmail());
-        authService.sendVerificationOtp(request.getEmail());
+        authService.sendVerificationOtp(request.getEmail(), request.getRole());
 
         ApiResponse response = new ApiResponse();
         response.setMessage("otp sent successfully");

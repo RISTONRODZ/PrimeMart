@@ -23,7 +23,7 @@ public class Product {
 
     private int sellingPrice;
 
-    private int discountPrice;
+    private int mrpPrice;
 
     private int discountPercent;
 

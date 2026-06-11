@@ -1,4 +1,4 @@
-package util;
+package org.riston.ecommerce.util;
 
 import java.security.SecureRandom;
 
