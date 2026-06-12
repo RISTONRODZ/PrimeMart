@@ -1,6 +1,7 @@
 package org.riston.ecommerce.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,28 +21,19 @@ import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class AppConfig {
 
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, SecretKey secretKey) {
-        http.sessionManagement(management -> management.sessionCreationPolicy(
-                        SessionCreationPolicy.STATELESS
-                )).authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/api/products/*/reviews")
-                        .permitAll()
-                        .anyRequest().permitAll()
-
-                ).addFilterBefore(new JwtTokenValidator(secretKey), BasicAuthenticationFilter.class)
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+        http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)).authorizeHttpRequests(authorize -> authorize.requestMatchers("/api/**").authenticated().requestMatchers("/api/products/*/reviews").permitAll().anyRequest().permitAll()).addFilterBefore(new JwtTokenValidator(secretKey), BasicAuthenticationFilter.class).csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(corsConfigurationSource()));
         return http.build();
     }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         return (HttpServletRequest request) -> {
-
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedOrigins(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
@@ -50,7 +42,6 @@ public class AppConfig {
             config.setExposedHeaders(Collections.singletonList("Authorization"));
             config.setMaxAge(3600L);
             return config;
-
         };
     }
 
