@@ -3,13 +3,13 @@ package org.riston.ecommerce.controller;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.exception.InvalidOtpException;
-import org.riston.ecommerce.modal.Seller;
-import org.riston.ecommerce.modal.VerificationCode;
+import org.riston.ecommerce.model.Seller;
+import org.riston.ecommerce.model.VerificationCode;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.AuthResponse;
 import org.riston.ecommerce.service.AuthService;
-import org.riston.ecommerce.service.EmailService;
+import org.riston.ecommerce.service.impl.EmailServiceImpl;
 import org.riston.ecommerce.service.SellerService;
 import org.riston.ecommerce.util.OtpUtil;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ public class SellerController {
     private final SellerService sellerService;
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(@RequestBody LoginRequest req) {
@@ -110,7 +110,7 @@ public class SellerController {
 
                         "</div>";
 
-        emailService.sendVerificationOtpEmail(
+        emailServiceImpl.sendVerificationOtpEmail(
                 seller.getEmail(),
                 subject,
                 text

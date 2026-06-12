@@ -2,9 +2,9 @@ package org.riston.ecommerce.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.ProductException;
-import org.riston.ecommerce.modal.Category;
-import org.riston.ecommerce.modal.Product;
-import org.riston.ecommerce.modal.Seller;
+import org.riston.ecommerce.model.Category;
+import org.riston.ecommerce.model.Product;
+import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.repository.CategoryRepository;
 import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.request.CreateProductRequest;

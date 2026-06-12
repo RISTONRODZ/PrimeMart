@@ -1,7 +1,7 @@
 package org.riston.ecommerce.repository;
 
 import org.riston.ecommerce.domain.AccountStatus;
-import org.riston.ecommerce.modal.Seller;
+import org.riston.ecommerce.model.Seller;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

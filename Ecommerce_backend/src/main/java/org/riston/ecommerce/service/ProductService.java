@@ -1,13 +1,12 @@
 package org.riston.ecommerce.service;
 
-import org.riston.ecommerce.modal.Product;
-import org.riston.ecommerce.modal.Seller;
+import org.riston.ecommerce.model.Product;
+import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.request.CreateProductRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
+
 import java.util.List;
 
-@Service
 public interface ProductService {
     Product createProduct(CreateProductRequest req, Seller seller);
     void deleteProduct(Long ProductId);

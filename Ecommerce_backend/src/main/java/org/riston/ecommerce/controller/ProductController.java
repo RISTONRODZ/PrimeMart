@@ -1,7 +1,7 @@
 package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.riston.ecommerce.modal.Product;
+import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

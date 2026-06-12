@@ -3,7 +3,7 @@ package org.riston.ecommerce.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.exception.UserNotFoundException;
-import org.riston.ecommerce.modal.User;
+import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.service.UserService;
 import org.springframework.stereotype.Service;

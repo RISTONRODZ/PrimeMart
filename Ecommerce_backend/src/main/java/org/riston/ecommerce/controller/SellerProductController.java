@@ -1,8 +1,8 @@
 package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.riston.ecommerce.modal.Product;
-import org.riston.ecommerce.modal.Seller;
+import org.riston.ecommerce.model.Product;
+import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.request.CreateProductRequest;
 import org.riston.ecommerce.service.ProductService;
 import org.riston.ecommerce.service.SellerService;

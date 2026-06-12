@@ -1,7 +1,7 @@
 package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.domain.USER_ROLE;
-import org.riston.ecommerce.modal.SignupRequest;
+import org.riston.ecommerce.model.SignupRequest;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.AuthResponse;
 

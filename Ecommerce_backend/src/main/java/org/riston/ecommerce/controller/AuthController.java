@@ -2,7 +2,7 @@ package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.riston.ecommerce.modal.SignupRequest;
+import org.riston.ecommerce.model.SignupRequest;
 import org.riston.ecommerce.request.LoginOtpRequest;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.ApiResponse;

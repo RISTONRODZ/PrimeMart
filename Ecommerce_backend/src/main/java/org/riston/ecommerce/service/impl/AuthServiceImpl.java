@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.exception.SellerNotFoundException;
-import org.riston.ecommerce.modal.*;
+import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.AuthResponse;
@@ -14,7 +14,6 @@ import org.riston.ecommerce.repository.CartRepository;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
 import org.riston.ecommerce.service.AuthService;
-import org.riston.ecommerce.service.EmailService;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -43,7 +42,7 @@ public class AuthServiceImpl implements AuthService {
     private final CartRepository cartRepository;
     private final JwtProvider jwtProvider;
     private final VerificationCodeRepository verificationCodeRepository;
-    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
     private final CustomUserServiceImpl customUserService;
     private final SellerRepository sellerRepository;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
@@ -100,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
                 "  </div>" +
                 "  <p style='font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 40px;'>If you did not request this code, please ignore this email.</p>" +
                 "</div>";
-        emailService.sendVerificationOtpEmail(email, subject, text);
+        emailServiceImpl.sendVerificationOtpEmail(email, subject, text);
     }
 
     @Override

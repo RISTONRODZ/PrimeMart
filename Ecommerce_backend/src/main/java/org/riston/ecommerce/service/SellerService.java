@@ -1,7 +1,7 @@
 package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.domain.AccountStatus;
-import org.riston.ecommerce.modal.Seller;
+import org.riston.ecommerce.model.Seller;
 
 import java.util.List;
 

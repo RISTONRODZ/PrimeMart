@@ -1,7 +1,7 @@
 package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.riston.ecommerce.modal.User;
+import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,6 +1,6 @@
 package org.riston.ecommerce.repository;
 
-import org.riston.ecommerce.modal.Product;
+import org.riston.ecommerce.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

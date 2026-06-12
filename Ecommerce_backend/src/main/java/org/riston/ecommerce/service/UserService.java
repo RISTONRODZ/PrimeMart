@@ -1,6 +1,6 @@
 package org.riston.ecommerce.service;
 
-import org.riston.ecommerce.modal.User;
+import org.riston.ecommerce.model.User;
 
 
 public interface UserService {
