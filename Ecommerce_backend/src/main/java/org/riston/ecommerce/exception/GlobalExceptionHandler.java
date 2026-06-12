@@ -7,7 +7,6 @@ import org.riston.ecommerce.response.ErrorResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -23,7 +22,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error,HttpStatus.FORBIDDEN);
     }
-    @ExceptionHandler({SellerNotFoundException.class, UserNotFoundException.class})
+    @ExceptionHandler({SellerNotFoundException.class, UserNotFoundException.class,ItemNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFoundExceptions(RuntimeException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
@@ -78,5 +77,6 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
 
 }
