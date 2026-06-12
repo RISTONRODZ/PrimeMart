@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error,HttpStatus.FORBIDDEN);
     }
-    @ExceptionHandler({SellerNotFoundException.class, UserNotFoundException.class,ItemNotFoundException.class})
+    @ExceptionHandler({SellerNotFoundException.class, UserNotFoundException.class,ItemNotFoundException.class,OrderNotFoundException.class, OrderItemNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFoundExceptions(RuntimeException ex, HttpServletRequest request) {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
