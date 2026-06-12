@@ -25,4 +25,6 @@ public class SellerReport {
 
     private Long netEarnings = 0L;
 
+    private Long canceledOrders = 0L;
+
 }

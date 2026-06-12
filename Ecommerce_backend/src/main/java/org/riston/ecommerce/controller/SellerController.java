@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.exception.InvalidOtpException;
 import org.riston.ecommerce.model.Seller;
+import org.riston.ecommerce.model.SellerReport;
 import org.riston.ecommerce.model.VerificationCode;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
 import org.riston.ecommerce.request.LoginRequest;
 import org.riston.ecommerce.response.AuthResponse;
 import org.riston.ecommerce.service.AuthService;
+import org.riston.ecommerce.service.SellerReportService;
 import org.riston.ecommerce.service.impl.EmailServiceImpl;
 import org.riston.ecommerce.service.SellerService;
 import org.riston.ecommerce.util.OtpUtil;
@@ -27,7 +29,7 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
     private final EmailServiceImpl emailServiceImpl;
-
+    private final SellerReportService sellerReportService;
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(@RequestBody LoginRequest req) {
         String email = req.getEmail();
@@ -130,7 +132,14 @@ public class SellerController {
         Seller seller = sellerService.getSellerProfile(jwt);
         return new ResponseEntity<>(seller, HttpStatus.OK);
     }
+    @GetMapping("/report")
+    public ResponseEntity<SellerReport> getSellerReport(
+            @RequestHeader("Authorization") String jwt)  {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        SellerReport report = sellerReportService.getSellerReport(seller);
 
+        return new ResponseEntity<>(report, HttpStatus.OK);
+    }
     @GetMapping
     public ResponseEntity<List<Seller>> getAllSeller(
             @RequestParam(required = false) AccountStatus status

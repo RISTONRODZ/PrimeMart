@@ -2,6 +2,7 @@ package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.riston.ecommerce.domain.OrderStatus;
 import org.riston.ecommerce.domain.PaymentStatus;
 
 import java.time.LocalDateTime;
@@ -27,9 +28,10 @@ public class Order {
     @Column(name = "seller_id")
     private Long sellerId;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
-
+    @ManyToOne
+    private Address shippingAddress;
     @Embedded
     private PaymentDetails paymentDetails = new PaymentDetails();
     private double totalMrpPrice;
@@ -38,7 +40,7 @@ public class Order {
 
     private Integer discount;
 
-    private PaymentStatus.OrderStatus orderStatus;
+    private OrderStatus orderStatus;
 
     private int totalItem;
 
@@ -46,5 +48,12 @@ public class Order {
 
     private LocalDateTime orderDate = LocalDateTime.now();
     private LocalDateTime deliverDate = orderDate.plusDays(7);
-
+    /**
+     * Helper method to maintain bidirectional relationship consistency.
+     * Ensures both sides of the association are updated when an item is added.
+     */
+    public void addOrderItem(OrderItem item) {
+        orderItems.add(item);
+        item.setOrder(this);
+    }
 }
