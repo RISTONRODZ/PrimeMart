@@ -1,4 +1,4 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,19 +11,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class VerificationCode {
+public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String otp;
 
-    private String email;
-
-    @OneToOne
-    private User user;
+    @ManyToOne
+    private User customer;
 
     @OneToOne
+    private  Order order;
+
+    @ManyToOne
     private Seller seller;
 
-    private LocalDateTime expiryDate;
+    private LocalDateTime date = LocalDateTime.now();
 }

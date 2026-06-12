@@ -1,4 +1,4 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,4 +24,5 @@ public class Cart {
     private int totalItem;
     private int discount;
     private String couponCode;
+    private Integer totalMrpPrice;
 }

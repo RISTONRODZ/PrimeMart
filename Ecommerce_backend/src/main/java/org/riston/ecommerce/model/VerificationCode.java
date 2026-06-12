@@ -1,10 +1,9 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -12,14 +11,19 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
-public class Wishlist {
+public class VerificationCode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private String otp;
+
+    private String email;
 
     @OneToOne
     private User user;
 
-    @ManyToMany
-    private Set<Product> products = new HashSet<>();
+    @OneToOne
+    private Seller seller;
+
+    private LocalDateTime expiryDate;
 }

@@ -1,4 +1,4 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

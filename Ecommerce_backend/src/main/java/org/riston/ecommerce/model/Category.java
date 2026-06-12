@@ -1,4 +1,4 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

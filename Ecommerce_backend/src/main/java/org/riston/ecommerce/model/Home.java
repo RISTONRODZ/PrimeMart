@@ -1,9 +1,10 @@
-package org.riston.ecommerce.modal;
+package org.riston.ecommerce.model;
 
 import lombok.Data;
 
 import java.util.List;
 @Data
+@SuppressWarnings("unused")
 public class Home {
     private List<HomeCategory> grid;
 
