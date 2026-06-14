@@ -27,4 +27,6 @@ public class SellerReport {
 
     private Long canceledOrders = 0L;
 
+    private Long totalOrders = 0L;
+
 }

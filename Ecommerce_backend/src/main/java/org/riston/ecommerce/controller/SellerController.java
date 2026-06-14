@@ -14,6 +14,7 @@ import org.riston.ecommerce.service.SellerReportService;
 import org.riston.ecommerce.service.impl.EmailServiceImpl;
 import org.riston.ecommerce.service.SellerService;
 import org.riston.ecommerce.util.OtpUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,8 @@ public class SellerController {
     private final AuthService authService;
     private final EmailServiceImpl emailServiceImpl;
     private final SellerReportService sellerReportService;
+    @Value("${app.frontend.url}")
+    private String frontendBaseUrl;
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(@RequestBody LoginRequest req) {
         String email = req.getEmail();
@@ -60,8 +63,7 @@ public class SellerController {
         verificationCodeRepository.save(verificationCode);
         String subject = "Welcome to PrimeMart - Verify Your Seller Account";
 
-        String verificationUrl =
-                "http://localhost:3000/verify-seller?otp=" + otp;
+        String verificationUrl = frontendBaseUrl + "/verify-seller?otp=" + otp;
 
         String text =
                 "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; " +
