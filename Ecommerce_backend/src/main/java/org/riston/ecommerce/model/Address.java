@@ -11,7 +11,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(of = {"address", "city", "state", "pinCode", "mobileNumber"})
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
