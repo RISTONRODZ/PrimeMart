@@ -32,8 +32,7 @@ public class OrderServiceImpl implements OrderService {
             userRepository.save(user);
         }
         Address savedAddress = addressRepository.save(shippingAddress);
-        Map<Long, List<CartItem>> itemsBySeller = cart.getCartItems().stream()
-                .collect(Collectors.groupingBy(item -> item.getProduct().getSeller().getId()));
+        Map<Long, List<CartItem>> itemsBySeller = cart.getCartItems().stream().collect(Collectors.groupingBy(item -> item.getProduct().getSeller().getId()));
 
         Set<Order> orders = new HashSet<>();
 
@@ -104,14 +103,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderItem getOrderItemById(Long id) {
-        return orderItemRepository.findById(id).orElseThrow(() ->
-                new OrderItemNotFoundException("Order item does not exist")
-        );
+        return orderItemRepository.findById(id).orElseThrow(() -> new OrderItemNotFoundException("Order item does not exist"));
     }
 
     @Override
     public Order findOrderByOrderId(String orderId) {
-        return orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+        return orderRepository.findByOrderId(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
     }
 }

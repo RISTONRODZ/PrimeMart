@@ -20,7 +20,7 @@ import org.riston.ecommerce.repository.PaymentOrderRepository;
 import org.riston.ecommerce.service.PaymentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
+import org.riston.ecommerce.service.TransactionService;
 import java.util.Set;
 
 @Service
@@ -30,6 +30,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentOrderRepository paymentOrderRepository;
     private final RazorpayClient razorpayClient;
+    private final TransactionService transactionService;
     @Value("${app.frontend.success-url}")
     private String successUrl;
 
@@ -106,7 +107,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             Long paidAmount = ((Number) payment.get("amount")).longValue();
             Long expectedAmountInPaise = paymentOrder.getAmount() * 100;
-            
+
             if (paidAmount.longValue() != expectedAmountInPaise.longValue()) {
                 paymentOrder.setStatus(PaymentOrderStatus.FAILED);
                 throw new PaymentValidationException(
@@ -116,6 +117,7 @@ public class PaymentServiceImpl implements PaymentService {
             }
             for (Order order : paymentOrder.getOrders()) {
                 order.setPaymentStatus(PaymentStatus.COMPLETED);
+                transactionService.createTransaction(order);
             }
             paymentOrder.setStatus(PaymentOrderStatus.SUCCESS);
 
