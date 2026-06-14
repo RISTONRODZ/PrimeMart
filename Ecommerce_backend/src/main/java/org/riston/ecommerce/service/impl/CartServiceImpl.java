@@ -31,14 +31,24 @@ public class CartServiceImpl implements CartService {
             cart.getCartItems().add(cartItem);
             cartItem.setMrpPrice(quantity * product.getMrpPrice());
             cartItem.setCart(cart);
-            return cartItemRepository.save(cartItem);
+            CartItem savedItem = cartItemRepository.save(cartItem);
+            cart.getCartItems().add(savedItem);
+            findUserCart(user);
+            cartItemRepository.save(cartItem);
+            return savedItem;
         }
         return isPresent;
     }
 
     @Override
     public Cart findUserCart(User user) {
+
         Cart cart = cartRepository.findByUserId(user.getId());
+        if (cart == null) {
+            cart = new Cart();
+            cart.setUser(user);
+            cart = cartRepository.save(cart);
+        }
         int totalPrice = 0;
         int totalDiscountedPrice = 0;
         int totalItem = 0;
