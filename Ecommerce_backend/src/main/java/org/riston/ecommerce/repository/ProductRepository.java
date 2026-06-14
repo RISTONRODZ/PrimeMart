@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findBySellerId(Long sellerId);
-
+    List<Product> findByCategoryId(Long categoryId);
     @Query("SELECT p FROM Product p WHERE :query IS NULL OR " +
             "lower(p.title) LIKE lower(concat('%', :query, '%')) OR " +
             "lower(p.category.name) LIKE lower(concat('%', :query, '%'))")
