@@ -12,7 +12,8 @@ public interface OrderService {
     List<Order> usersOrderHistory(Long userId);
     List<Order> sellersOrder(Long userId);
     Order updateOrderStatus(String orderId, OrderStatus orderStatus);
-    Order cancelOrder(String orderId,User user);
+    void cancelOrder(String orderId,User user);
     OrderItem getOrderItemById(Long Id) throws OrderNotFoundException;
     Order findOrderByOrderId(String orderId);
+    void processCancelOrder(String orderId, User user);
 }

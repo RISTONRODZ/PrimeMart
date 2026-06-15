@@ -1,19 +1,21 @@
 package org.riston.ecommerce.service.impl;
 
 import io.github.bucket4j.Bucket;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.exception.SellerNotFoundException;
 import org.riston.ecommerce.model.*;
-import org.riston.ecommerce.repository.SellerRepository;
-import org.riston.ecommerce.request.LoginRequest;
-import org.riston.ecommerce.response.AuthResponse;
 import org.riston.ecommerce.repository.CartRepository;
+import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
+import org.riston.ecommerce.request.LoginRequest;
+import org.riston.ecommerce.response.AuthResponse;
 import org.riston.ecommerce.service.AuthService;
+import org.riston.ecommerce.util.OtpUtil;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.riston.ecommerce.util.OtpUtil;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -48,12 +49,11 @@ public class AuthServiceImpl implements AuthService {
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     private Bucket createNewBucket() {
-        return Bucket.builder()
-                .addLimit(limit -> limit.capacity(3).refillIntervally(1, Duration.ofMinutes(1)))
-                .build();
+        return Bucket.builder().addLimit(limit -> limit.capacity(3).refillIntervally(1, Duration.ofMinutes(1))).build();
     }
 
     @Override
+    @Transactional
     public void sendVerificationOtp(String email, USER_ROLE role) {
         Bucket bucket = cache.computeIfAbsent(email, k -> createNewBucket());
 
@@ -89,16 +89,7 @@ public class AuthServiceImpl implements AuthService {
         verificationCodeRepository.save(verificationCode);
 
         String subject = "PrimeMart Verification Code";
-        String text = "<div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>" +
-                "  <h2 style='color: #111827; text-align: center;'>Verify Your Account</h2>" +
-                "  <p style='font-size: 16px; color: #4B5563; line-height: 1.5;'>Please use the following One-Time Password (OTP) to complete your action. This code is valid for 5 minutes:</p>" +
-                "  <div style='text-align: center; margin: 30px 0;'>" +
-                "    <span style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4F46E5; background-color: #F3F4F6; padding: 12px 30px; border-radius: 6px; border: 1px dashed #4F46E5;'>" +
-                otp +
-                "    </span>" +
-                "  </div>" +
-                "  <p style='font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 40px;'>If you did not request this code, please ignore this email.</p>" +
-                "</div>";
+        String text = "<div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>" + "  <h2 style='color: #111827; text-align: center;'>Verify Your Account</h2>" + "  <p style='font-size: 16px; color: #4B5563; line-height: 1.5;'>Please use the following One-Time Password (OTP) to complete your action. This code is valid for 15 minutes:</p>" + "  <div style='text-align: center; margin: 30px 0;'>" + "    <span style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4F46E5; background-color: #F3F4F6; padding: 12px 30px; border-radius: 6px; border: 1px dashed #4F46E5;'>" + otp + "    </span>" + "  </div>" + "  <p style='font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 40px;'>If you did not request this code, please ignore this email.</p>" + "</div>";
         emailServiceImpl.sendVerificationOtpEmail(email, subject, text);
     }
 
@@ -106,51 +97,39 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse registerUser(SignupRequest req) {
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.getEmail());
 
-        if (verificationCode == null) {
-            throw new IllegalArgumentException("invalid otp");
+        if (verificationCode == null || !verificationCode.getOtp().equals(req.getOtp())) {
+            throw new IllegalArgumentException("Invalid OTP");
         }
-
         if (LocalDateTime.now().isAfter(verificationCode.getExpiryDate())) {
             verificationCodeRepository.delete(verificationCode);
-            throw new IllegalArgumentException("invalid otp");
+            throw new IllegalArgumentException("OTP has expired");
         }
-
-        if (!verificationCode.getOtp().equals(req.getOtp())) {
-            throw new IllegalArgumentException("invalid otp");
-        }
-
         verificationCodeRepository.delete(verificationCode);
-
-        User user = userRepository.findByEmail(req.getEmail());
-        if (user == null) {
-            User createdUser = new User();
-            createdUser.setEmail(req.getEmail());
-            createdUser.setFullName(req.getFullName());
-            createdUser.setMobile("8786543456");
-            createdUser.setPassword(passwordEncoder.encode(req.getOtp()));
-            user = userRepository.save(createdUser);
-
-            Cart cart = new Cart();
-            cart.setUser(user);
-            cartRepository.save(cart);
+        User existingUser = userRepository.findByEmail(req.getEmail());
+        if (existingUser != null) {
+            throw new IllegalArgumentException("User already exists with this email");
         }
+
+        User createdUser = new User();
+        createdUser.setEmail(req.getEmail());
+        createdUser.setFullName(req.getFullName());
+        createdUser.setMobile("8786543456");
+        createdUser.setPassword(passwordEncoder.encode(req.getOtp()));
+        User user = userRepository.save(createdUser);
+
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cartRepository.save(cart);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(USER_ROLE.ROLE_CUSTOMER.toString()));
 
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(req.getEmail(), null, authorities);
-
+        Authentication authentication = new UsernamePasswordAuthenticationToken(req.getEmail(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtProvider.generateToken(authentication);
 
-        AuthResponse res = new AuthResponse();
-        res.setJwt(jwt);
-        res.setMessage("register success");
-        res.setRole(USER_ROLE.ROLE_CUSTOMER);
-
-        return res;
+        return new AuthResponse(jwt, "Register success", USER_ROLE.ROLE_CUSTOMER);
     }
 
     @Override
@@ -175,10 +154,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
             throw new BadCredentialsException("DEBUG: Account matching identifier '" + email + "' was not found.");
         }
-
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(
-                email.startsWith("seller_") ? email.substring("seller_".length()) : email
-        );
+        String lookupEmail = email.startsWith("seller_") ? email.substring("seller_".length()) : email;
+        log.info("Attempting to find OTP in DB for email: '{}'", lookupEmail);
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(email.startsWith("seller_") ? email.substring("seller_".length()) : email);
 
         if (verificationCode == null) {
             throw new BadCredentialsException("wrong otp");

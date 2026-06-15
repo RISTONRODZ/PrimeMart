@@ -13,11 +13,11 @@ import org.riston.ecommerce.domain.PaymentStatus;
 import org.riston.ecommerce.exception.PaymentGatewayException;
 import org.riston.ecommerce.exception.PaymentOrderNotFoundException;
 import org.riston.ecommerce.exception.PaymentValidationException;
-import org.riston.ecommerce.model.Order;
-import org.riston.ecommerce.model.PaymentOrder;
-import org.riston.ecommerce.model.User;
+import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.PaymentOrderRepository;
 import org.riston.ecommerce.service.PaymentService;
+import org.riston.ecommerce.service.SellerReportService;
+import org.riston.ecommerce.service.SellerService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.riston.ecommerce.service.TransactionService;
@@ -33,6 +33,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final TransactionService transactionService;
     @Value("${app.frontend.success-url}")
     private String successUrl;
+    private final SellerService sellerService;
+    private final SellerReportService sellerReportService;
 
     @Override
     public PaymentOrder createOrder(User user, Set<Order> orders) {
@@ -178,6 +180,20 @@ public class PaymentServiceImpl implements PaymentService {
                     "Failed to create payment link",
                     e
             );
+        }
+    }
+    @Transactional
+    @Override
+    public void updateSellerReports(PaymentOrder paymentOrder) {
+        for (Order order : paymentOrder.getOrders()) {
+            Seller seller = sellerService.getSellerById(order.getSellerId());
+            SellerReport report = sellerReportService.getSellerReport(seller);
+
+            report.setTotalOrders(report.getTotalOrders() + 1);
+            report.setTotalEarnings(report.getTotalEarnings() + order.getTotalSellingPrice());
+
+            sellerReportService.updateSellerReport(report);
+            log.info("Report updated for seller: {}", seller.getId());
         }
     }
 

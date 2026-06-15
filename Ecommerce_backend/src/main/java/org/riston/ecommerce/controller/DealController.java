@@ -23,23 +23,17 @@ public class DealController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Deal> updateDeal(
-            @PathVariable Long id,
-            @RequestBody Deal deal
-    ) {
+    public ResponseEntity<Deal> updateDeal(@PathVariable Long id, @RequestBody Deal deal) {
         Deal updatedDeal = dealService.updateDeal(deal, id);
         return ResponseEntity.ok(updatedDeal);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteDeals(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<String>> deleteDeals(@PathVariable Long id) {
         dealService.deleteDeal(id);
-
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setMessage("Deal deleted");
-
-        return new ResponseEntity<>(apiResponse, HttpStatus.ACCEPTED);
+        return ResponseEntity.ok(ApiResponse.success("Deal deleted successfully",null));
     }
+
     @GetMapping
     public ResponseEntity<List<Deal>> getDeals() {
         List<Deal> deals = dealService.getDeals();

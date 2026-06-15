@@ -18,4 +18,5 @@ public interface PaymentService {
                                 String paymentId);
 
     PaymentLink createRazorpayPaymentLink(User user, Long amount, Long orderId);
+    void updateSellerReports(PaymentOrder paymentOrder);
 }

@@ -1,5 +1,6 @@
 package org.riston.ecommerce.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Cart;
 import org.riston.ecommerce.model.CartItem;
@@ -34,7 +35,7 @@ public class CartController {
     }
 
     @PutMapping("/add")
-    public ResponseEntity<CartItem> addItemToCart(@RequestBody AddItemRequest req,
+    public ResponseEntity<ApiResponse<CartItem>> addItemToCart(@Valid @RequestBody AddItemRequest req,
                                                   @RequestHeader("Authorization") String jwt) {
         User user = userService.findUserByJwtToken(jwt);
         Product product = productService.findProductById(req.getProductId());
@@ -43,13 +44,11 @@ public class CartController {
                 product,
                 req.getSize(),
                 req.getQuantity());
-        ApiResponse res = new ApiResponse();
-        res.setMessage("Item added to cart successfully");
-        return new ResponseEntity<>(item, HttpStatus.ACCEPTED);
+        return ResponseEntity.ok(ApiResponse.success("Item added to cart successfully", item));
     }
 
     @DeleteMapping("/item/{cartItemId}")
-    public ResponseEntity<ApiResponse> deleteCartItemHandler(
+    public ResponseEntity<ApiResponse<String>> deleteCartItemHandler(
             @PathVariable Long cartItemId,
             @RequestHeader("Authorization") String jwt) {
 
@@ -57,10 +56,7 @@ public class CartController {
 
         cartItemService.removeCartItem(user.getId(), cartItemId);
 
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setMessage("Item removed from cart");
-
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
+        return ResponseEntity.ok(ApiResponse.success("Item removed from cart", null));
     }
 
     @PutMapping("/item/{cartItemId}")

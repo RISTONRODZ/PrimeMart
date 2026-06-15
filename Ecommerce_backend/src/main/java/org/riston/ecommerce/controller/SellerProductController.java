@@ -1,5 +1,6 @@
 package org.riston.ecommerce.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Seller;
@@ -28,21 +29,23 @@ public class SellerProductController {
 
     @PostMapping()
     public ResponseEntity<Product> createProduct(
-            @RequestBody CreateProductRequest request,
+            @Valid @RequestBody CreateProductRequest request,
             @RequestHeader("Authorization") String jwt
     ) {
         Seller seller = sellerService.getSellerProfile(jwt);
         Product product = productService.createProduct(request, seller);
-        return new ResponseEntity<>(product,HttpStatus.CREATED);
+        return new ResponseEntity<>(product, HttpStatus.CREATED);
     }
+
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable Long productId){
+    public ResponseEntity<Product> deleteProduct(@PathVariable Long productId) {
         productService.deleteProduct(productId);
         return ResponseEntity.noContent().build();
     }
+
     @PutMapping("/{productId}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long productId,
-                                                 @RequestBody Product product){
+                                                 @RequestBody Product product) {
         return ResponseEntity.ok(productService.updateProduct(productId, product));
     }
 }

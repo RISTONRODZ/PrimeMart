@@ -1,5 +1,6 @@
 package org.riston.ecommerce.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.OrderStatus;
 import org.riston.ecommerce.domain.PaymentStatus;
@@ -11,6 +12,8 @@ import org.riston.ecommerce.repository.OrderItemRepository;
 import org.riston.ecommerce.repository.OrderRepository;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.service.OrderService;
+import org.riston.ecommerce.service.SellerReportService;
+import org.riston.ecommerce.service.SellerService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,8 @@ public class OrderServiceImpl implements OrderService {
     private final AddressRepository addressRepository;
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
+    private final SellerService sellerService;
+    private final SellerReportService sellerReportService;
 
     @Override
     public Set<Order> createOrder(User user, Address shippingAddress, Cart cart) {
@@ -92,13 +97,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order cancelOrder(String orderId, User user) {
+    public void cancelOrder(String orderId, User user) {
         Order order = findOrderByOrderId(orderId);
         if (!user.getId().equals(order.getUser().getId())) {
             throw new AccessDeniedException("You do not have permission to cancel this order.");
         }
         order.setOrderStatus(OrderStatus.CANCELED);
-        return orderRepository.save(order);
+         orderRepository.save(order);
     }
 
     @Override
@@ -109,5 +114,24 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order findOrderByOrderId(String orderId) {
         return orderRepository.findByOrderId(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
+    }
+
+    @Override
+    @Transactional
+    public void processCancelOrder(String orderId, User user) {
+        Order order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+
+        if (OrderStatus.CANCELED.equals(order.getOrderStatus())) {
+            throw new IllegalStateException("Order is already canceled.");
+        }
+        this.cancelOrder(orderId, user);
+        Seller seller = sellerService.getSellerById(order.getSellerId());
+        SellerReport report = sellerReportService.getSellerReport(seller);
+
+        report.setCanceledOrders(report.getCanceledOrders() + 1);
+        report.setTotalRefunds(report.getTotalRefunds() + order.getTotalSellingPrice());
+
+        sellerReportService.updateSellerReport(report);
     }
 }
