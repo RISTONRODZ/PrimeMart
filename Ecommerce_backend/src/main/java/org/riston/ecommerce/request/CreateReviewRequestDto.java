@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 @Data
-public class CreateReviewRequest {
+public class CreateReviewRequestDto {
     @NotBlank(message = "Review must not be blank")
     private String reviewText;
     @NotNull

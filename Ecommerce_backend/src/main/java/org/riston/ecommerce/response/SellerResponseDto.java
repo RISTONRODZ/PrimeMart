@@ -2,7 +2,7 @@ package org.riston.ecommerce.response;
 
 import org.riston.ecommerce.domain.AccountStatus;
 
-public record SellerResponse(
+public record SellerResponseDto(
         Long id,
         String sellerName,
         String email,

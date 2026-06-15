@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class LoginRequest {
+public class LoginRequestDto {
     @Email(message = "Invalid email format")
     @NotBlank(message = "Email is required")
     private String email;

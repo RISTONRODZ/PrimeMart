@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AddItemRequest {
+public class AddItemRequestDto {
     @NotBlank(message = "Size is required")
     private String size;
     @Min(value = 1, message = "Quantity must be at least 1")

@@ -4,7 +4,7 @@ import lombok.Data;
 import org.riston.ecommerce.domain.USER_ROLE;
 
 @Data
-public class LoginOtpRequest {
+public class LoginOtpRequestDto {
     @Email(message = "please enter a valid email")
     @NotBlank(message = "Email cannot be blank")
     private String email;
