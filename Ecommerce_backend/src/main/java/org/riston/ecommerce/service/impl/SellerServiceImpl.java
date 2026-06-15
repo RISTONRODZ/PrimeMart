@@ -1,13 +1,12 @@
 package org.riston.ecommerce.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.exception.SellerNotFoundException;
-import org.riston.ecommerce.model.Address;
 import org.riston.ecommerce.model.Seller;
-import org.riston.ecommerce.repository.AddressRepository;
 import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +20,6 @@ public class SellerServiceImpl implements SellerService {
     private final SellerRepository sellerRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
-    private final AddressRepository addressRepository;
-
     @Override
     public Seller getSellerProfile(String jwt) {
         String email = jwtProvider.getEmailFromJwtToken(jwt);
@@ -30,27 +27,27 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
+    @Transactional
     public Seller createSeller(Seller seller) {
         Seller sellerExists = sellerRepository.findByEmail(seller.getEmail());
         if (sellerExists != null) {
-            throw new SellerNotFoundException("Seller account not found");
+            throw new RuntimeException("A seller with this email already exists.");
         }
-        Address saveAddress = addressRepository.save(seller.getPickupAddress());
+
         Seller newSeller = new Seller();
         newSeller.setEmail(seller.getEmail());
         newSeller.setPassword(passwordEncoder.encode(seller.getPassword()));
         newSeller.setSellerName(seller.getSellerName());
-        newSeller.setPickupAddress(saveAddress);
+        newSeller.setMobile(seller.getMobile());
         newSeller.setGSTIN(seller.getGSTIN());
         newSeller.setRole(USER_ROLE.ROLE_SELLER);
-        newSeller.setMobile(seller.getMobile());
-        newSeller.setBankDetails(seller.getBankDetails());
-        newSeller.setBusinessDetails(seller.getBusinessDetails());
         newSeller.setEmailVerified(false);
         newSeller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
+        newSeller.setPickupAddress(seller.getPickupAddress());
+        newSeller.setBankDetails(seller.getBankDetails());
+        newSeller.setBusinessDetails(seller.getBusinessDetails());
         return sellerRepository.save(newSeller);
     }
-
     @Override
     public Seller getSellerById(Long id) {
         return sellerRepository.findById(id)
@@ -68,7 +65,10 @@ public class SellerServiceImpl implements SellerService {
 
     @Override
     public List<Seller> getAllSellers(AccountStatus status) {
-        return sellerRepository.findByAccountStatus(status);
+        if (status != null) {
+            return sellerRepository.findByAccountStatus(status);
+        }
+        return sellerRepository.findAll();
     }
 
     @Override
@@ -113,9 +113,11 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
+    @Transactional
     public Seller verifyEmail(String email, String otp) {
         Seller seller = getSellerByEmail(email);
         seller.setEmailVerified(true);
+        seller.setAccountStatus(AccountStatus.ACTIVE);
         return sellerRepository.save(seller);
     }
 
