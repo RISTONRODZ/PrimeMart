@@ -28,6 +28,7 @@ public class Review {
 
     @JsonIgnore
     @ManyToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @ManyToOne

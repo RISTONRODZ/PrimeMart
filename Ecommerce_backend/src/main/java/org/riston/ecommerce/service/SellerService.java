@@ -2,6 +2,7 @@ package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.model.Seller;
+import org.riston.ecommerce.response.SellerStatusResponse;
 
 import java.util.List;
 
@@ -23,4 +24,5 @@ public interface SellerService {
     Seller verifyEmail(String email, String otp);
     @SuppressWarnings("unused")
     Seller updateSellerAccountStatus(Long sellerId, AccountStatus status);
+    SellerStatusResponse mapToStatusResponse(Seller seller);
 }

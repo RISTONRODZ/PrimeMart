@@ -3,14 +3,13 @@ package org.riston.ecommerce.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Data;
 
-@Data
-public class LoginRequestDto {
-    @Email(message = "Invalid email format")
-    @NotBlank(message = "Email is required")
-    private String email;
-    @NotBlank(message = "OTP is required")
-    @Pattern(regexp = "^\\d{6}$", message = "OTP must be exactly 6 digits")
-    private String otp;
-}
+public record LoginRequestDto(
+        @Email(message = "Invalid email format")
+        @NotBlank(message = "Email is required")
+        String email,
+
+        @NotBlank(message = "OTP is required")
+        @Pattern(regexp = "^\\d{6}$", message = "OTP must be exactly 6 digits")
+        String otp
+) {}

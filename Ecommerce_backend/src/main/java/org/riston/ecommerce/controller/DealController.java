@@ -2,7 +2,7 @@ package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Deal;
-import org.riston.ecommerce.response.ApiResponse;
+import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.service.DealService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,31 +12,32 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/deals")
+@RequestMapping("/api/v1/admin/deals")
 public class DealController {
     private final DealService dealService;
 
     @PostMapping
-    public ResponseEntity<Deal> createDeals(@RequestBody Deal deals) {
+    public ResponseEntity<ApiResponseDto<Deal>> createDeals(@RequestBody Deal deals) {
         Deal createdDeals = dealService.createDeal(deals);
-        return new ResponseEntity<>(createdDeals, HttpStatus.ACCEPTED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponseDto.success("Deal created successfully", createdDeals));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Deal> updateDeal(@PathVariable Long id, @RequestBody Deal deal) {
+    public ResponseEntity<ApiResponseDto<Deal>> updateDeal(@PathVariable Long id, @RequestBody Deal deal) {
         Deal updatedDeal = dealService.updateDeal(deal, id);
-        return ResponseEntity.ok(updatedDeal);
+        return ResponseEntity.ok(ApiResponseDto.success("Deal updated successfully", updatedDeal));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<String>> deleteDeals(@PathVariable Long id) {
+    public ResponseEntity<ApiResponseDto<String>> deleteDeals(@PathVariable Long id) {
         dealService.deleteDeal(id);
-        return ResponseEntity.ok(ApiResponse.success("Deal deleted successfully",null));
+        return ResponseEntity.ok(ApiResponseDto.success("Deal deleted successfully", null));
     }
 
     @GetMapping
-    public ResponseEntity<List<Deal>> getDeals() {
+    public ResponseEntity<ApiResponseDto<List<Deal>>> getDeals() {
         List<Deal> deals = dealService.getDeals();
-        return ResponseEntity.ok(deals);
+        return ResponseEntity.ok(ApiResponseDto.success("Deals fetched successfully", deals));
     }
 }

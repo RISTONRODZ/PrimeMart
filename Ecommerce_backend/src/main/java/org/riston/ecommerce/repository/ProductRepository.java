@@ -1,19 +1,14 @@
 package org.riston.ecommerce.repository;
 
 import org.riston.ecommerce.model.Product;
+import org.riston.ecommerce.model.Seller;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findBySellerId(Long sellerId);
     List<Product> findByCategoryId(Long categoryId);
-    @Query("SELECT p FROM Product p WHERE :query IS NULL OR " +
-            "lower(p.title) LIKE lower(concat('%', :query, '%')) OR " +
-            "lower(p.category.name) LIKE lower(concat('%', :query, '%'))")
-    List<Product> searchProduct(@Param("query") String query);
-
+    Product findByTitleAndSeller(String title, Seller seller);
 }

@@ -2,13 +2,13 @@ package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.model.SignupRequest;
-import org.riston.ecommerce.request.LoginRequest;
-import org.riston.ecommerce.response.AuthResponse;
+import org.riston.ecommerce.request.LoginRequestDto;
+import org.riston.ecommerce.response.AuthResponseDto;
 
 public interface AuthService {
     void sendVerificationOtp(String email, USER_ROLE role);
 
-    AuthResponse registerUser(SignupRequest req);
+    AuthResponseDto registerUser(SignupRequest req);
 
-    AuthResponse loginUser(LoginRequest res);
+    AuthResponseDto loginUser(LoginRequestDto res);
 }

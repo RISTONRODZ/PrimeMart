@@ -4,7 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Seller;
-import org.riston.ecommerce.request.CreateProductRequest;
+import org.riston.ecommerce.request.CreateProductRequestDto;
+import org.riston.ecommerce.response.ProductResponse;
 import org.riston.ecommerce.service.ProductService;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.http.HttpStatus;
@@ -15,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sellers/products")
+@RequestMapping("/api/v1/sellers/products")
 public class SellerProductController {
     private final ProductService productService;
     private final SellerService sellerService;
@@ -27,14 +28,26 @@ public class SellerProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @PostMapping()
-    public ResponseEntity<Product> createProduct(
-            @Valid @RequestBody CreateProductRequest request,
-            @RequestHeader("Authorization") String jwt
-    ) {
+    @PostMapping
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody CreateProductRequestDto request,
+                                                         @RequestHeader("Authorization") String jwt) {
         Seller seller = sellerService.getSellerProfile(jwt);
         Product product = productService.createProduct(request, seller);
-        return new ResponseEntity<>(product, HttpStatus.CREATED);
+
+        ProductResponse response = new ProductResponse(
+                product.getId(),
+                product.getTitle(),
+                product.getDescription(),
+                product.getSellingPrice(),
+                product.getMrpPrice(),
+                product.getDiscountPercent(),
+                product.getColor(),
+                product.getImages(),
+                product.getCategory().getCategoryId(),
+                product.getSeller().getSellerName()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{productId}")
@@ -44,8 +57,7 @@ public class SellerProductController {
     }
 
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId,
-                                                 @RequestBody Product product) {
+    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody Product product) {
         return ResponseEntity.ok(productService.updateProduct(productId, product));
     }
 }

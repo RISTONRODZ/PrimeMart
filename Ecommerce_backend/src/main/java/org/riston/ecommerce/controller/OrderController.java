@@ -4,9 +4,15 @@ import com.razorpay.PaymentLink;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.PaymentOrderRepository;
-import org.riston.ecommerce.response.ApiResponse; // Import added
-import org.riston.ecommerce.response.PaymentLinkResponse;
-import org.riston.ecommerce.service.*;
+import org.riston.ecommerce.response.ApiResponseDto;
+import org.riston.ecommerce.response.OrderDto;
+import org.riston.ecommerce.response.OrderItemDto;
+import org.riston.ecommerce.response.PaymentLinkResponseDto;
+import org.riston.ecommerce.service.CartService;
+import org.riston.ecommerce.service.OrderService;
+import org.riston.ecommerce.service.PaymentService;
+import org.riston.ecommerce.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 public class OrderController {
 
@@ -25,7 +31,7 @@ public class OrderController {
     private final PaymentOrderRepository paymentOrderRepository;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PaymentLinkResponse>> createOrderHandler(@RequestBody Address shippingAddress, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<ApiResponseDto<PaymentLinkResponseDto>> createOrderHandler(@RequestBody Address shippingAddress, @RequestHeader("Authorization") String jwt) {
         User user = userService.findUserByJwtToken(jwt);
         Cart cart = cartService.findUserCart(user);
 
@@ -34,39 +40,42 @@ public class OrderController {
 
         PaymentLink payment = paymentService.createRazorpayPaymentLink(user, paymentOrder.getAmount(), paymentOrder.getId());
 
-        PaymentLinkResponse res = new PaymentLinkResponse();
-        res.setPayment_link_url(payment.get("short_url"));
-        res.setPayment_link_id(payment.get("id"));
+        PaymentLinkResponseDto res = new PaymentLinkResponseDto(String.valueOf(payment.get("short_url")), String.valueOf(payment.get("id")));
 
-        paymentOrder.setPaymentLinkId(payment.get("id"));
+        paymentOrder.setPaymentLinkId(String.valueOf(payment.get("id")));
+
         paymentOrderRepository.save(paymentOrder);
 
-        return ResponseEntity.ok(ApiResponse.success("Order created successfully", res));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.success("Order created successfully", res));
     }
 
     @GetMapping("/history")
-    public ResponseEntity<ApiResponse<List<Order>>> usersOrderHistoryHandler(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<ApiResponseDto<List<OrderDto>>> usersOrderHistoryHandler(@RequestHeader("Authorization") String jwt) {
         User user = userService.findUserByJwtToken(jwt);
         List<Order> orders = orderService.usersOrderHistory(user.getId());
-        return ResponseEntity.ok(ApiResponse.success("Order history retrieved", orders));
+
+        List<OrderDto> dtos = orders.stream().map(OrderDto::fromEntity).toList();
+
+        return ResponseEntity.ok(ApiResponseDto.success("Order history retrieved", dtos));
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponse<Order>> getOrderById(@PathVariable String orderId) {
+    public ResponseEntity<ApiResponseDto<OrderDto>> getOrderById(@PathVariable String orderId) {
         Order order = orderService.findOrderByOrderId(orderId);
-        return ResponseEntity.ok(ApiResponse.success("Order found", order));
+        return ResponseEntity.ok(ApiResponseDto.success("Order found", OrderDto.fromEntity(order)));
     }
 
     @GetMapping("/item/{orderItemId}")
-    public ResponseEntity<ApiResponse<OrderItem>> getOrderItemById(@PathVariable Long orderItemId) {
+    public ResponseEntity<ApiResponseDto<OrderItemDto>> getOrderItemById(@PathVariable Long orderItemId) {
         OrderItem orderItem = orderService.getOrderItemById(orderItemId);
-        return ResponseEntity.ok(ApiResponse.success("Order item found", orderItem));
+        return ResponseEntity.ok(ApiResponseDto.success("Order item found", OrderItemDto.fromEntity(orderItem)));
     }
 
     @PutMapping("/{orderId}/cancel")
-    public ResponseEntity<ApiResponse<Order>> cancelOrder(@PathVariable String orderId, @RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<ApiResponseDto<Void>> cancelOrder(@PathVariable String orderId, @RequestHeader("Authorization") String jwt) {
         User user = userService.findUserByJwtToken(jwt);
         orderService.processCancelOrder(orderId, user);
-        return ResponseEntity.ok(ApiResponse.success("Order canceled successfully", null));
+
+        return ResponseEntity.ok(ApiResponseDto.success("Order canceled successfully", null));
     }
 }

@@ -1,9 +1,8 @@
 package org.riston.ecommerce.response;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Data
-public class PaymentLinkResponseDto {
-    private String payment_link_url;
-    private String payment_link_id;
-}
+public record PaymentLinkResponseDto(
+        @JsonProperty("payment_link_url") String paymentLinkUrl,
+        @JsonProperty("payment_link_id") String paymentLinkId
+) {}

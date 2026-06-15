@@ -2,18 +2,17 @@ package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Seller;
-import org.riston.ecommerce.request.CreateProductRequest;
+import org.riston.ecommerce.request.CreateProductRequestDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface ProductService {
-    Product createProduct(CreateProductRequest req, Seller seller);
+    Product createProduct(CreateProductRequestDto req, Seller seller);
     void deleteProduct(Long ProductId);
     Product updateProduct(Long productId,Product product);
     Product findProductById(Long productId);
-    List<Product> searchProducts(String query);
-
     Page<Product> getAllProducts(
             String category,
             String brand,
@@ -28,5 +27,6 @@ public interface ProductService {
     );
 
     List<Product> getProductBySellerId(Long sellerId);
+    Page<Product> searchAndFilter(String query, String category, Pageable pageable);
 
 }

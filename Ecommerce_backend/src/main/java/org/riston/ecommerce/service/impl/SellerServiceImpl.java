@@ -8,6 +8,7 @@ import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.exception.SellerNotFoundException;
 import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.repository.SellerRepository;
+import org.riston.ecommerce.response.SellerStatusResponse;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -126,5 +127,14 @@ public class SellerServiceImpl implements SellerService {
         Seller seller = getSellerById(sellerId);
         seller.setAccountStatus(status);
         return sellerRepository.save(seller);
+    }
+
+    public SellerStatusResponse mapToStatusResponse(Seller seller) {
+        return new SellerStatusResponse(
+                seller.getId(),
+                seller.getSellerName(),
+                seller.getBusinessDetails().getBusinessEmail(),
+                seller.getAccountStatus()
+        );
     }
 }

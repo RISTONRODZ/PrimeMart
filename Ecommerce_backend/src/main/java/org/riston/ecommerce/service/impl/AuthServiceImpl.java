@@ -12,8 +12,8 @@ import org.riston.ecommerce.repository.CartRepository;
 import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
-import org.riston.ecommerce.request.LoginRequest;
-import org.riston.ecommerce.response.AuthResponse;
+import org.riston.ecommerce.request.LoginRequestDto;
+import org.riston.ecommerce.response.AuthResponseDto;
 import org.riston.ecommerce.service.AuthService;
 import org.riston.ecommerce.util.OtpUtil;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse registerUser(SignupRequest req) {
+    public AuthResponseDto registerUser(SignupRequest req) {
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.getEmail());
 
         if (verificationCode == null || !verificationCode.getOtp().equals(req.getOtp())) {
@@ -129,22 +129,23 @@ public class AuthServiceImpl implements AuthService {
 
         String jwt = jwtProvider.generateToken(authentication);
 
-        return new AuthResponse(jwt, "Register success", USER_ROLE.ROLE_CUSTOMER);
+        return new AuthResponseDto(jwt, "Register success", USER_ROLE.ROLE_CUSTOMER);
     }
 
     @Override
-    public AuthResponse loginUser(LoginRequest req) {
-        String email = req.getEmail();
-        String otp = req.getOtp();
+    public AuthResponseDto loginUser(LoginRequestDto req) {
+        String email = req.email();
+        String otp = req.otp();
         Authentication authentication = authenticate(email, otp);
         String token = jwtProvider.generateToken(authentication);
-        AuthResponse authResponse = new AuthResponse();
-        authResponse.setJwt(token);
-        authResponse.setMessage("Login success");
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String roleName = authorities.isEmpty() ? null : authorities.iterator().next().getAuthority();
-        authResponse.setRole(USER_ROLE.valueOf(roleName));
-        return authResponse;
+        USER_ROLE userRole = roleName != null ? USER_ROLE.valueOf(roleName) : null;
+        return new AuthResponseDto(
+                token,
+                "Login success",
+                userRole
+        );
     }
 
     private Authentication authenticate(String email, String otp) {
@@ -156,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
         }
         String lookupEmail = email.startsWith("seller_") ? email.substring("seller_".length()) : email;
         log.info("Attempting to find OTP in DB for email: '{}'", lookupEmail);
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(email.startsWith("seller_") ? email.substring("seller_".length()) : email);
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(lookupEmail);
 
         if (verificationCode == null) {
             throw new BadCredentialsException("wrong otp");

@@ -1,5 +1,9 @@
 package org.riston.ecommerce.service.impl;
 
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.ProductException;
 import org.riston.ecommerce.model.Category;
@@ -7,16 +11,14 @@ import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.repository.CategoryRepository;
 import org.riston.ecommerce.repository.ProductRepository;
-import org.riston.ecommerce.request.CreateProductRequest;
+import org.riston.ecommerce.request.CreateProductRequestDto;
 import org.riston.ecommerce.service.ProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,51 +26,47 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    private final ProductRepository productRepository;
     public final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
     @Override
-    public Product createProduct(CreateProductRequest req, Seller seller) {
-        Category category = categoryRepository.findByCategoryId(req.getCategory());
-        if (category == null) {
-            category = new Category();
-            category.setCategoryId(req.getCategory());
-            category.setLevel(1);
-            category = categoryRepository.save(category);
+    @Transactional
+    public Product createProduct(CreateProductRequestDto req, Seller seller) {
+        Product existingProduct = productRepository.findByTitleAndSeller(req.title(), seller);
+        if (existingProduct != null) {
+            throw new RuntimeException("Product with title '" + req.title() + "' already exists.");
         }
 
-        Category category1 = categoryRepository.findByCategoryId(req.getCategory2());
-        if (category1 == null) {
-            category1 = new Category();
-            category1.setCategoryId(req.getCategory2());
-            category1.setLevel(2);
-            category1.setParentCategory(category);
-            category1 = categoryRepository.save(category1);
-        }
+        Category category = findOrCreateCategory(req.category(), 1, null);
+        Category category1 = findOrCreateCategory(req.category2(), 2, category);
+        Category category2 = findOrCreateCategory(req.category3(), 3, category1);
 
-        Category category2 = categoryRepository.findByCategoryId(req.getCategory3());
-        if (category2 == null) {
-            category2 = new Category();
-            category2.setCategoryId(req.getCategory3());
-            category2.setLevel(3);
-            category2.setParentCategory(category1);
-            category2 = categoryRepository.save(category2);
-        }
-
-        int discountPercentage = calculateDiscountPercentage(req.getMrpPrice(), req.getSellingPrice());
         Product product = new Product();
         product.setSeller(seller);
         product.setCategory(category2);
-        product.setDescription(req.getDescription());
+        product.setDescription(req.description());
         product.setCreatedAt(LocalDateTime.now());
-        product.setTitle(req.getTitle());
-        product.setColor(req.getColor());
-        product.setSellingPrice(req.getSellingPrice());
-        product.setImages(req.getImages());
-        product.setMrpPrice(req.getMrpPrice());
-        product.setSizes(req.getSizes());
-        product.setDiscountPercent(discountPercentage);
+        product.setTitle(req.title());
+        product.setColor(req.color());
+        product.setSellingPrice(req.sellingPrice());
+        product.setImages(req.images());
+        product.setMrpPrice(req.mrpPrice());
+        product.setSizes(req.sizes());
+        product.setDiscountPercent(calculateDiscountPercentage(req.mrpPrice(), req.sellingPrice()));
+
         return productRepository.save(product);
+    }
+
+    private Category findOrCreateCategory(String categoryId, int level, Category parent) {
+        Category category = categoryRepository.findByCategoryId(categoryId);
+        if (category == null) {
+            category = new Category();
+            category.setCategoryId(categoryId);
+            category.setLevel(level);
+            category.setParentCategory(parent);
+            category = categoryRepository.save(category);
+        }
+        return category;
     }
 
     private int calculateDiscountPercentage(Integer mrpPrice, Integer sellingPrice) {
@@ -99,50 +97,62 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> searchProducts(String query) {
-        return productRepository.searchProduct(query);
-    }
-
-    @Override
     public Page<Product> getAllProducts(String category, String brand, String colors, String size, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber) {
-        Specification<Product> spec = (root, query, criteriaBuilder) -> {
+        Pageable pageable = createPageable(sort, pageNumber);
+
+        return productRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (category != null && !category.isEmpty()) {
-                Join<Product, Category> categoryJoin = root.join("category");
-                predicates.add(criteriaBuilder.equal(categoryJoin.get("categoryId"), category));
+                Join<Product, Category> categoryJoin = root.join("category", JoinType.LEFT);
+                predicates.add(cb.equal(categoryJoin.get("categoryId"), category));
             }
             if (minPrice != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));
             }
             if (maxPrice != null) {
-                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("sellingPrice"), maxPrice));
+                predicates.add(cb.lessThanOrEqualTo(root.get("sellingPrice"), maxPrice));
             }
             if (minDiscount != null) {
-                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("discountPercent"), minDiscount));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("discountPercent"), minDiscount));
             }
             if (colors != null && !colors.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("color"), colors));
+                predicates.add(cb.equal(root.get("color"), colors));
             }
             if (size != null && !size.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("size"), size));
+                predicates.add(cb.equal(root.get("sizes"), size));
             }
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
-        Pageable pageable;
-        if (sort != null && !sort.isEmpty()) {
-            pageable = switch (sort) {
-                case "price_low" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.by("sellingPrice").ascending());
-                case "price_high" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.by("sellingPrice").descending());
-                default -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.unsorted());
-            };
-        } else {
-            pageable = PageRequest.of(pageNumber != null ? pageNumber : 0, 10, Sort.unsorted());
-        }
-        return productRepository.findAll(spec, pageable);
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
     }
 
     @Override
     public List<Product> getProductBySellerId(Long sellerId) {
         return productRepository.findBySellerId(sellerId);
+    }
+
+    @Override
+    public Page<Product> searchAndFilter(String query, String category, Pageable pageable) {
+        return productRepository.findAll((root, cq, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (query != null && !query.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("title")), "%" + query.toLowerCase() + "%"));
+            }
+
+            if (category != null && !category.isEmpty()) {
+                Join<Product, Category> categoryJoin = root.join("category", JoinType.LEFT);
+                predicates.add(cb.equal(categoryJoin.get("categoryId"), category));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
+    }
+
+    private Pageable createPageable(String sort, Integer pageNumber) {
+        int page = (pageNumber != null) ? pageNumber : 0;
+        Sort sortOrder = Sort.unsorted();
+        if ("price_low".equals(sort)) sortOrder = Sort.by("sellingPrice").ascending();
+        if ("price_high".equals(sort)) sortOrder = Sort.by("sellingPrice").descending();
+        return PageRequest.of(page, 10, sortOrder);
     }
 }

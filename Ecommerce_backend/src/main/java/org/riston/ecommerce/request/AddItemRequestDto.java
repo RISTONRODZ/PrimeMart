@@ -3,14 +3,14 @@ package org.riston.ecommerce.request;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
-@Data
-public class AddItemRequestDto {
-    @NotBlank(message = "Size is required")
-    private String size;
-    @Min(value = 1, message = "Quantity must be at least 1")
-    private int quantity;
-    @NotNull(message = "Product ID cannot be null")
-    private Long productId;
-}
+public record AddItemRequestDto(
+        @NotBlank(message = "Size is required")
+        String size,
+
+        @Min(value = 1, message = "Quantity must be at least 1")
+        int quantity,
+
+        @NotNull(message = "Product ID cannot be null")
+        Long productId
+) {}

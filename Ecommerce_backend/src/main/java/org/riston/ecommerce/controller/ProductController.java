@@ -1,44 +1,50 @@
 package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.riston.ecommerce.model.Product;
+import org.riston.ecommerce.response.ProductResponse;
 import org.riston.ecommerce.service.ProductService;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long productId) {
-        Product product = productService.findProductById(productId);
-        return new ResponseEntity<>(product, HttpStatus.OK);
+    public ResponseEntity<ProductResponse> getProductById(@PathVariable Long productId) {
+        return ResponseEntity.ok(new ProductResponse(productService.findProductById(productId)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Product>> searchProduct(@RequestParam(required = false) String query) {
-        List<Product> products = productService.searchProducts(query);
-        return new ResponseEntity<>(products, HttpStatus.OK);
+    public ResponseEntity<Page<ProductResponse>> searchProducts(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String category,
+            @PageableDefault(size = 20) Pageable pageable) {
+
+        return ResponseEntity.ok(productService.searchAndFilter(query, category, pageable)
+                .map(ProductResponse::new));
     }
 
     @GetMapping
-    public ResponseEntity<Page<Product>> getAllProducts(@RequestParam(required = false) String category,
-                                                        @RequestParam(required = false) String brand,
-                                                        @RequestParam(required = false) String color,
-                                                        @RequestParam(required = false) String size,
-                                                        @RequestParam(required = false) Integer minPrice,
-                                                        @RequestParam(required = false) Integer maxPrice,
-                                                        @RequestParam(required = false) Integer minDiscount,
-                                                        @RequestParam(required = false) String sort,
-                                                        @RequestParam(required = false) String stock,
-                                                        @RequestParam(defaultValue = "0") Integer pageNumber) {
-        return new ResponseEntity<>(productService.getAllProducts(category, brand, color, size, minPrice, maxPrice, minDiscount, sort, stock, pageNumber),HttpStatus.OK);
+    public ResponseEntity<Page<ProductResponse>> getAllProducts(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String size,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) Integer minDiscount,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String stock,
+            @RequestParam(defaultValue = "0") Integer pageNumber) {
+
+        return ResponseEntity.ok(productService.getAllProducts(category, brand, color, size,
+                        minPrice, maxPrice, minDiscount, sort, stock, pageNumber)
+                .map(ProductResponse::new));
     }
 }

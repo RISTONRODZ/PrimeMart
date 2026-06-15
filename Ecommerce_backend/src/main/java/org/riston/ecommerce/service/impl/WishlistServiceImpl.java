@@ -1,5 +1,6 @@
 package org.riston.ecommerce.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.User;
@@ -33,9 +34,18 @@ public class WishlistServiceImpl implements WishlistService {
     @Override
     public Wishlist addProductToWishList(User user, Product product) {
         Wishlist wishlist = getWishlistByUserId(user);
-        if(wishlist.getProducts().contains(product)){
-            wishlist.getProducts().add(product);
+        wishlist.getProducts().add(product);
+        return wishlistRepository.save(wishlist);
+    }
+
+    @Override
+    @Transactional
+    public Wishlist removeProductFromWishList(User user, Product product) {
+        Wishlist wishlist = getWishlistByUserId(user);
+        if (wishlist.getProducts() != null) {
+            wishlist.getProducts().remove(product);
         }
+
         return wishlistRepository.save(wishlist);
     }
 }
