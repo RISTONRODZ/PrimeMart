@@ -32,7 +32,7 @@ public class CouponServiceImpl implements CouponService {
             throw new InvalidCouponException("valid for minimum order value " + coupon.getMinimumOrderValue());
         }
 
-        if (coupon.isActive() &&
+        if (coupon.getIsActive() &&
                 java.time.LocalDate.now().isAfter(coupon.getValidityStartDate()) &&
                 java.time.LocalDate.now().isBefore(coupon.getValidityEndDate())) {
 

@@ -1,5 +1,6 @@
 package org.riston.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,9 +26,9 @@ public class Coupon {
     private LocalDate validityStartDate;
 
     private LocalDate validityEndDate;
-    private  double minimumOrderValue;
-
-    private boolean isActive = true;
-@ManyToMany(mappedBy = "usedCoupons")
+    private double minimumOrderValue;
+    @JsonProperty("active")
+    private Boolean isActive = true;
+    @ManyToMany(mappedBy = "usedCoupons")
     private Set<User> usedByUsers = new HashSet<>();
 }
