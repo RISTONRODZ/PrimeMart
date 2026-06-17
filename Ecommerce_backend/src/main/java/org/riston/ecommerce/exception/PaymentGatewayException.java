@@ -1,5 +1,4 @@
 package org.riston.ecommerce.exception;
-@SuppressWarnings("unused")
 public class PaymentGatewayException extends RuntimeException {
 
     public PaymentGatewayException(String message) {

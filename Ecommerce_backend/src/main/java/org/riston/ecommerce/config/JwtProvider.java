@@ -33,7 +33,6 @@ public class JwtProvider {
         log.info("Generated JWT: {}",token);
         return token;
     }
-    @SuppressWarnings("unused")
     public String getEmailFromJwtToken(String jwt) {
         String token = jwt.startsWith("Bearer ") ? jwt.substring(7) : jwt;
 
