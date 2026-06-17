@@ -72,4 +72,9 @@ public class ReviewController {
 
         return ResponseEntity.ok("Review deleted successfully");
     }
+    @GetMapping
+    public ResponseEntity<List<ReviewResponseDto>> getAllReviews() {
+        log.info("Request received to fetch all reviews");
+        return ResponseEntity.ok(reviewService.getAllReviews());
+    }
 }

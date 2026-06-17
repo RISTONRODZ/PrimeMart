@@ -22,9 +22,9 @@ public class HomeServiceImpl implements HomeService {
     @Override
     public Home createHomePageData(List<HomeCategory> allCategories) {
         Map<HomeCategorySection, List<HomeCategory>> categorized = allCategories.stream()
+                .filter(cat -> cat.getSection() != null)
                 .collect(Collectors.groupingBy(HomeCategory::getSection));
 
-        // Ensure Deals exist
         List<Deal> deals = dealRepository.findAll();
         if (deals.isEmpty()) {
             deals = initializeDeals(categorized.getOrDefault(HomeCategorySection.DEALS, List.of()));

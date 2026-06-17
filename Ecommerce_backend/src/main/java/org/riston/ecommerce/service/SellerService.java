@@ -22,7 +22,6 @@ public interface SellerService {
     void deleteSeller(Long id);
 
     Seller verifyEmail(String email, String otp);
-    @SuppressWarnings("unused")
     Seller updateSellerAccountStatus(Long sellerId, AccountStatus status);
     SellerStatusResponse mapToStatusResponse(Seller seller);
 }

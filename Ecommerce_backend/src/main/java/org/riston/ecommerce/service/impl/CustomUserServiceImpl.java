@@ -16,35 +16,38 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class CustomUserServiceImpl implements UserDetailsService {
+    private static final String SELLER_PREFIX = "seller_";
     private final UserRepository userRepository;
     private final SellerRepository sellerRepository;
-    private static final  String SELLER_PREFIX="seller_";
+
     @Override
     @NonNull
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if(username.startsWith(SELLER_PREFIX)){
+        if (username.startsWith(SELLER_PREFIX)) {
             String actualUsername = username.substring(SELLER_PREFIX.length());
             Seller seller = sellerRepository.findByEmail(actualUsername);
-            if(seller != null){
-                return buildUserDetails(seller.getEmail(),seller.getPassword(),seller.getRole());
+            if (seller != null) {
+                return buildUserDetails(seller.getEmail(), seller.getPassword(), seller.getRole());
             }
-        }else{
+        } else {
             User user = userRepository.findByEmail(username);
-            if(user != null){
-                return buildUserDetails(user.getEmail(),user.getPassword(),user.getRole());
+            if (user != null) {
+                return buildUserDetails(user.getEmail(), user.getPassword(), user.getRole());
             }
         }
-        throw new UsernameNotFoundException("user not found with email "+username);
+        throw new UsernameNotFoundException("user not found with email " + username);
     }
 
     private UserDetails buildUserDetails(String email, String password, USER_ROLE role) {
-        if(role == null) role = USER_ROLE.ROLE_CUSTOMER;
+        if (role == null) {
+            throw new IllegalStateException("CRITICAL: Role mapping failed or database column is null for identifier: " + email);
+        }
         List<GrantedAuthority> authorityList = new ArrayList<>();
         authorityList.add(new SimpleGrantedAuthority(role.toString()));
-        return new org.springframework.security.core.userdetails.User(email,password,authorityList);
+        return new org.springframework.security.core.userdetails.User(email, password, authorityList);
     }
-
 }

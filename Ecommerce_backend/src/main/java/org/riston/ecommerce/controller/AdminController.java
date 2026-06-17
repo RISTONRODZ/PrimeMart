@@ -3,13 +3,14 @@ package org.riston.ecommerce.controller;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.model.Seller;
+import org.riston.ecommerce.response.SellerResponseDto;
 import org.riston.ecommerce.response.SellerStatusResponse;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,5 +24,17 @@ public class AdminController {
         SellerStatusResponse response = sellerService.mapToStatusResponse(updatedSeller);
 
         return ResponseEntity.ok(response);
+    }
+    @DeleteMapping("/seller/{id}")
+    public ResponseEntity<Void> adminDeleteSeller(@PathVariable Long id) {
+        sellerService.deleteSeller(id);
+        return ResponseEntity.noContent().build();
+    }
+    @GetMapping
+    public ResponseEntity<List<SellerResponseDto>> getAllSeller(@RequestParam(required = false) AccountStatus status) {
+        List<SellerResponseDto> responses = sellerService.getAllSellers(status).stream()
+                .map(s -> new SellerResponseDto(s.getId(), s.getSellerName(), s.getEmail(), s.getMobile(), s.getGSTIN(), s.getAccountStatus(), s.getEmailVerified()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 }

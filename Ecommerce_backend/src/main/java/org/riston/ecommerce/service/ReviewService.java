@@ -4,6 +4,7 @@ import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Review;
 import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.request.CreateReviewRequestDto;
+import org.riston.ecommerce.response.ReviewResponseDto;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface ReviewService {
     Review updateReview(Long reviewId,String reviewText,double rating,Long userId);
     void deleteReview(Long reviewId,Long userId);
     Review getReviewById(Long reviewId);
+    List<ReviewResponseDto> getAllReviews();
+
 }

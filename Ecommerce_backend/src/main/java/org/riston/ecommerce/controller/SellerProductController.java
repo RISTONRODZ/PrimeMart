@@ -12,11 +12,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/sellers/products")
+@RequestMapping("/api/v1/seller/products")
 public class SellerProductController {
     private final ProductService productService;
     private final SellerService sellerService;
@@ -51,13 +53,36 @@ public class SellerProductController {
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Product> deleteProduct(@PathVariable Long productId) {
-        productService.deleteProduct(productId);
-        return ResponseEntity.noContent().build();
-    }
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
+                                           @RequestHeader("Authorization") String jwt) {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        Product product = productService.findProductById(productId);
 
+        Map<String, String> response = new HashMap<>();
+
+        if (!product.getSeller().getId().equals(seller.getId())) {
+            response.put("error", "Access Denied");
+            response.put("message", "You do not have permission to delete this product because you are not the owner.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+
+        productService.deleteProduct(productId);
+
+        response.put("status", "success");
+        response.put("message", "Product with ID " + productId + " was successfully deleted.");
+        return ResponseEntity.ok(response);
+    }
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId, @RequestBody Product product) {
-        return ResponseEntity.ok(productService.updateProduct(productId, product));
+    public ResponseEntity<Product> updateProduct(@PathVariable Long productId,
+                                                 @RequestBody Product productDetails,
+                                                 @RequestHeader("Authorization") String jwt) {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        Product product = productService.findProductById(productId);
+
+        if (!product.getSeller().getId().equals(seller.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(productService.updateProduct(productId, productDetails));
     }
 }

@@ -1,6 +1,7 @@
 package org.riston.ecommerce.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.exception.ResourceAccessDeniedException;
 import org.riston.ecommerce.exception.ReviewNotFoundException;
 import org.riston.ecommerce.model.Product;
@@ -8,14 +9,18 @@ import org.riston.ecommerce.model.Review;
 import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.repository.ReviewRepository;
 import org.riston.ecommerce.request.CreateReviewRequestDto;
+import org.riston.ecommerce.response.ReviewResponseDto;
+import org.riston.ecommerce.response.UserSummaryDto;
 import org.riston.ecommerce.service.ReviewService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -73,4 +78,33 @@ public class ReviewServiceImpl implements ReviewService {
     public Review getReviewById(Long reviewId) {
         return reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewNotFoundException("review not found"));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewResponseDto> getAllReviews() {
+        log.info("Fetching all reviews from database");
+        return reviewRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+    public ReviewResponseDto mapToDto(Review review) {
+        User user = review.getUser();
+        UserSummaryDto userDto = new UserSummaryDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getMobile(),
+                user.getRole().toString()
+        );
+
+        return new ReviewResponseDto(
+                review.getId(),
+                review.getReviewText(),
+                review.getRating(),
+                null,
+                userDto,
+                review.getCreatedAt()
+        );
+    }
+
 }

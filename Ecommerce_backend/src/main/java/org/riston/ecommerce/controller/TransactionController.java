@@ -29,8 +29,6 @@ public class TransactionController {
 
         Seller seller = sellerService.getSellerProfile(jwt);
         List<Transaction> transactions = transactionService.getTransactionsBySellerId(seller);
-
-        // Convert Entities smoothly to lightweight Records using Stream API
         List<TransactionResponseDto> dtoList = transactions.stream().map(this::convertToDto).toList();
 
         return ResponseEntity.ok(ApiResponseDto.success("Seller transactions retrieved successfully", dtoList));

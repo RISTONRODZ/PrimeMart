@@ -20,6 +20,7 @@ public class Seller {
     private String mobile;
     @Column(unique = true,nullable = false)
     private String email;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
@@ -34,7 +35,9 @@ public class Seller {
 
     private String GSTIN;
 
-    private USER_ROLE role=USER_ROLE.ROLE_SELLER;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private USER_ROLE role = USER_ROLE.ROLE_SELLER;
 
     private Boolean emailVerified = false;
 

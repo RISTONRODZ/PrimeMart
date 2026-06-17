@@ -16,8 +16,12 @@ public class HomeCategoryServiceImpl implements HomeCategoryService {
     private final HomeCategoryRepository homeCategoryRepository;
     private final DealRepository dealRepository;
 
-    @Override
     public List<HomeCategory> createCategories(List<HomeCategory> homeCategories) {
+        for (HomeCategory cat : homeCategories) {
+            if (cat.getCategoryId() == null) {
+                throw new IllegalArgumentException("Category ID cannot be null");
+            }
+        }
         return homeCategoryRepository.saveAll(homeCategories);
     }
 

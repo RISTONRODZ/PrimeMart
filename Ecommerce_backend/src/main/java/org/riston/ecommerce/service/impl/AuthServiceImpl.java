@@ -15,6 +15,7 @@ import org.riston.ecommerce.repository.VerificationCodeRepository;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.response.AuthResponseDto;
 import org.riston.ecommerce.service.AuthService;
+import org.riston.ecommerce.service.SellerService;
 import org.riston.ecommerce.util.OtpUtil;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthServiceImpl implements AuthService {
+    private static final String SIGNIN_PREFIX = "signin_";
+    private static final String SELLER_PREFIX = "seller_";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartRepository cartRepository;
@@ -47,9 +50,20 @@ public class AuthServiceImpl implements AuthService {
     private final CustomUserServiceImpl customUserService;
     private final SellerRepository sellerRepository;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final SellerService sellerService;
 
     private Bucket createNewBucket() {
         return Bucket.builder().addLimit(limit -> limit.capacity(3).refillIntervally(1, Duration.ofMinutes(1))).build();
+    }
+
+    private String cleanEmailAddress(String email) {
+        if (email == null) return null;
+        if (email.startsWith(SIGNIN_PREFIX)) {
+            return email.substring(SIGNIN_PREFIX.length());
+        } else if (email.startsWith(SELLER_PREFIX)) {
+            return email.substring(SELLER_PREFIX.length());
+        }
+        return email;
     }
 
     @Override
@@ -61,36 +75,54 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalStateException("Too many OTP requests. Please wait a minute before trying again.");
         }
 
-        String SIGNIN_PREFIX = "signin_";
-        if (email.startsWith(SIGNIN_PREFIX)) {
-            email = email.substring(SIGNIN_PREFIX.length());
-            if (role.equals(USER_ROLE.ROLE_SELLER)) {
-                Seller seller = sellerRepository.findByEmail(email);
-                if (seller == null) {
-                    throw new SellerNotFoundException("seller not found with the provided email");
-                }
-            } else {
-                log.info("email: {}", email);
-                User user = userRepository.findByEmail(email);
-                if (user == null) {
-                    throw new IllegalArgumentException("User doesn't exist for the provided email");
-                }
+        String cleanEmail = cleanEmailAddress(email);
+
+        if (role.equals(USER_ROLE.ROLE_SELLER)) {
+            Seller seller = sellerRepository.findByEmail(cleanEmail);
+            if (seller == null) {
+                throw new SellerNotFoundException("seller not found with the provided email");
+            }
+        } else {
+            User user = userRepository.findByEmail(cleanEmail);
+            if (user == null) {
+                throw new IllegalArgumentException("User doesn't exist for the provided email");
             }
         }
-        VerificationCode exists = verificationCodeRepository.findByEmail(email);
+
+        VerificationCode exists = verificationCodeRepository.findByEmail(cleanEmail);
         if (exists != null) {
             verificationCodeRepository.delete(exists);
         }
+
         String otp = OtpUtil.generateOtp();
         VerificationCode verificationCode = new VerificationCode();
         verificationCode.setOtp(otp);
-        verificationCode.setEmail(email);
+        verificationCode.setEmail(cleanEmail);
+        verificationCode.setRole(role);
         verificationCode.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         verificationCodeRepository.save(verificationCode);
 
-        String subject = "PrimeMart Verification Code";
-        String text = "<div style='font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;'>" + "  <h2 style='color: #111827; text-align: center;'>Verify Your Account</h2>" + "  <p style='font-size: 16px; color: #4B5563; line-height: 1.5;'>Please use the following One-Time Password (OTP) to complete your action. This code is valid for 15 minutes:</p>" + "  <div style='text-align: center; margin: 30px 0;'>" + "    <span style='font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #4F46E5; background-color: #F3F4F6; padding: 12px 30px; border-radius: 6px; border: 1px dashed #4F46E5;'>" + otp + "    </span>" + "  </div>" + "  <p style='font-size: 12px; color: #9CA3AF; text-align: center; margin-top: 40px;'>If you did not request this code, please ignore this email.</p>" + "</div>";
-        emailServiceImpl.sendVerificationOtpEmail(email, subject, text);
+        String subject = "PrimeMart | Your Verification Code";
+
+        String text = """
+                <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 30px; border: 1px solid #e4e4e7; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <h2 style="color: #0f172a; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">PrimeMart</h2>
+                    </div>
+                    <p style="color: #334155; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">Hello,</p>
+                    <p style="color: #334155; font-size: 15px; line-height: 1.5; margin: 0 0 24px 0;">Use the verification code below to securely sign in to your PrimeMart account. This code is valid for 15 minutes.</p>
+                    <div style="text-align: center; margin: 32px 0;">
+                        <span style="display: inline-block; font-size: 36px; font-weight: 700; letter-spacing: 6px; color: #2563eb; background-color: #eff6ff; padding: 12px 32px; border-radius: 8px; border: 1px solid #bfdbfe;">
+                            %s
+                        </span>
+                    </div>
+                
+                    <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 0 0 24px 0;">If you didn't request this code, you can safely ignore this email. Someone might have typed your email address by mistake.</p>
+                    <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;">
+                    <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">&copy; 2026 PrimeMart. All rights reserved.</p>
+                </div>
+                """.formatted(otp);
+        emailServiceImpl.sendVerificationOtpEmail(cleanEmail, subject, text);
     }
 
     @Override
@@ -115,6 +147,7 @@ public class AuthServiceImpl implements AuthService {
         createdUser.setFullName(req.getFullName());
         createdUser.setMobile("8786543456");
         createdUser.setPassword(passwordEncoder.encode(req.getOtp()));
+        createdUser.setRole(USER_ROLE.ROLE_CUSTOMER);
         User user = userRepository.save(createdUser);
 
         Cart cart = new Cart();
@@ -134,32 +167,29 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto loginUser(LoginRequestDto req) {
-        String email = req.email();
-        String otp = req.otp();
-        Authentication authentication = authenticate(email, otp);
+        Authentication authentication = authenticate(req.email(), req.otp());
         String token = jwtProvider.generateToken(authentication);
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String roleName = authorities.isEmpty() ? null : authorities.iterator().next().getAuthority();
         USER_ROLE userRole = roleName != null ? USER_ROLE.valueOf(roleName) : null;
-        return new AuthResponseDto(
-                token,
-                "Login success",
-                userRole
-        );
+
+        return new AuthResponseDto(token, "Login success", userRole);
     }
 
     private Authentication authenticate(String email, String otp) {
+        String cleanEmail = cleanEmailAddress(email);
+        String lookupUsername = (email != null && email.startsWith(SELLER_PREFIX)) ? email : cleanEmail;
+
         UserDetails userDetails;
         try {
-            userDetails = customUserService.loadUserByUsername(email);
+            userDetails = customUserService.loadUserByUsername(lookupUsername);
         } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
-            throw new BadCredentialsException("DEBUG: Account matching identifier '" + email + "' was not found.");
+            throw new BadCredentialsException("Account not found");
         }
-        String lookupEmail = email.startsWith("seller_") ? email.substring("seller_".length()) : email;
-        log.info("Attempting to find OTP in DB for email: '{}'", lookupEmail);
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(lookupEmail);
 
-        if (verificationCode == null) {
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(cleanEmail);
+
+        if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
             throw new BadCredentialsException("wrong otp");
         }
 
@@ -168,12 +198,17 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("wrong otp");
         }
 
-        if (!verificationCode.getOtp().equals(otp)) {
-            throw new BadCredentialsException("wrong otp");
-        }
+        USER_ROLE role = verificationCode.getRole();
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role.toString()));
 
 //        verificationCodeRepository.delete(verificationCode);
 
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+    }
+
+    @Override
+    @Transactional
+    public Seller registerSeller(Seller seller) {
+        return sellerService.createSeller(seller);
     }
 }

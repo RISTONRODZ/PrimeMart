@@ -2,12 +2,15 @@ package org.riston.ecommerce.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.model.SignupRequest;
 import org.riston.ecommerce.request.LoginOtpRequestDto;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.AuthResponseDto;
+import org.riston.ecommerce.response.SellerResponseDto;
 import org.riston.ecommerce.service.AuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,5 +45,12 @@ public class AuthController {
     public ResponseEntity<AuthResponseDto> loginHandler(@RequestBody LoginRequestDto request) {
         AuthResponseDto authResponse = authService.loginUser(request);
         return ResponseEntity.ok(authResponse);
+    }
+    @PostMapping("/signup/seller")
+    public ResponseEntity<ApiResponseDto<SellerResponseDto>> createSellerHandler(@RequestBody Seller seller) {
+        Seller savedSeller = authService.registerSeller(seller);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponseDto.success("Seller registered successfully.", SellerResponseDto.fromEntity(savedSeller)));
     }
 }

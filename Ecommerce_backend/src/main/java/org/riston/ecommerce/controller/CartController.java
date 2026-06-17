@@ -11,10 +11,7 @@ import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.CartItemDto;
 import org.riston.ecommerce.response.UpdateCartItemRequest;
 import org.riston.ecommerce.response.UserCartResponse;
-import org.riston.ecommerce.service.CartItemService;
-import org.riston.ecommerce.service.CartService;
-import org.riston.ecommerce.service.ProductService;
-import org.riston.ecommerce.service.UserService;
+import org.riston.ecommerce.service.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +23,7 @@ public class CartController {
     private final CartItemService cartItemService;
     private final UserService userService;
     private final ProductService productService;
+    private final CouponService couponService;
 
     @GetMapping
     public ResponseEntity<ApiResponseDto<UserCartResponse>> findUserCartHandler(@RequestHeader("Authorization") String jwt) {
@@ -66,6 +64,19 @@ public class CartController {
         CartItemDto responseData = CartItemDto.fromEntity(updatedCartItem);
 
         return ResponseEntity.ok(ApiResponseDto.success("Cart item updated successfully", responseData));
+    }
+    @PostMapping("/apply")
+    public ResponseEntity<ApiResponseDto<Cart>> applyCoupon(@RequestParam String apply, @RequestParam String code, @RequestParam double orderValue, @RequestHeader("Authorization") String jwt) {
+        User user = userService.findUserByJwtToken(jwt);
+        Cart cart;
+
+        if (apply.equals("true")) {
+            cart = couponService.applyCoupon(code, orderValue, user);
+        } else {
+            cart = couponService.removeCoupon(code, user);
+        }
+
+        return ResponseEntity.ok(ApiResponseDto.success("Coupon processed successfully", cart));
     }
 
 }

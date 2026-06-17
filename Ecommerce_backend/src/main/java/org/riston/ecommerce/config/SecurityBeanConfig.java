@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @Log4j2
@@ -19,6 +20,6 @@ public class SecurityBeanConfig {
         if (secret.length() < 32) {
             log.error("CRITICAL: JWT Secret is too short! Expected >= 32, got {}", secret.length());
         }
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 }

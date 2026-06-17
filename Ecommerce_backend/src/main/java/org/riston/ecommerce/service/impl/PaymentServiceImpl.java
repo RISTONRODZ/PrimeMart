@@ -39,9 +39,12 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentOrder createOrder(User user, Set<Order> orders) {
 
-        Long amount = orders.stream()
+        long amount = orders.stream()
                 .mapToLong(Order::getTotalSellingPrice)
                 .sum();
+        if (amount <= 0) {
+            throw new RuntimeException("Invalid payment amount: " + amount);
+        }
 
         PaymentOrder paymentOrder = new PaymentOrder();
         paymentOrder.setAmount(amount);

@@ -2,6 +2,7 @@ package org.riston.ecommerce.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.riston.ecommerce.domain.USER_ROLE;
 
 import java.time.LocalDateTime;
 
@@ -21,6 +22,8 @@ public class VerificationCode {
 
     @OneToOne
     private User user;
+
+    private USER_ROLE role;
 
     @OneToOne
     private Seller seller;

@@ -1,5 +1,6 @@
 package org.riston.ecommerce.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,7 +20,7 @@ public class HomeCategory {
     private Long id;
 
     private String name;
-
+    @JsonProperty("imageUrl")
     private String image;
 
     private String categoryId;
