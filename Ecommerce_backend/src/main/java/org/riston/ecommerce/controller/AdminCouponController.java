@@ -1,7 +1,14 @@
 package org.riston.ecommerce.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.Coupon;
 import org.riston.ecommerce.request.CouponRequest;
 import org.riston.ecommerce.response.ApiResponseDto;
@@ -14,21 +21,40 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/coupons")
+@Tag(
+        name = "Coupon Management",
+        description = "Endpoints for admin to create, manage, and delete discount coupons"
+)
 public class AdminCouponController {
     private final CouponService couponService;
 
     @PostMapping("/create")
+    @Operation(summary = "Create a new coupon", description = "Admin-only endpoint to register a new discount code")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Coupon created successfully",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request payload")
+    })
     public ResponseEntity<ApiResponseDto<Coupon>> createCoupon(@Valid @RequestBody CouponRequest request) {
         return ResponseEntity.ok(ApiResponseDto.success("Coupon created", couponService.createCoupon(request)));
     }
 
     @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Delete a coupon", description = "Permanently removes a coupon from the system by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Coupon deleted successfully"),
+    })
+    @ApiNotFoundResponse
     public ResponseEntity<ApiResponseDto<Void>> deleteCoupon(@PathVariable Long id) {
         couponService.deleteCoupon(id);
         return ResponseEntity.ok(ApiResponseDto.success("Coupon deleted successfully", null));
     }
 
     @GetMapping("/all")
+    @Operation(summary = "Get all coupons", description = "Retrieves a complete list of all active discount coupons")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully")
+    })
     public ResponseEntity<ApiResponseDto<List<Coupon>>> getAllCoupons() {
         List<Coupon> coupons = couponService.findAllCoupons();
         return ResponseEntity.ok(ApiResponseDto.success("All coupons retrieved successfully", coupons));

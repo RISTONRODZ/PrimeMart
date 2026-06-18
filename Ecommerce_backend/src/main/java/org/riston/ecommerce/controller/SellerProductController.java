@@ -1,7 +1,13 @@
 package org.riston.ecommerce.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.request.CreateProductRequestDto;
@@ -73,9 +79,21 @@ public class SellerProductController {
         return ResponseEntity.ok(response);
     }
     @PutMapping("/{productId}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long productId,
-                                                 @RequestBody Product productDetails,
-                                                 @RequestHeader("Authorization") String jwt) {
+    @Operation(
+        summary = "Update product",
+        description = "Updates a product created by the authenticated seller"
+    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+    })
+    @ApiNotFoundResponse
+    public ResponseEntity<Product> updateProduct(
+        @Parameter(description = "Product ID to update", required = true)
+        @PathVariable Long productId,
+        @RequestBody Product productDetails,
+        @RequestHeader("Authorization") String jwt
+    ) {
         Seller seller = sellerService.getSellerProfile(jwt);
         Product product = productService.findProductById(productId);
 

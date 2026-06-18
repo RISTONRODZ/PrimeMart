@@ -1,9 +1,36 @@
 package org.riston.ecommerce.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.riston.ecommerce.model.OrderItem;
+@Schema(description = "Data transfer object representing an individual item within an order")
+public record OrderItemDto(
+        @Schema(description = "Unique identifier of the order item", example = "1001")
+        Long id,
 
-public record OrderItemDto(Long id, Long productId, String productTitle, String productImage, String color, String size,
-                           int quantity, int mrpPrice, int sellingPrice) {
+        @Schema(description = "ID of the product", example = "500")
+        Long productId,
+
+        @Schema(description = "Title of the product", example = "Running Shoes")
+        String productTitle,
+
+        @Schema(description = "URL of the product image")
+        String productImage,
+
+        @Schema(description = "Color of the item", example = "Blue")
+        String color,
+
+        @Schema(description = "Selected size", example = "10")
+        String size,
+
+        @Schema(description = "Quantity purchased", example = "1")
+        int quantity,
+
+        @Schema(description = "MRP price at the time of purchase", example = "2999")
+        int mrpPrice,
+
+        @Schema(description = "Actual selling price at the time of purchase", example = "1999")
+        int sellingPrice
+) {
 
     public static OrderItemDto fromEntity(OrderItem entity) {
         if (entity == null) {

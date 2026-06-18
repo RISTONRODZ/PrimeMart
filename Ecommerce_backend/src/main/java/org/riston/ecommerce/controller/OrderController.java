@@ -1,7 +1,14 @@
 package org.riston.ecommerce.controller;
 
 import com.razorpay.PaymentLink;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.PaymentOrderRepository;
 import org.riston.ecommerce.response.ApiResponseDto;
@@ -22,6 +29,10 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
+@Tag(
+        name = "Order Management",
+        description = "Endpoints for creating, retrieving, and managing orders"
+)
 public class OrderController {
 
     private final OrderService orderService;
@@ -31,7 +42,19 @@ public class OrderController {
     private final PaymentOrderRepository paymentOrderRepository;
 
     @PostMapping
-    public ResponseEntity<ApiResponseDto<PaymentLinkResponseDto>> createOrderHandler(@RequestBody Address shippingAddress, @RequestHeader("Authorization") String jwt) {
+    @Operation(
+            summary = "Create order",
+            description = "Creates a new order from the user's cart with shipping address and initiates Razorpay payment"
+    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Order created successfully with payment link"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or cart is empty"),
+    })
+    public ResponseEntity<ApiResponseDto<PaymentLinkResponseDto>> createOrderHandler(
+            @RequestBody Address shippingAddress,
+            @RequestHeader("Authorization") String jwt
+    ) {
         User user = userService.findUserByJwtToken(jwt);
         Cart cart = cartService.findUserCart(user);
 
@@ -50,7 +73,17 @@ public class OrderController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<ApiResponseDto<List<OrderDto>>> usersOrderHistoryHandler(@RequestHeader("Authorization") String jwt) {
+    @Operation(
+            summary = "Get order history",
+            description = "Retrieves the complete order history for the authenticated user"
+    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order history retrieved successfully"),
+    })
+    public ResponseEntity<ApiResponseDto<List<OrderDto>>> usersOrderHistoryHandler(
+            @RequestHeader("Authorization") String jwt
+    ) {
         User user = userService.findUserByJwtToken(jwt);
         List<Order> orders = orderService.usersOrderHistory(user.getId());
 
@@ -60,19 +93,55 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<ApiResponseDto<OrderDto>> getOrderById(@PathVariable String orderId) {
+    @Operation(
+            summary = "Get order by ID",
+            description = "Retrieves detailed information for a specific order"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order found and retrieved"),
+    })
+    @ApiNotFoundResponse
+    public ResponseEntity<ApiResponseDto<OrderDto>> getOrderById(
+            @Parameter(description = "Unique order identifier", required = true)
+            @PathVariable String orderId
+    ) {
         Order order = orderService.findOrderByOrderId(orderId);
         return ResponseEntity.ok(ApiResponseDto.success("Order found", OrderDto.fromEntity(order)));
     }
 
     @GetMapping("/item/{orderItemId}")
-    public ResponseEntity<ApiResponseDto<OrderItemDto>> getOrderItemById(@PathVariable Long orderItemId) {
+    @Operation(
+            summary = "Get order item by ID",
+            description = "Retrieves details of a specific item within an order"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order item found"),
+    })
+    @ApiNotFoundResponse
+    public ResponseEntity<ApiResponseDto<OrderItemDto>> getOrderItemById(
+            @Parameter(description = "Unique order item identifier", required = true)
+            @PathVariable Long orderItemId
+    ) {
         OrderItem orderItem = orderService.getOrderItemById(orderItemId);
         return ResponseEntity.ok(ApiResponseDto.success("Order item found", OrderItemDto.fromEntity(orderItem)));
     }
 
     @PutMapping("/{orderId}/cancel")
-    public ResponseEntity<ApiResponseDto<Void>> cancelOrder(@PathVariable String orderId, @RequestHeader("Authorization") String jwt) {
+    @Operation(
+            summary = "Cancel order",
+            description = "Cancels an existing order if it's in a cancellable state"
+    )
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order cancelled successfully"),
+
+    })
+    @ApiNotFoundResponse
+    public ResponseEntity<ApiResponseDto<Void>> cancelOrder(
+            @Parameter(description = "Unique order identifier", required = true)
+            @PathVariable String orderId,
+            @RequestHeader("Authorization") String jwt
+    ) {
         User user = userService.findUserByJwtToken(jwt);
         orderService.processCancelOrder(orderId, user);
 

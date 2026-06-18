@@ -92,7 +92,12 @@ public class AppConfig {
 
                         // 6. Coupon - Customer Only
                         .requestMatchers("/api/v1/coupons/apply").hasAuthority("ROLE_CUSTOMER")
-
+                        //swagger
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
                         // 7. Secure-by-default Catch-all
                         .anyRequest().authenticated()
                 )
