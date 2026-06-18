@@ -7,6 +7,7 @@ import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +25,9 @@ public class CustomUserServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
     private final SellerRepository sellerRepository;
 
+    @Value("${app.admin.email}")
+    private String adminEmail;
+
     @Override
     @NonNull
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -36,7 +40,8 @@ public class CustomUserServiceImpl implements UserDetailsService {
         } else {
             User user = userRepository.findByEmail(username);
             if (user != null) {
-                return buildUserDetails(user.getEmail(), user.getPassword(), user.getRole());
+                USER_ROLE role = user.getEmail().equalsIgnoreCase(adminEmail) ? USER_ROLE.ROLE_ADMIN : user.getRole();
+                return buildUserDetails(user.getEmail(), user.getPassword(), role);
             }
         }
         throw new UsernameNotFoundException("user not found with email " + username);

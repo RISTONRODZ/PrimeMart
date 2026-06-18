@@ -37,7 +37,7 @@ public class AuthController {
     @PostMapping("/send-otp")
     public ResponseEntity<ApiResponseDto<String>> sendOtpHandler(@RequestBody LoginOtpRequestDto request) {
         log.info("Processing OTP request for email: {}", request.email());
-        authService.sendVerificationOtp(request.email(), request.role());
+        authService.sendVerificationOtp(request.email());
         return ResponseEntity.ok(ApiResponseDto.success("Otp sent successfully", null));
     }
 
