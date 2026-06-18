@@ -5,13 +5,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.config.JwtProvider;
+import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.request.LoginRequestDto;
+import org.riston.ecommerce.request.SellerRequestDto;
 import org.riston.ecommerce.response.AuthResponseDto;
 import org.riston.ecommerce.service.AuthService;
-import org.riston.ecommerce.service.SellerService;
 import org.riston.ecommerce.util.OtpUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -45,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailServiceImpl emailServiceImpl;
     private final CustomUserServiceImpl customUserService;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
-    private final SellerService sellerService;
+    private final SellerRepository sellerRepository;
 
     @Value("${app.admin.email}")
     private String adminEmail;
@@ -187,7 +188,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public Seller registerSeller(Seller seller) {
-        return sellerService.createSeller(seller);
+    public Seller registerSeller(SellerRequestDto request) {
+        Seller seller = new Seller();
+        seller.setSellerName(request.sellerName());
+        seller.setEmail(request.email());
+        seller.setPassword(passwordEncoder.encode(request.password())); // Assuming you handle passwords
+        seller.setMobile(request.mobile());
+        seller.setGSTIN(request.gstin());
+        seller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
+        return sellerRepository.save(seller);
     }
 }

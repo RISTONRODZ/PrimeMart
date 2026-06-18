@@ -8,8 +8,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
+import org.riston.ecommerce.mapper.DealMapper;
 import org.riston.ecommerce.model.Deal;
+import org.riston.ecommerce.request.DealRequestDto;
 import org.riston.ecommerce.response.ApiResponseDto;
+import org.riston.ecommerce.response.DealResponseDto;
 import org.riston.ecommerce.service.DealService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,15 +26,15 @@ import java.util.List;
 @Tag(name = "Admin Deal Management", description = "Endpoints for managing promotional deals.")
 public class DealController {
     private final DealService dealService;
-
+    private final DealMapper dealMapper;
     @PostMapping
     @Operation(summary = "Create a new deal")
     @ApiResponse(responseCode = "201", description = "Deal created",
             content = @Content(schema = @Schema(implementation = ApiResponseDto.class)))
-    public ResponseEntity<ApiResponseDto<Deal>> createDeals(@RequestBody Deal deals) {
-        Deal createdDeals = dealService.createDeal(deals);
+    public ResponseEntity<ApiResponseDto<DealResponseDto>> createDeals(@RequestBody DealRequestDto request) {
+        Deal deal = dealService.createDeal(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponseDto.success("Deal created successfully", createdDeals));
+                .body(ApiResponseDto.success("Deal created successfully", dealMapper.toDto(deal)));
     }
 
     @PatchMapping("/{id}")
@@ -40,11 +43,12 @@ public class DealController {
             @ApiResponse(responseCode = "200", description = "Updated", content = @Content(schema = @Schema(implementation = ApiResponseDto.class))),
     })
     @ApiNotFoundResponse
-    public ResponseEntity<ApiResponseDto<Deal>> updateDeal(@PathVariable Long id, @RequestBody Deal deal) {
+    public ResponseEntity<ApiResponseDto<DealResponseDto>> updateDeal(@PathVariable Long id, @RequestBody DealRequestDto deal) {
         Deal updatedDeal = dealService.updateDeal(deal, id);
-        return ResponseEntity.ok(ApiResponseDto.success("Deal updated successfully", updatedDeal));
-    }
+        DealResponseDto responseDto = dealMapper.toDto(updatedDeal);
 
+        return ResponseEntity.ok(ApiResponseDto.success("Deal updated successfully", responseDto));
+    }
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a deal")
     @ApiResponse(responseCode = "200", description = "Deleted", content = @Content(schema = @Schema(implementation = ApiResponseDto.class)))

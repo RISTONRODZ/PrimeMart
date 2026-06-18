@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
+import org.riston.ecommerce.mapper.CartItemMapper;
 import org.riston.ecommerce.model.Cart;
 import org.riston.ecommerce.model.CartItem;
 import org.riston.ecommerce.model.Product;
@@ -35,7 +36,7 @@ public class CartController {
     private final UserService userService;
     private final ProductService productService;
     private final CouponService couponService;
-
+    private final CartItemMapper cartItemMapper;
     @GetMapping
     @Operation(
             summary = "Retrieve user's cart",
@@ -70,8 +71,11 @@ public class CartController {
     ) {
         User user = userService.findUserByJwtToken(jwt);
         Product product = productService.findProductById(req.productId());
+
         CartItem item = cartService.addCartItem(user, product, req.size(), req.quantity());
-        CartItemDto dto = new CartItemDto(item.getId(), product.getId(), product.getTitle(), (product.getImages() != null && !product.getImages().isEmpty()) ? product.getImages().get(0) : null, item.getSize(), item.getQuantity(), item.getMrpPrice(), item.getSellingPrice(), product.getSeller() != null ? product.getSeller().getSellerName() : null);
+
+        CartItemDto dto = cartItemMapper.toDto(item);
+
         return ResponseEntity.ok(ApiResponseDto.success("Item added to cart success", dto));
     }
 
@@ -135,7 +139,7 @@ public class CartController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Coupon processed successfully"),
     })
-    public ResponseEntity<ApiResponseDto<Cart>> applyCoupon(
+    public ResponseEntity<ApiResponseDto<UserCartResponse>> applyCoupon(
             @Parameter(description = "Whether to apply ('true') or remove ('false') the coupon", required = true)
             @RequestParam String apply,
             @Parameter(description = "Coupon code to apply", required = true)
@@ -152,8 +156,8 @@ public class CartController {
         } else {
             cart = couponService.removeCoupon(code, user);
         }
-
-        return ResponseEntity.ok(ApiResponseDto.success("Coupon processed successfully", cart));
+        UserCartResponse response = UserCartResponse.fromEntity(cart);
+        return ResponseEntity.ok(ApiResponseDto.success("Coupon processed successfully", response));
     }
 
 }

@@ -3,9 +3,10 @@ package org.riston.ecommerce.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.*;
+import org.riston.ecommerce.mapper.CouponMapper;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
-import org.riston.ecommerce.request.CouponRequest;
+import org.riston.ecommerce.response.CouponResponseDto;
 import org.riston.ecommerce.service.CouponService;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -16,6 +17,7 @@ public class CouponServiceImpl implements CouponService {
     private final CouponRepository couponRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final CouponMapper couponMapper;
 
     @Override
     public Cart applyCoupon(String code, double orderValue, User user) {
@@ -73,21 +75,15 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public Coupon createCoupon(CouponRequest request) {
-        Coupon coupon = new Coupon();
-        coupon.setCode(request.code());
-        coupon.setDiscountPercentage(String.valueOf(request.discountPercentage()));
-        coupon.setMinimumOrderValue(request.minimumOrderValue());
-        coupon.setIsActive(request.isActive());
-        coupon.setValidityStartDate(request.validityStartDate().toLocalDate());
-        coupon.setValidityEndDate(request.validityEndDate().toLocalDate());
-
+    public Coupon createCoupon(Coupon coupon) {
         return couponRepository.save(coupon);
     }
 
     @Override
-    public List<Coupon> findAllCoupons() {
-        return couponRepository.findAll();
+    public List<CouponResponseDto> findAllCoupons() {
+        return couponRepository.findAll().stream()
+                .map(couponMapper::toDto)
+                .toList();
     }
 
     @Override

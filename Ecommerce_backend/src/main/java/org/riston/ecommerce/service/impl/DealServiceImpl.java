@@ -6,6 +6,7 @@ import org.riston.ecommerce.model.Deal;
 import org.riston.ecommerce.model.HomeCategory;
 import org.riston.ecommerce.repository.DealRepository;
 import org.riston.ecommerce.repository.HomeCategoryRepository;
+import org.riston.ecommerce.request.DealRequestDto;
 import org.riston.ecommerce.service.DealService;
 import org.springframework.stereotype.Service;
 
@@ -23,30 +24,26 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
-    public Deal createDeal(Deal deal) {
-        if (deal.getHomeCategory() == null || deal.getHomeCategory().getId() == null) {
-            throw new IllegalArgumentException("Home Category ID must be provided to create a deal");
-        }
-
-        HomeCategory category = homeCategoryRepository.findById(deal.getHomeCategory().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-
+    public Deal createDeal(DealRequestDto request) {
+        HomeCategory category = homeCategoryRepository.findById(request.homeCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));Deal deal = new Deal();
+        deal.setDiscount(request.discount());
         deal.setHomeCategory(category);
-        return dealRepository.save(deal); 
+        return dealRepository.save(deal);
     }
 
     @Override
-    public Deal updateDeal(Deal deal, Long id) {
+    public Deal updateDeal(DealRequestDto request, Long id) {
         Deal existingDeal = dealRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Deal not found"));
 
-        if (deal.getDiscount() != null) {
-            existingDeal.setDiscount(deal.getDiscount());
+        if (request.discount() != null) {
+            existingDeal.setDiscount(request.discount());
         }
 
-        if (deal.getHomeCategory() != null && deal.getHomeCategory().getId() != null) {
-            HomeCategory category = homeCategoryRepository.findById(deal.getHomeCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + deal.getHomeCategory().getId()));
+        if (request.homeCategoryId() != null) {
+            HomeCategory category = homeCategoryRepository.findById(request.homeCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found with id " + request.homeCategoryId()));
             existingDeal.setHomeCategory(category);
         }
 

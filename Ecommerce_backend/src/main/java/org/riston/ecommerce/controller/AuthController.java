@@ -11,6 +11,7 @@ import org.riston.ecommerce.model.Seller;
 import org.riston.ecommerce.model.SignupRequest;
 import org.riston.ecommerce.request.LoginOtpRequestDto;
 import org.riston.ecommerce.request.LoginRequestDto;
+import org.riston.ecommerce.request.SellerRequestDto;
 import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.AuthResponseDto;
 import org.riston.ecommerce.response.SellerResponseDto;
@@ -75,8 +76,8 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Seller registered successfully"),
     })
-    public ResponseEntity<ApiResponseDto<SellerResponseDto>> createSellerHandler(@RequestBody Seller seller) {
-        Seller savedSeller = authService.registerSeller(seller);
+    public ResponseEntity<ApiResponseDto<SellerResponseDto>> createSellerHandler(@RequestBody SellerRequestDto request) {
+        Seller savedSeller = authService.registerSeller(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponseDto.success("Seller registered successfully.", SellerResponseDto.fromEntity(savedSeller)));
     }
