@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.*;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
+import org.riston.ecommerce.request.CouponRequest;
 import org.riston.ecommerce.service.CouponService;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -73,8 +73,15 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public Coupon createCoupon(Coupon coupon) {
+    public Coupon createCoupon(CouponRequest request) {
+        Coupon coupon = new Coupon();
+        coupon.setCode(request.code());
+        coupon.setDiscountPercentage(String.valueOf(request.discountPercentage()));
+        coupon.setMinimumOrderValue(request.minimumOrderValue());
+        coupon.setIsActive(request.isActive());
+        coupon.setValidityStartDate(request.validityStartDate().toLocalDate());
+        coupon.setValidityEndDate(request.validityEndDate().toLocalDate());
+
         return couponRepository.save(coupon);
     }
 
@@ -84,7 +91,6 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteCoupon(Long id) {
         Coupon coupon = findCouponById(id);

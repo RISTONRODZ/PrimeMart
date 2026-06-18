@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.OrderStatus;
 import org.riston.ecommerce.model.Order;
 import org.riston.ecommerce.model.Seller;
+import org.riston.ecommerce.response.ApiResponseDto;
+import org.riston.ecommerce.response.OrderResponse;
 import org.riston.ecommerce.service.OrderService;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.http.HttpStatus;
@@ -20,24 +22,38 @@ public class SellerOrderController {
     private final OrderService orderService;
     private final SellerService sellerService;
 
-    @GetMapping()
-    public ResponseEntity<List<Order>> getAllOrdersHandler(@RequestHeader("Authorization") String jwt) {
+    @GetMapping
+    public ResponseEntity<ApiResponseDto<List<OrderResponse>>> getAllOrdersHandler(@RequestHeader("Authorization") String jwt) {
         Seller seller = sellerService.getSellerProfile(jwt);
         List<Order> orders = orderService.sellersOrder(seller.getId());
 
-        return new ResponseEntity<>(orders, HttpStatus.ACCEPTED);
+        List<OrderResponse> responseData = orders.stream()
+                .map(order -> new OrderResponse(
+                        order.getOrderId(),
+                        order.getOrderStatus().toString(),
+                        order.getTotalItem(),
+                        order.getTotalSellingPrice(),
+                        order.getOrderDate().toString(),
+                        order.getShippingAddress().getCity()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(ApiResponseDto.success("Orders retrieved successfully", responseData));
     }
 
     @PatchMapping("/{orderId}/status/{orderStatus}")
-    public ResponseEntity<Order> updateOrderHandler(@RequestHeader("Authorization") String jwt,
-                                                    @PathVariable String orderId,
-                                                    @PathVariable OrderStatus orderStatus) {
+    public ResponseEntity<ApiResponseDto<Order>> updateOrderHandler(@RequestHeader("Authorization") String jwt,
+                                                                    @PathVariable String orderId,
+                                                                    @PathVariable OrderStatus orderStatus) {
         Seller seller = sellerService.getSellerProfile(jwt);
         Order order = orderService.findOrderByOrderId(orderId);
+
         if (!order.getSellerId().equals(seller.getId())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponseDto.error("You do not have permission to update this order"));
         }
+
         Order updatedOrder = orderService.updateOrderStatus(orderId, orderStatus);
-        return new ResponseEntity<>(updatedOrder, HttpStatus.ACCEPTED);
+        return ResponseEntity.ok(ApiResponseDto.success("Order status updated", updatedOrder));
     }
 }

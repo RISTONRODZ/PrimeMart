@@ -1,8 +1,10 @@
 package org.riston.ecommerce.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.model.Coupon;
-import org.riston.ecommerce.response.ApiResponseDto; // ⚡ Added Envelope
+import org.riston.ecommerce.request.CouponRequest;
+import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.service.CouponService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +18,8 @@ public class AdminCouponController {
     private final CouponService couponService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponseDto<Coupon>> createCoupon(@RequestBody Coupon coupon) {
-        Coupon createdCoupon = couponService.createCoupon(coupon);
-        return ResponseEntity.ok(ApiResponseDto.success("Coupon created successfully", createdCoupon));
+    public ResponseEntity<ApiResponseDto<Coupon>> createCoupon(@Valid @RequestBody CouponRequest request) {
+        return ResponseEntity.ok(ApiResponseDto.success("Coupon created", couponService.createCoupon(request)));
     }
 
     @DeleteMapping("/delete/{id}")
