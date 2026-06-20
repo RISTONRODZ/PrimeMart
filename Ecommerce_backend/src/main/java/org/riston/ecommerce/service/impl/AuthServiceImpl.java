@@ -108,6 +108,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDto registerUser(SignupRequest req) {
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.getEmail());
 
@@ -118,7 +119,7 @@ public class AuthServiceImpl implements AuthService {
             verificationCodeRepository.delete(verificationCode);
             throw new IllegalArgumentException("OTP has expired");
         }
-//        verificationCodeRepository.delete(verificationCode);
+        verificationCodeRepository.delete(verificationCode);
         User existingUser = userRepository.findByEmail(req.getEmail());
         if (existingUser != null) {
             throw new IllegalArgumentException("User already exists with this email");
@@ -145,6 +146,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDto loginUser(LoginRequestDto req) {
         Authentication authentication = authenticate(req.email(), req.otp());
         String token = jwtProvider.generateToken(authentication);
@@ -171,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("OTP has expired");
         }
 
-//        verificationCodeRepository.delete(verificationCode);
+        verificationCodeRepository.delete(verificationCode);
 
         USER_ROLE role;
         if (isSeller) {

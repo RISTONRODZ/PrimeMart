@@ -9,6 +9,7 @@ import org.riston.ecommerce.repository.CartItemRepository;
 import org.riston.ecommerce.repository.CartRepository;
 import org.riston.ecommerce.service.CartService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,24 +18,29 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
 
     @Override
+    @Transactional
     public CartItem addCartItem(User user, Product product, String size, int quantity) {
         Cart cart = findUserCart(user);
+
         CartItem isPresent = cartItemRepository.findByCartAndProductAndSize(cart, product, size);
-        if(isPresent == null){
+        if (isPresent == null) {
             CartItem cartItem = new CartItem();
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
             cartItem.setUserId(user.getId());
             cartItem.setSize(size);
+
             int totalPrice = quantity * product.getSellingPrice();
             cartItem.setSellingPrice(totalPrice);
-            cart.getCartItems().add(cartItem);
             cartItem.setMrpPrice(quantity * product.getMrpPrice());
             cartItem.setCart(cart);
+
             CartItem savedItem = cartItemRepository.save(cartItem);
+
             cart.getCartItems().add(savedItem);
-            findUserCart(user);
-            cartItemRepository.save(cartItem);
+            recalculateCartTotals(cart);
+            cartRepository.save(cart);
+
             return savedItem;
         }
         return isPresent;
@@ -42,27 +48,32 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Cart findUserCart(User user) {
-
         Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {
             cart = new Cart();
             cart.setUser(user);
             cart = cartRepository.save(cart);
         }
+
+        recalculateCartTotals(cart);
+        return cart;
+    }
+
+    private void recalculateCartTotals(Cart cart) {
         int totalPrice = 0;
         int totalDiscountedPrice = 0;
         int totalItem = 0;
+
         for (CartItem cartItem : cart.getCartItems()) {
             totalPrice += cartItem.getMrpPrice();
             totalDiscountedPrice += cartItem.getSellingPrice();
             totalItem += cartItem.getQuantity();
         }
+
         cart.setTotalMrpPrice(totalPrice);
         cart.setTotalItem(totalItem);
         cart.setTotalSellingPrice(totalDiscountedPrice);
         cart.setDiscount(calculateDiscountPercentage(totalPrice, totalDiscountedPrice));
-        cart.setTotalItem(totalItem);
-        return cart;
     }
 
     private int calculateDiscountPercentage(Integer mrpPrice, Integer sellingPrice) {
