@@ -11,6 +11,7 @@ import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.request.SellerRequestDto;
+import org.riston.ecommerce.request.SignupRequest;
 import org.riston.ecommerce.response.AuthResponseDto;
 import org.riston.ecommerce.service.AuthService;
 import org.riston.ecommerce.util.OtpUtil;
@@ -109,26 +110,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto registerUser(SignupRequest req) {
-        VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.getEmail());
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.email());
 
-        if (verificationCode == null || !verificationCode.getOtp().equals(req.getOtp())) {
+        if (verificationCode == null || !verificationCode.getOtp().equals(req.otp())) {
             throw new IllegalArgumentException("Invalid OTP");
         }
         if (LocalDateTime.now().isAfter(verificationCode.getExpiryDate())) {
             verificationCodeRepository.delete(verificationCode);
             throw new IllegalArgumentException("OTP has expired");
         }
-//        verificationCodeRepository.delete(verificationCode);
-        User existingUser = userRepository.findByEmail(req.getEmail());
+        verificationCodeRepository.delete(verificationCode);
+        User existingUser = userRepository.findByEmail(req.email());
         if (existingUser != null) {
             throw new IllegalArgumentException("User already exists with this email");
         }
 
         User createdUser = new User();
-        createdUser.setEmail(req.getEmail());
-        createdUser.setFullName(req.getFullName());
+        createdUser.setEmail(req.email());
+        createdUser.setFullName(req.fullName());
         createdUser.setMobile("8786543456");
-        createdUser.setPassword(passwordEncoder.encode(req.getOtp()));
+        createdUser.setPassword(passwordEncoder.encode(req.otp()));
         createdUser.setRole(USER_ROLE.ROLE_CUSTOMER);
         User user = userRepository.save(createdUser);
 
@@ -137,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         cartRepository.save(cart);
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(USER_ROLE.ROLE_CUSTOMER.toString()));
-        Authentication authentication = new UsernamePasswordAuthenticationToken(req.getEmail(), null, authorities);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(req.email(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String jwt = jwtProvider.generateToken(authentication);
@@ -145,6 +146,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDto loginUser(LoginRequestDto req) {
         Authentication authentication = authenticate(req.email(), req.otp());
         String token = jwtProvider.generateToken(authentication);
@@ -171,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("OTP has expired");
         }
 
-//        verificationCodeRepository.delete(verificationCode);
+        verificationCodeRepository.delete(verificationCode);
 
         USER_ROLE role;
         if (isSeller) {
@@ -192,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
         Seller seller = new Seller();
         seller.setSellerName(request.sellerName());
         seller.setEmail(request.email());
-        seller.setPassword(passwordEncoder.encode(request.password())); // Assuming you handle passwords
+        seller.setPassword(passwordEncoder.encode(request.password()));
         seller.setMobile(request.mobile());
         seller.setGSTIN(request.gstin());
         seller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);

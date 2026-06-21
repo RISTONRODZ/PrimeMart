@@ -1,7 +1,7 @@
 package org.riston.ecommerce.service;
 
 import org.riston.ecommerce.model.Seller;
-import org.riston.ecommerce.model.SignupRequest;
+import org.riston.ecommerce.request.SignupRequest;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.request.SellerRequestDto;
 import org.riston.ecommerce.response.AuthResponseDto;

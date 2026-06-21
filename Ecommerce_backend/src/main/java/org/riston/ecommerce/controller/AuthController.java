@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.Seller;
-import org.riston.ecommerce.model.SignupRequest;
+import org.riston.ecommerce.request.SignupRequest;
 import org.riston.ecommerce.request.LoginOtpRequestDto;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.request.SellerRequestDto;
@@ -39,7 +39,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid registration data")
     })
     public ResponseEntity<AuthResponseDto> createUserHandler(@RequestBody SignupRequest request) {
-        log.info("Processing signup request for email: {}", request.getEmail());
+        log.info("Processing signup request for email: {}", request.email());
         return ResponseEntity.ok(authService.registerUser(request));
     }
 
