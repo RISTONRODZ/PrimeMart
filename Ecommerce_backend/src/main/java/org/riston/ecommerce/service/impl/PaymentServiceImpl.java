@@ -7,6 +7,7 @@ import com.razorpay.RazorpayException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.riston.ecommerce.domain.PaymentOrderStatus;
 import org.riston.ecommerce.domain.PaymentStatus;
@@ -125,6 +126,8 @@ public class PaymentServiceImpl implements PaymentService {
 
             return true;
 
+        } catch (PaymentValidationException e) {
+            throw e;
         } catch (RazorpayException e) {
             log.error("Payment verification failed. paymentOrderId={}, paymentId={}",
                     paymentOrder.getId(), paymentId, e);
@@ -183,7 +186,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private JSONObject buildPaymentLinkRequest(User user, Long amountInPaise, Long orderId){
+    private JSONObject buildPaymentLinkRequest(User user, Long amountInPaise, Long orderId) throws JSONException {
         JSONObject paymentLinkRequest = new JSONObject();
 
         paymentLinkRequest.put("amount", amountInPaise);

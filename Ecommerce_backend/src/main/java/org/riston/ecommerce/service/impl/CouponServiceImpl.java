@@ -34,22 +34,20 @@ public class CouponServiceImpl implements CouponService {
             throw new InvalidCouponException("valid for minimum order value " + coupon.getMinimumOrderValue());
         }
 
-        if (coupon.getIsActive() &&
-                java.time.LocalDate.now().isAfter(coupon.getValidityStartDate()) &&
-                java.time.LocalDate.now().isBefore(coupon.getValidityEndDate())) {
+        if (!coupon.getIsActive() ||
+                java.time.LocalDate.now().isBefore(coupon.getValidityStartDate()) ||
+                java.time.LocalDate.now().isAfter(coupon.getValidityEndDate())) {
 
-            user.getUsedCoupons().add(coupon);
-            userRepository.save(user);
-            double discountPercentage = Double.parseDouble(coupon.getDiscountPercentage());
-            double discountedPrice = (cart.getTotalSellingPrice() * discountPercentage) / 100;
-            cart.setTotalSellingPrice(cart.getTotalSellingPrice() - discountedPrice);
-            cart.setCouponCode(code);
-            cartRepository.save(cart);
-
-            return cart;
+            throw new InvalidCouponException("coupon expired or not active");
         }
-
-        throw new InvalidCouponException("coupon expired or not active");
+        user.getUsedCoupons().add(coupon);
+        userRepository.save(user);
+        double discountPercentage = Double.parseDouble(coupon.getDiscountPercentage());
+        double discountedPrice = (cart.getTotalSellingPrice() * discountPercentage) / 100;
+        cart.setTotalSellingPrice(cart.getTotalSellingPrice() - discountedPrice);
+        cart.setCouponCode(code);
+        cartRepository.save(cart);
+        return cart;
     }
 
     @Override
