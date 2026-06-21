@@ -38,7 +38,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentOrder createOrder(User user, Set<Order> orders) {
-
         long amount = orders.stream()
                 .mapToLong(Order::getTotalSellingPrice)
                 .sum();
@@ -56,7 +55,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentOrder getPaymentOrderById(Long orderId) {
-
         return paymentOrderRepository.findById(orderId)
                 .orElseThrow(() ->
                         new PaymentOrderNotFoundException(
@@ -67,14 +65,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentOrder getPaymentOrderByPaymentId(String paymentLinkId) {
-
         PaymentOrder paymentOrder =
                 paymentOrderRepository.findByPaymentLinkId(paymentLinkId);
 
         if (paymentOrder == null) {
             throw new PaymentOrderNotFoundException(
-                    "Payment order not found with payment link id: "
-                            + paymentLinkId
+                    "Payment order not found with payment link id: " + paymentLinkId
             );
         }
 
@@ -84,7 +80,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @Override
     public boolean proceedPaymentOrder(PaymentOrder paymentOrder, String paymentId) {
-        // Idempotency
         if (paymentOrder.getStatus() == PaymentOrderStatus.SUCCESS) {
             return true;
         }
@@ -102,7 +97,6 @@ public class PaymentServiceImpl implements PaymentService {
                         paymentOrder.getId(), paymentId, paymentStatus);
                 return false;
             }
-
 
             String currency = payment.get("currency");
             if (!"INR".equals(currency)) {
@@ -135,56 +129,45 @@ public class PaymentServiceImpl implements PaymentService {
             log.error("Payment verification failed. paymentOrderId={}, paymentId={}",
                     paymentOrder.getId(), paymentId, e);
             throw new PaymentGatewayException("Unable to verify payment with provider", e);
+        } catch (Exception e) {
+            log.error("Internal processing error during payment verification. paymentOrderId={}, paymentId={}",
+                    paymentOrder.getId(), paymentId, e);
+            throw new PaymentGatewayException("Internal processing error during verification", e);
         }
     }
 
     @Override
-    public PaymentLink createRazorpayPaymentLink(
-            User user,
-            Long amount,
-            Long orderId) {
+    public PaymentLink createRazorpayPaymentLink(User user, Long amount, Long orderId) {
         if (amount == null || amount <= 0) {
             throw new PaymentValidationException("Invalid payment amount: " + amount);
         }
 
         try {
-
             Long amountInPaise = amount * 100;
 
             JSONObject paymentLinkRequest = buildPaymentLinkRequest(user, amountInPaise, orderId);
 
             PaymentLink paymentLink = razorpayClient.paymentLink.create(paymentLinkRequest);
-            PaymentOrder paymentOrder =
-                    getPaymentOrderById(orderId);
+            PaymentOrder paymentOrder = getPaymentOrderById(orderId);
 
-            paymentOrder.setPaymentLinkId(
-                    paymentLink.get("id")
-            );
+            paymentOrder.setPaymentLinkId(paymentLink.get("id"));
 
             paymentOrderRepository.save(paymentOrder);
 
-            log.info(
-                    "Payment link created successfully. paymentOrderId={}, paymentLinkId={}",
-                    paymentOrder.getId(),
-                    paymentLink.get("id")
-            );
+            log.info("Payment link created successfully. paymentOrderId={}, paymentLinkId={}",
+                    paymentOrder.getId(), paymentLink.get("id"));
 
             return paymentLink;
 
         } catch (RazorpayException e) {
-
-            log.error(
-                    "Failed to create payment link for paymentOrderId={}",
-                    orderId,
-                    e
-            );
-
-            throw new PaymentGatewayException(
-                    "Failed to create payment link",
-                    e
-            );
+            log.error("Failed to create payment link for paymentOrderId={}", orderId, e);
+            throw new PaymentGatewayException("Failed to create payment link", e);
+        } catch (Exception e) {
+            log.error("Failed to build request payloads for paymentOrderId={}", orderId, e);
+            throw new PaymentGatewayException("Failed to generate payment payload structure", e);
         }
     }
+
     @Transactional
     @Override
     public void updateSellerReports(PaymentOrder paymentOrder) {
@@ -200,8 +183,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    private JSONObject buildPaymentLinkRequest(User user, Long amountInPaise, Long orderId) {
-
+    private JSONObject buildPaymentLinkRequest(User user, Long amountInPaise, Long orderId){
         JSONObject paymentLinkRequest = new JSONObject();
 
         paymentLinkRequest.put("amount", amountInPaise);

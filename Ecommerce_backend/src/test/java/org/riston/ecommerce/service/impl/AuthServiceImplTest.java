@@ -10,11 +10,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.model.Cart;
-import org.riston.ecommerce.model.SignupRequest;
+import org.riston.ecommerce.request.SignupRequest;
 import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.model.VerificationCode;
 import org.riston.ecommerce.repository.CartRepository;
-import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.repository.UserRepository;
 import org.riston.ecommerce.repository.VerificationCodeRepository;
 import org.riston.ecommerce.response.AuthResponseDto;
@@ -39,7 +38,7 @@ public class AuthServiceImplTest {
     private EmailServiceImpl emailServiceImpl;
     @Mock
     private JwtProvider jwtProvider;
-     @Spy
+    @Spy
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @InjectMocks
     private AuthServiceImpl authServiceImpl;
@@ -96,10 +95,7 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("this should register a user")
     void registerUser_Success(){
-      SignupRequest request = new SignupRequest();
-        request.setEmail("xyz@gmail.com");
-        request.setFullName("xyz");
-        request.setOtp("123456");
+      SignupRequest request = new SignupRequest("xyz@gmail.com","xyz","123456");
 
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("xyz@gmail.com");
@@ -124,9 +120,7 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("registerUser should throw exception when OTP is invalid")
     void registerUser_InvalidOtp_ThrowsException() {
-        SignupRequest request = new SignupRequest();
-        request.setEmail("xyz@gmail.com");
-        request.setOtp("wrong-otp");
+        SignupRequest request = new SignupRequest("xyz@gmail.com","xyz","wrong_otp");
 
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("xyz@gmail.com");
@@ -145,9 +139,7 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("registerUser should throw exception when OTP has expired")
     void registerUser_ExpiredOtp_ThrowsException() {
-        SignupRequest request = new SignupRequest();
-        request.setEmail("xyz@gmail.com");
-        request.setOtp("123456");
+        SignupRequest request = new SignupRequest("xyz@gmail.com","xyz","123456");
 
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("xyz@gmail.com");
@@ -168,9 +160,7 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("registerUser should throw exception when user already exists")
     void registerUser_UserAlreadyExists_ThrowsException() {
-        SignupRequest request = new SignupRequest();
-        request.setEmail("xyz@gmail.com");
-        request.setOtp("123456");
+        SignupRequest request = new SignupRequest("xyz@gmail.com","xyz","123456");
 
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("xyz@gmail.com");
