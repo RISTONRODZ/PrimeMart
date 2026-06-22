@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
@@ -64,7 +65,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "201", description = "Review created successfully", content = @Content(schema = @Schema(implementation = ReviewResponseDto.class))),
     })
     @ApiNotFoundResponse
-    public ResponseEntity<ReviewResponseDto> writeReview(@RequestBody CreateReviewRequestDto req, @Parameter(description = "The unique identifier of the product to write a review", required = true) @PathVariable Long productId, @Parameter(description = "JWT token", required = true) @RequestHeader("Authorization") String jwt) throws ProductException {
+    public ResponseEntity<ReviewResponseDto> writeReview(@Valid @RequestBody CreateReviewRequestDto req, @Parameter(description = "The unique identifier of the product to write a review", required = true) @PathVariable Long productId, @Parameter(description = "JWT token", required = true) @RequestHeader("Authorization") String jwt) throws ProductException {
         User user = userService.findUserByJwtToken(jwt);
         Product product = productService.findProductById(productId);
         Review review = reviewService.createReview(req, user, product);

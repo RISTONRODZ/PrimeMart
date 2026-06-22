@@ -27,7 +27,8 @@ class OrderServiceImplTest {
     @Mock private AddressRepository addressRepository;
     @Mock private SellerService sellerService;
     @Mock private SellerReportService sellerReportService;
-
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private OrderServiceImpl orderService;
 
@@ -58,10 +59,9 @@ class OrderServiceImplTest {
     void createOrder_Success() {
         Address address = new Address();
         when(addressRepository.save(any(Address.class))).thenReturn(address);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
         when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArguments()[0]);
-
         Set<Order> orders = orderService.createOrder(user, address, cart);
-
         assertFalse(orders.isEmpty());
         verify(orderRepository, times(1)).save(any(Order.class));
     }

@@ -202,7 +202,7 @@ public class AuthServiceImplTest {
                 authServiceImpl.registerUser(request)
         );
 
-        assertEquals("User already exists with  email", exception.getMessage());
+        assertEquals("User already exists with this email", exception.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 

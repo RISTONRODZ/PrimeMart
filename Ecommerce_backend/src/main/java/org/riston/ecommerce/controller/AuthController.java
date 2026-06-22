@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
@@ -38,7 +39,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Registration successful"),
             @ApiResponse(responseCode = "400", description = "Invalid registration data")
     })
-    public ResponseEntity<AuthResponseDto> createUserHandler(@RequestBody SignupRequest request) {
+    public ResponseEntity<AuthResponseDto> createUserHandler(@Valid @RequestBody SignupRequest request) {
         log.info("Processing signup request for email: {}", request.email());
         return ResponseEntity.ok(authService.registerUser(request));
     }
@@ -50,7 +51,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "OTP sent successfully"),
     })
     @ApiNotFoundResponse
-    public ResponseEntity<ApiResponseDto<String>> sendOtpHandler(@RequestBody LoginOtpRequestDto request) {
+    public ResponseEntity<ApiResponseDto<String>> sendOtpHandler(@Valid @RequestBody LoginOtpRequestDto request) {
         log.info("Processing OTP request for email: {}", request.email());
         authService.sendVerificationOtp(request.email());
         return ResponseEntity.ok(ApiResponseDto.success("Otp sent successfully", null));
@@ -64,7 +65,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Authentication successful, returns JWT")
     })
-    public ResponseEntity<AuthResponseDto> loginHandler(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<AuthResponseDto> loginHandler(@Valid @RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.loginUser(request));
     }
 
@@ -76,7 +77,7 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Seller registered successfully"),
     })
-    public ResponseEntity<ApiResponseDto<SellerResponseDto>> createSellerHandler(@RequestBody SellerRequestDto request) {
+    public ResponseEntity<ApiResponseDto<SellerResponseDto>> createSellerHandler(@Valid @RequestBody SellerRequestDto request) {
         Seller savedSeller = authService.registerSeller(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponseDto.success("Seller registered successfully.", SellerResponseDto.fromEntity(savedSeller)));

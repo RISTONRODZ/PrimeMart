@@ -154,13 +154,13 @@ class CartControllerTest {
 
         @Test
         @DisplayName("invalid/expired JWT is rejected per GlobalExceptionHandler's BadCredentialsException mapping (403)")
-        void findUserCart_invalidToken_returns403() throws Exception {
+        void findUserCart_invalidToken_returns401() throws Exception {
             when(userService.findUserByJwtToken("Bearer invalid.token"))
                     .thenThrow(new org.springframework.security.authentication.BadCredentialsException(
                             "Invalid or expired token"));
 
             mockMvc.perform(get(BASE).header("Authorization", "Bearer invalid.token"))
-                    .andExpect(status().isForbidden())
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.message").value("Invalid or expired token"));
 
@@ -204,7 +204,7 @@ class CartControllerTest {
         }
 
         @Test
-        @DisplayName("returns 400 when size is blank (@NotBlank violation) — body is EMPTY due to a GlobalExceptionHandler defect")
+        @DisplayName("returns 400 when size is blank (@NotBlank violation)")
         void addItem_blankSize_returns400() throws Exception {
             String invalidJson = """
                     {"size": "", "quantity": 2, "productId": 500}
@@ -215,14 +215,15 @@ class CartControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string(""));
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Size is required")));
 
             verifyNoInteractions(cartService);
             verifyNoInteractions(productService);
         }
 
         @Test
-        @DisplayName("returns 400 when quantity is less than 1 (@Min violation) — body is EMPTY (see blankSize test above for why)")
+        @DisplayName("returns 400 when quantity is less than 1 (@Min violation)")
         void addItem_quantityBelowMin_returns400() throws Exception {
             String invalidJson = """
                     {"size": "10", "quantity": 0, "productId": 500}
@@ -233,13 +234,14 @@ class CartControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string(""));
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Quantity must be at least 1")));
 
             verifyNoInteractions(cartService);
         }
 
         @Test
-        @DisplayName("returns 400 when productId is null (@NotNull violation) — body is EMPTY (see blankSize test above for why)")
+        @DisplayName("returns 400 when productId is null (@NotNull violation)")
         void addItem_nullProductId_returns400() throws Exception {
             String invalidJson = """
                     {"size": "10", "quantity": 2, "productId": null}
@@ -250,7 +252,8 @@ class CartControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string(""));
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Product ID cannot be null")));
 
             verifyNoInteractions(cartService);
         }
@@ -355,18 +358,19 @@ class CartControllerTest {
         }
 
         @Test
-        @DisplayName("returns 400 when quantity is less than 1 (@Min violation) — body is EMPTY due to GlobalExceptionHandler defect")
+        @DisplayName("returns 400 when quantity is less than 1 (@Min violation)")
         void updateCartItem_quantityBelowMin_returns400() throws Exception {
             String invalidJson = """
-                    {"quantity": 0, "size": "M"}
-                    """;
+            {"quantity": 0, "size": "M"}
+            """;
 
             mockMvc.perform(put(BASE + "/item/101")
                             .header("Authorization", JWT)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidJson))
                     .andExpect(status().isBadRequest())
-                    .andExpect(content().string(""));
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Quantity must be at least 1")));
 
             verifyNoInteractions(cartItemService);
         }

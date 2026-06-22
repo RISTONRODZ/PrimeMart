@@ -210,9 +210,10 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("invalid/expired JWT is rejected per BadCredentialsException mapping (403)")
-        void createOrder_invalidToken_returns403() throws Exception {
+        @DisplayName("invalid/expired JWT is rejected per BadCredentialsException mapping (401)")
+        void createOrder_invalidToken_returns401() throws Exception {
             Address address = sampleAddress();
+
             when(userService.findUserByJwtToken(anyString()))
                     .thenThrow(new org.springframework.security.authentication.BadCredentialsException("Invalid or expired token"));
 
@@ -220,7 +221,7 @@ class OrderControllerTest {
                             .header("Authorization", "Bearer invalid.token")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(address)))
-                    .andExpect(status().isForbidden())
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }
@@ -378,13 +379,13 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("invalid/expired JWT is rejected per BadCredentialsException mapping (403)")
-        void cancelOrder_invalidToken_returns403() throws Exception {
+        @DisplayName("invalid/expired JWT is rejected per BadCredentialsException mapping (401)")
+        void cancelOrder_invalidToken_returns401() throws Exception {
             when(userService.findUserByJwtToken(anyString()))
                     .thenThrow(new org.springframework.security.authentication.BadCredentialsException("Invalid or expired token"));
 
             mockMvc.perform(put(BASE + "/ORD-998877/cancel").header("Authorization", "Bearer invalid.token"))
-                    .andExpect(status().isForbidden())
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.success").value(false));
         }
     }

@@ -131,7 +131,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("returns 200 with success envelope on valid email")
         void sendOtp_success() throws Exception {
-            LoginOtpRequestDto request = new LoginOtpRequestDto("john@example.com", "000000");
+            LoginOtpRequestDto request = new LoginOtpRequestDto("john@example.com");
 
             doNothing().when(authService).sendVerificationOtp("john@example.com");
 
@@ -164,7 +164,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("generic service exception is handled as 500 with error envelope")
         void sendOtp_genericServiceException_returns500() throws Exception {
-            LoginOtpRequestDto request = new LoginOtpRequestDto("unknown@example.com", "123456");
+            LoginOtpRequestDto request = new LoginOtpRequestDto("unknown@example.com");
             doThrow(new RuntimeException("Unexpected failure sending OTP"))
                     .when(authService).sendVerificationOtp("unknown@example.com");
 
@@ -234,8 +234,8 @@ class AuthControllerTest {
         }
 
         @Test
-        @DisplayName("BadCredentialsException from service is mapped to 403 by GlobalExceptionHandler")
-        void login_badCredentials_returns403() throws Exception {
+        @DisplayName("BadCredentialsException from service is mapped to 401 by GlobalExceptionHandler")
+        void login_badCredentials_returns401() throws Exception {
             LoginRequestDto request = new LoginRequestDto("john@example.com", "999999");
             when(authService.loginUser(request))
                     .thenThrow(new org.springframework.security.authentication.BadCredentialsException(
@@ -244,7 +244,7 @@ class AuthControllerTest {
             mockMvc.perform(post(BASE + "/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden())
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.success").value(false))
                     .andExpect(jsonPath("$.message").value("Invalid credentials"));
         }
@@ -274,13 +274,13 @@ class AuthControllerTest {
         @DisplayName("returns 201 with wrapped seller response on successful registration")
         void signupSeller_success() throws Exception {
             SellerRequestDto request = new SellerRequestDto(
-                    "Nike Official Store", "seller_nike@example.com", "P@ssw0rd!", "+919988776655", "27AAAAA0000A1Z5");
+                    "Nike Official Store", "seller_nike@example.com", "P@ssw0rd!", "9988776655", "27AAAAA0000A1Z5");
 
             Seller savedSeller = new Seller();
             savedSeller.setId(1L);
             savedSeller.setSellerName("Nike Official Store");
             savedSeller.setEmail("seller_nike@example.com");
-            savedSeller.setMobile("+919988776655");
+            savedSeller.setMobile("9988776655");
             savedSeller.setGSTIN("27AAAAA0000A1Z5");
             savedSeller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
             savedSeller.setEmailVerified(false);
@@ -296,7 +296,7 @@ class AuthControllerTest {
                     .andExpect(jsonPath("$.data.id").value(1))
                     .andExpect(jsonPath("$.data.sellerName").value("Nike Official Store"))
                     .andExpect(jsonPath("$.data.email").value("seller_nike@example.com"))
-                    .andExpect(jsonPath("$.data.mobile").value("+919988776655"))
+                    .andExpect(jsonPath("$.data.mobile").value("9988776655"))
                     .andExpect(jsonPath("$.data.gstin").value("27AAAAA0000A1Z5"))
                     .andExpect(jsonPath("$.data.accountStatus").value("PENDING_VERIFICATION"))
                     .andExpect(jsonPath("$.data.emailVerified").value(false))
@@ -323,7 +323,7 @@ class AuthControllerTest {
         @DisplayName("unrecognized service exception (e.g. duplicate email) falls through to catch-all 500")
         void signupSeller_duplicateEmail_returns500ViaCatchAll() throws Exception {
             SellerRequestDto request = new SellerRequestDto(
-                    "Dupe Store", "dupe@example.com", "pass", "+910000000000", "GSTIN123");
+                    "Dupe Store", "dupe@example.com", "password1", "9000000000", "27AAAAA0000A1Z5");
 
             when(authService.registerSeller(request))
                     .thenThrow(new RuntimeException("Email already registered"));
@@ -339,51 +339,52 @@ class AuthControllerTest {
     }
 
     @Nested
-    @DisplayName("Validation gap (documents current unvalidated behavior)")
+    @DisplayName("Validation rules")
     class ValidationGapTests {
 
         @Test
-        @DisplayName("KNOWN GAP: /login accepts an invalid email format and still reaches the service")
-        void login_invalidEmailFormat_stillReachesService() throws Exception {
+        @DisplayName("/login rejects an invalid email format")
+        void login_invalidEmailFormat_returns400() throws Exception {
             LoginRequestDto request = new LoginRequestDto("not-an-email", "123456");
-            when(authService.loginUser(request)).thenReturn(
-                    new AuthResponseDto("jwt", "Login successful", USER_ROLE.ROLE_CUSTOMER));
 
             mockMvc.perform(post(BASE + "/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Invalid email format")));
 
-            verify(authService).loginUser(request);
+            verifyNoInteractions(authService);
         }
 
         @Test
-        @DisplayName("KNOWN GAP: /login accepts a malformed (non-6-digit) OTP and still reaches the service")
-        void login_malformedOtp_stillReachesService() throws Exception {
+        @DisplayName("/login rejects a malformed OTP")
+        void login_malformedOtp_returns400() throws Exception {
             LoginRequestDto request = new LoginRequestDto("john@example.com", "12");
-            when(authService.loginUser(request)).thenReturn(
-                    new AuthResponseDto("jwt", "Login successful", USER_ROLE.ROLE_CUSTOMER));
 
             mockMvc.perform(post(BASE + "/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("OTP must be exactly 6 digits")));
 
-            verify(authService).loginUser(request);
+            verifyNoInteractions(authService);
         }
 
         @Test
-        @DisplayName("KNOWN GAP: /send-otp accepts an invalid email format and still reaches the service")
-        void sendOtp_invalidEmailFormat_stillReachesService() throws Exception {
-            LoginOtpRequestDto request = new LoginOtpRequestDto("not-an-email", "123456");
-            doNothing().when(authService).sendVerificationOtp("not-an-email");
+        @DisplayName("/send-otp rejects an invalid email format")
+        void sendOtp_invalidEmailFormat_returns400() throws Exception {
+            LoginOtpRequestDto request = new LoginOtpRequestDto("not-an-email");
 
             mockMvc.perform(post(BASE + "/send-otp")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.success").value(false))
+                    .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("please enter a valid email")));
 
-            verify(authService).sendVerificationOtp("not-an-email");
+            verifyNoInteractions(authService);
         }
     }
 }

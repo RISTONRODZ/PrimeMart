@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.mapper.DealMapper;
@@ -31,7 +32,7 @@ public class DealController {
     @Operation(summary = "Create a new deal")
     @ApiResponse(responseCode = "201", description = "Deal created",
             content = @Content(schema = @Schema(implementation = ApiResponseDto.class)))
-    public ResponseEntity<ApiResponseDto<DealResponseDto>> createDeals(@RequestBody DealRequestDto request) {
+    public ResponseEntity<ApiResponseDto<DealResponseDto>> createDeals(@Valid @RequestBody DealRequestDto request) {
         Deal deal = dealService.createDeal(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponseDto.success("Deal created successfully", dealMapper.toDto(deal)));
