@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @RestController
@@ -63,9 +64,12 @@ public class OrderController {
 
         PaymentLink payment = paymentService.createRazorpayPaymentLink(user, paymentOrder.getAmount(), paymentOrder.getId());
 
-        PaymentLinkResponseDto res = new PaymentLinkResponseDto(String.valueOf(payment.get("short_url")), String.valueOf(payment.get("id")));
+        PaymentLinkResponseDto res = new PaymentLinkResponseDto(
+                Objects.toString(payment.get("short_url"), null),
+                Objects.toString(payment.get("id"), null)
+        );
 
-        paymentOrder.setPaymentLinkId(String.valueOf(payment.get("id")));
+        paymentOrder.setPaymentLinkId(Objects.toString(payment.get("id"), null));
 
         paymentOrderRepository.save(paymentOrder);
 

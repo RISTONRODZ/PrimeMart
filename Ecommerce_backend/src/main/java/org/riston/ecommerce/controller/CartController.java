@@ -17,7 +17,7 @@ import org.riston.ecommerce.model.User;
 import org.riston.ecommerce.request.AddItemRequestDto;
 import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.CartItemDto;
-import org.riston.ecommerce.response.UpdateCartItemRequest;
+import org.riston.ecommerce.request.UpdateCartItemRequest;
 import org.riston.ecommerce.response.UserCartResponse;
 import org.riston.ecommerce.service.*;
 import org.springframework.http.ResponseEntity;

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.User;
@@ -15,6 +16,7 @@ import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.UserResponseDto;
 import org.riston.ecommerce.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
     name = "User Management",
     description = "Endpoints for managing user profiles and account information"
 )
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -51,7 +54,7 @@ public class UserController {
             description = "JWT token obtained from login endpoint",
             required = true,
             example = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        )
+        ) @NotBlank(message = "Authorization header cannot be empty")
         @RequestHeader("Authorization") String jwt
     ) {
         User user = userService.findUserByJwtToken(jwt);
