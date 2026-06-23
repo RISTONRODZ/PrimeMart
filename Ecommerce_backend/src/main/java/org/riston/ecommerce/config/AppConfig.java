@@ -43,6 +43,7 @@ public class AppConfig {
                         .requestMatchers("/api/v1/auth/**", "/api/v1/home").permitAll()
                         .requestMatchers("/api/v1/seller/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews").permitAll()
+                        .requestMatchers("/ai-chat").permitAll()
 
                         // 2. Admin-Only Endpoints
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
