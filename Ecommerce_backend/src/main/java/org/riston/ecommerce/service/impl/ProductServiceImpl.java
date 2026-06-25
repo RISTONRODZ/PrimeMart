@@ -28,6 +28,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     public final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final EmbeddingIngestionServiceImpl embeddingIngestionService;
 
     @Override
     @Transactional
@@ -53,8 +54,9 @@ public class ProductServiceImpl implements ProductService {
         product.setMrpPrice(req.mrpPrice());
         product.setSizes(req.sizes());
         product.setDiscountPercent(calculateDiscountPercentage(req.mrpPrice(), req.sellingPrice()));
-
-        return productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
+        embeddingIngestionService.ingestProducts(List.of(savedProduct));
+        return savedProduct;
     }
 
     private Category findOrCreateCategory(String categoryId, int level, Category parent) {
