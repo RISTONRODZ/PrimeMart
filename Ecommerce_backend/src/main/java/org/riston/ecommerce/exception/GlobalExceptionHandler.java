@@ -67,10 +67,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponseDto<String>> handleMissingRequestParameter(MissingServletRequestParameterException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponseDto.error(ex.getMessage()));
     }
+    @ExceptionHandler(GuardrailException.class)
+    public ResponseEntity<ApiResponseDto<String>> handleGuardrailException(GuardrailException ex) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("rate limit")) {
+            status = HttpStatus.TOO_MANY_REQUESTS;
+        }
+        return ResponseEntity.status(status).body(ApiResponseDto.error(ex.getMessage()));
+    }
 
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponseDto<String>> handleAllExceptions(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponseDto.error("An unexpected error occurred: " + ex.getMessage()));
     }
+
 }
