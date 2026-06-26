@@ -1,6 +1,12 @@
 package org.riston.ecommerce.service.impl;
 
+import org.riston.ecommerce.model.Cart;
+import org.riston.ecommerce.model.Order;
+import org.riston.ecommerce.model.User;
+import org.riston.ecommerce.service.CartService;
+import org.riston.ecommerce.service.OrderService;
 import org.riston.ecommerce.service.RagService;
+import org.riston.ecommerce.service.UserService;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.SafeGuardAdvisor;
@@ -23,11 +29,18 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-// Advisor order: SafeGuard → RAG → Memory → Logger
-// SafeGuard runs first to block injections before any retrieval happens
 public class RagServiceImpl implements RagService {
 
+    private final CartService cartService;
+    private final OrderService orderService;
+    private final UserService userService;
+    private final ChatClient chatClient;
+    private final ChatClient rewriteClient;
+    private final JdbcChatMemoryRepository chatMemoryRepository;
+
     private static final String SYSTEM_PROMPT = """
+            /no_think
+            Do not use chain-of-thought reasoning. Answer directly and concisely based only on the provided context.
             You are a precise e-commerce assistant for an online store.
 
             STRICT RULES — follow these before answering anything:
@@ -47,22 +60,28 @@ public class RagServiceImpl implements RagService {
             """;
 
     private static final List<String> INJECTION_KEYWORDS = List.of(
-            "ignore previous instructions", "ignore all instructions", "you are now", "act as",
-            "pretend you are", "forget your instructions", "disregard your", "new persona",
-            "jailbreak", "dan mode", "[INST]", "<SYS>", "override", "system prompt"
+            "ignore previous instructions",
+            "ignore all instructions",
+            "forget your instructions",
+            "disregard your instructions",
+            "jailbreak",
+            "dan mode",
+            "new persona",
+            "[INST]",
+            "<SYS>"
     );
 
     private static final String GUARD_BLOCK_MESSAGE = "I can only help with product and shopping queries.";
 
-    private final ChatClient chatClient;
-    private final ChatClient rewriteClient;
-    private final JdbcChatMemoryRepository chatMemoryRepository;
-
-    public RagServiceImpl(
-            VectorStore vectorStore,
-            ChatModel chatModel,
-            JdbcChatMemoryRepository chatMemoryRepository) {
-
+    public RagServiceImpl(VectorStore vectorStore,
+                          ChatModel chatModel,
+                          JdbcChatMemoryRepository chatMemoryRepository,
+                          CartService cartService,
+                          OrderService orderService,
+                          UserService userService) {
+        this.cartService = cartService;
+        this.orderService = orderService;
+        this.userService = userService;
         this.chatMemoryRepository = chatMemoryRepository;
 
         ChatMemory chatMemory = MessageWindowChatMemory.builder()
@@ -72,8 +91,8 @@ public class RagServiceImpl implements RagService {
 
         VectorStoreDocumentRetriever retriever = VectorStoreDocumentRetriever.builder()
                 .vectorStore(vectorStore)
-                .similarityThreshold(0.65)
-                .topK(4)
+                .similarityThreshold(0.3)
+                .topK(6)
                 .build();
 
         ContextualQueryAugmenter augmenter = ContextualQueryAugmenter.builder()
@@ -96,6 +115,7 @@ public class RagServiceImpl implements RagService {
                 .build();
 
         this.chatClient = ChatClient.builder(chatModel)
+                .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(
                         safeGuard,
                         ragAdvisor,
@@ -108,18 +128,23 @@ public class RagServiceImpl implements RagService {
     }
 
     @Override
-    public Flux<String> query(String userQuestion, String conversationId) {
+    public Flux<String> query(String userQuestion, String conversationId, String userEmail) {
         try {
             if (userQuestion == null || userQuestion.isBlank()) {
                 return Flux.just(GUARD_BLOCK_MESSAGE);
             }
 
+            String userContext = buildUserContext(userEmail);
             String finalQuestion = rewriteQuestionIfNecessary(userQuestion, conversationId);
-            log.info("Query routing execution: [{}] -> [{}]", userQuestion, finalQuestion);
+
+            String questionWithContext = userContext.isBlank()
+                    ? finalQuestion
+                    : userContext + "\nUser Question: " + finalQuestion;
+
+            log.info("Final question sent to pipeline: [{}]", questionWithContext);
 
             return chatClient.prompt()
-                    .system(SYSTEM_PROMPT)
-                    .user(finalQuestion)
+                    .user(questionWithContext)
                     .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
                     .stream()
                     .content()
@@ -131,6 +156,55 @@ public class RagServiceImpl implements RagService {
             log.error("Fatal error in query processing", ex);
             return Flux.just("An unexpected error occurred. Please try again.");
         }
+    }
+    private String buildUserContext(String userEmail) {
+        StringBuilder ctx = new StringBuilder("\n\nUSER ACCOUNT CONTEXT:\n");
+
+        if (userEmail == null || userEmail.isBlank()) {
+            ctx.append("User Status: NOT LOGGED IN\n");
+            ctx.append("Instruction: If the user asks for their orders, cart, or account details, tell them they must log in first.\n");
+            return ctx.toString();
+        }
+
+        try {
+            User user = userService.findUserByEmail(userEmail);
+            if (user == null) {
+                log.warn("User not found for email: {}", userEmail);
+                ctx.append("User Status: NOT LOGGED IN\n");
+                ctx.append("Instruction: If the user asks for their orders, cart, or account details, tell them they must log in first.\n");
+                return ctx.toString();
+            }
+
+            Cart cart = cartService.findUserCart(user);
+            if (cart != null && cart.getCartItems() != null && !cart.getCartItems().isEmpty()) {
+                ctx.append("Current Cart:\n");
+                cart.getCartItems().forEach(item ->
+                        ctx.append("- ").append(item.getProduct().getTitle())
+                                .append(" x").append(item.getQuantity())
+                                .append(" @ ₹").append(item.getSellingPrice()).append("\n")
+                );
+            } else {
+                ctx.append("Current Cart: empty\n");
+            }
+
+            List<Order> orders = orderService.usersOrderHistory(user.getId());
+            if (orders != null && !orders.isEmpty()) {
+                ctx.append("Recent Orders:\n");
+                orders.stream().limit(3).forEach(order ->
+                        ctx.append("- Order #").append(order.getId())
+                                .append(" | Status: ").append(order.getOrderStatus())
+                                .append(" | Total: ₹").append(order.getTotalSellingPrice()).append("\n")
+                );
+            } else {
+                ctx.append("Recent Orders: none\n");
+            }
+
+        } catch (Exception e) {
+            log.warn("Could not fetch user context for: {}", userEmail, e);
+        }
+
+        log.info("Built user context: [{}]", ctx.toString());
+        return ctx.toString();
     }
 
     private String rewriteQuestionIfNecessary(String question, String conversationId) {
@@ -146,6 +220,7 @@ public class RagServiceImpl implements RagService {
         try {
             String rewritten = rewriteClient.prompt()
                     .system("""
+                            /no_think
                             You are an AI query analyzer. Analyze the Conversation History and the Current Question.
                             If the Current Question depends on context from the history (uses pronouns like it, this, that, they, or requests modifications/follow-ups like 'how much?', 'any other?', 'compare'), rewrite it into a single, complete, standalone search query.
                             If the Current Question is already specific and complete on its own, output it exactly as provided without changing any words.
@@ -154,7 +229,7 @@ public class RagServiceImpl implements RagService {
                     .user("""
                             Conversation History:
                             %s
-                            
+
                             Current Question:
                             %s
                             """.formatted(history, question))

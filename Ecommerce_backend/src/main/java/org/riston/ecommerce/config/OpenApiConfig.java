@@ -44,7 +44,8 @@ public class OpenApiConfig {
                         "/api/v1/products/**",
                         "/api/v1/reviews/products/**",
                         "/api/v1/reviews",
-                        "/api/v1/home-categories"
+                        "/api/v1/home-categories",
+                        "/api/v1/ai/**"
                 )
 
                 .addOpenApiCustomizer(openApi -> {
