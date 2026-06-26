@@ -71,8 +71,6 @@ public class DataSeeder implements CommandLineRunner {
             List<HomeCategory> homeCategories = seedHomeCategories(categories);
             seedDeals(homeCategories);
 
-            // 6. Orders & Transaction History
-            seedOrdersAndTransactions(users, products);
             seedSellerReports(sellers);
 
             log.info("Database has been completely populated with clean, context-relevant mock data!");
@@ -82,7 +80,6 @@ public class DataSeeder implements CommandLineRunner {
         if (vectorStoreIsEmpty()) {
             log.info("Starting embedding ingestion...");
             embeddingIngestionServiceImpl.ingestProducts(productRepository.findAll());
-            embeddingIngestionServiceImpl.ingestOrders(orderRepository.findAll());
             log.info("Embeddings ingested into pgvector!");
         }
         else {
@@ -430,66 +427,6 @@ public class DataSeeder implements CommandLineRunner {
             dealRepository.save(deal);
         }
         log.info("Seeded Active System Deals");
-    }
-
-    private void seedOrdersAndTransactions(List<User> users, List<Product> products) {
-        for (int i = 0; i < 5; i++) {
-            User customer = users.get(random.nextInt(users.size()));
-            Product product = products.get(random.nextInt(products.size()));
-            Address address = customer.getAddresses().iterator().next();
-
-            Order order = new Order();
-            order.setOrderId("ORD-" + faker.regexify("[A-Z0-9]{7}"));
-            order.setUser(customer);
-            order.setSellerId(product.getSeller().getId());
-            order.setShippingAddress(address);
-            order.setOrderStatus(OrderStatus.PLACED);
-            order.setPaymentStatus(PaymentStatus.COMPLETED);
-            order.setOrderDate(LocalDateTime.now());
-            order.setDeliverDate(LocalDateTime.now().plusDays(5));
-
-            int quantity = random.nextInt(2) + 1;
-            double totalMrp = product.getMrpPrice() * quantity;
-            int totalSelling = product.getSellingPrice() * quantity;
-
-            order.setTotalItem(quantity);
-            order.setTotalMrpPrice(totalMrp);
-            order.setTotalSellingPrice(totalSelling);
-            order.setDiscount((int) (totalMrp - totalSelling));
-
-            PaymentDetails payment = order.getPaymentDetails();
-            payment.setPaymentId("pay_" + faker.regexify("[a-zA-Z0-9]{14}"));
-            payment.setRazorpayPaymentLinkId("plink_" + faker.regexify("[a-zA-Z0-9]{14}"));
-            payment.setStatus(PaymentStatus.COMPLETED);
-
-            Order savedOrder = orderRepository.save(order);
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(savedOrder);
-            orderItem.setProduct(product);
-            orderItem.setSize("L");
-            orderItem.setQuantity(quantity);
-            orderItem.setMrpPrice(product.getMrpPrice());
-            orderItem.setSellingPrice(product.getSellingPrice());
-            orderItem.setUserId(customer.getId());
-            orderItemRepository.save(orderItem);
-
-            PaymentOrder po = new PaymentOrder();
-            po.setAmount((long) totalSelling);
-            po.setStatus(PaymentOrderStatus.SUCCESS);
-            po.setPaymentMethod(PaymentMethod.RAZORPAY);
-            po.setUser(customer);
-            po.getOrders().add(savedOrder);
-            paymentOrderRepository.save(po);
-
-            Transaction transaction = new Transaction();
-            transaction.setCustomer(customer);
-            transaction.setOrder(savedOrder);
-            transaction.setSeller(product.getSeller());
-            transaction.setDate(LocalDateTime.now());
-            transactionRepository.save(transaction);
-        }
-        log.info("Seeded Orders, OrderItems, PaymentOrders, and Transactions");
     }
 
     private void seedSellerReports(List<Seller> sellers) {

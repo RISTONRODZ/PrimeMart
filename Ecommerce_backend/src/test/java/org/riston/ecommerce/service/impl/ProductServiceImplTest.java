@@ -24,13 +24,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProductServiceImplTest {
+class
+ProductServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    @SuppressWarnings("unused")
+    private EmbeddingIngestionServiceImpl embeddingIngestionService;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -52,7 +56,7 @@ class ProductServiceImplTest {
         when(productRepository.findByTitleAndSeller(anyString(), any())).thenReturn(null);
         when(categoryRepository.findByCategoryId(anyString())).thenReturn(new Category());
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArguments()[0]);
-
+        doNothing().when(embeddingIngestionService).ingestProducts(anyList());
         Product savedProduct = productService.createProduct(requestDto, seller);
 
         assertThat(savedProduct).isNotNull();
