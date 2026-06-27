@@ -1,8 +1,7 @@
 import { ThemeProvider } from "@mui/material";
 import customTheme from "./theme/customTheme.tsx";
-
-import { Home } from "./features/customer/home";
-import Navbar from "./components/layout/Navbar.tsx";
+import Navbar from "../components/layout/Navbar.tsx";
+import Home from "../features/customer/home/Home.tsx";
 
 
 const App = () => {
