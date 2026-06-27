@@ -1,19 +1,35 @@
+name: Backend CI
+
 on:
   push:
     branches:
       - master
-    paths:
-      - 'Ecommerce_backend/**'
   pull_request:
     branches:
       - master
-    paths:
-      - 'Ecommerce_backend/**'
 
 jobs:
-  backend-ci:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
 
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          base: ${{ github.event.pull_request.base.sha || github.event.before }}
+          filters: |
+            backend:
+              - 'Ecommerce_backend/**'
+
+  backend-ci:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:15
@@ -28,11 +44,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     defaults:
       run:
         working-directory: Ecommerce_backend
-
     env:
       DB_URL: ${{ secrets.DB_URL }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -45,11 +59,10 @@ jobs:
       RAZORPAY_API_KEY: ${{ secrets.RAZORPAY_API_KEY }}
       RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
       FRONTEND_URL_PAYMENT: ${{ secrets.FRONTEND_URL_PAYMENT }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -57,6 +70,6 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: Ecommerce_backend/pom.xml
-
+          
       - name: Build and run tests
         run: mvn -B clean verify
