@@ -1,18 +1,21 @@
 import { ThemeProvider } from "@mui/material";
 import customTheme from "./theme/customTheme.tsx";
-
-import { Home } from "./features/customer/home";
 import Navbar from "./components/layout/Navbar.tsx";
-
+import ProductCard from "./features/customer/home/product/ProductCard.tsx";
+import Home from "./features/customer/home/Home.tsx";
+import { BrowserRouter } from "react-router";
 
 const App = () => {
     return (
-        <ThemeProvider theme={customTheme}>
-            <div>
-                <Navbar />
-                <Home />
-            </div>
-        </ThemeProvider>
+        <BrowserRouter>
+            <ThemeProvider theme={customTheme}>
+                <div>
+                    <Navbar />
+                    <Home />
+                    <ProductCard/>
+                </div>
+            </ThemeProvider>
+        </BrowserRouter>
     );
 };
 
