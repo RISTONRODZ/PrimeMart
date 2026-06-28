@@ -1,5 +1,4 @@
 name: Backend CI
-
 on:
   push:
     branches:
@@ -7,17 +6,18 @@ on:
   pull_request:
     branches:
       - master
-
 jobs:
   changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-
+          fetch-depth: 0
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -25,7 +25,6 @@ jobs:
           filters: |
             backend:
               - 'Ecommerce_backend/**'
-
   backend-ci:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
@@ -62,7 +61,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -70,6 +69,6 @@ jobs:
           java-version: '21'
           cache: maven
           cache-dependency-path: Ecommerce_backend/pom.xml
-          
+
       - name: Build and run tests
         run: mvn -B clean verify
