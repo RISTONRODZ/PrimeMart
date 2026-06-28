@@ -1,7 +1,8 @@
 import { ThemeProvider } from "@mui/material";
 import customTheme from "./theme/customTheme.tsx";
 import Navbar from "../components/layout/Navbar.tsx";
-import Home from "../features/customer/home/Home.tsx";
+import AppRoutes from "../AppRoutes.tsx";
+import Footer from "../components/layout/Footer.tsx";
 
 
 const App = () => {
@@ -9,7 +10,8 @@ const App = () => {
         <ThemeProvider theme={customTheme}>
             <div>
                 <Navbar />
-                <Home />
+                <AppRoutes />
+                <Footer/>
             </div>
         </ThemeProvider>
     );

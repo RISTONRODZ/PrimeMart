@@ -3,3 +3,8 @@
 @theme {
     --font-pacifico: "Pacifico", cursive;
 }
+@layer base {
+    html, body {
+        @apply bg-[#FEFEFE] text-white min-h-screen;
+    }
+}
