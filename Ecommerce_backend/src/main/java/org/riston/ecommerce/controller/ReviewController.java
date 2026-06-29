@@ -43,7 +43,7 @@ public class ReviewController {
     private ReviewResponseDto mapToDto(Review review) {
         User user = review.getUser();
         UserSummaryDto userDto = new UserSummaryDto(user.getId(), user.getEmail(), user.getFullName(), user.getMobile(), user.getRole().toString());
-        return new ReviewResponseDto(review.getId(), review.getReviewText(), review.getRating(), null, userDto, review.getCreatedAt());
+        return new ReviewResponseDto(review.getId(), review.getReviewText(), review.getRating(), review.getProductImages(), userDto, review.getCreatedAt());
     }
 
     @GetMapping("/products/{productId}/reviews")
