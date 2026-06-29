@@ -2,28 +2,23 @@ import {Link} from "react-router-dom";
 
 const footerLinks = {
     shop: [
-        { label: "Men's fashion", href: "#" },
-        { label: "Women's fashion", href: "#" },
-        { label: "Electronics", href: "#" },
-        { label: "Home & furniture", href: "#" },
-        { label: "Beauty & care", href: "#" },
-        { label: "Sports & outdoors", href: "#" },
+        { label: "Men's fashion", to: "#" },
+        { label: "Women's fashion", to: "#" },
+        { label: "Electronics", to: "#" },
+        { label: "Home & furniture", to: "#" },
+        { label: "Beauty & care", to: "#" },
+        { label: "Sports & outdoors", to: "#" },
     ],
     help: [
-        { label: "Track your order", href: "#" },
-        { label: "Returns & refunds", href: "#" },
-        { label: "Shipping info", href: "#" },
-        { label: "FAQs", href: "#" },
-        { label: "Contact support", href: "#" },
-        { label: "Size guide", href: "#" },
+        { label: "Track your order", to: "#" },
+        { label: "Shipping info", to: "/shipping-info" },
+        { label: "FAQs", to: "/faqs" },
+        { label: "Contact support", to: "/contact-support" },
+        // { label: "Size guide", to: "#" },
     ],
     company: [
-        { label: "About us", href: "/about" },
-        // { label: "Careers", href: "#" },
-        { label: "Become a seller", href: "#" },
-        // { label: "Affiliate program", href: "#" },
-        // { label: "Press", href: "#" },
-        // { label: "Blog", href: "#" },
+        { label: "About us", to: "/about" },
+        { label: "Become a seller", to: "/become-a-seller" },
     ],
 };
 
@@ -113,9 +108,9 @@ const Footer = () => {
                     <ul className="space-y-2.5">
                         {footerLinks.shop.map((link) => (
                             <li key={link.label}>
-                                <a href={link.href} className="text-sm text-blue-200 hover:text-white transition-colors">
+                                <Link to={link.to} className="text-sm text-blue-200 hover:text-white transition-colors">
                                     {link.label}
-                                </a>
+                                </Link>
                             </li>
                         ))}
                     </ul>
@@ -125,9 +120,9 @@ const Footer = () => {
                     <ul className="space-y-2.5">
                         {footerLinks.help.map((link) => (
                             <li key={link.label}>
-                                <a href={link.href} className="text-sm text-blue-200 hover:text-white transition-colors">
+                                <Link to={link.to} className="text-sm text-blue-200 hover:text-white transition-colors">
                                     {link.label}
-                                </a>
+                                </Link>
                             </li>
                         ))}
                     </ul>
@@ -137,7 +132,7 @@ const Footer = () => {
                     <ul className="space-y-2.5">
                         {footerLinks.company.map((link) => (
                             <li key={link.label}>
-                                <Link to={link.href} className="text-sm text-blue-200 hover:text-white transition-colors">
+                                <Link to={link.to} className="text-sm text-blue-200 hover:text-white transition-colors">
                                     {link.label}
                                 </Link>
                             </li>
@@ -149,11 +144,12 @@ const Footer = () => {
                 <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <span className="text-xs text-blue-300">© {new Date().getFullYear()} PrimeMart. All rights reserved.</span>
                     <div className="flex gap-5">
-                        {["Privacy policy", "Terms of use"].map((label) => (
-                            <a key={label} href="#" className="text-xs text-blue-300 hover:text-white transition-colors">
-                                {label}
-                            </a>
-                        ))}
+                        <Link to="/privacy-policy" className="text-xs text-blue-300 hover:text-white transition-colors">
+                            Privacy policy
+                        </Link>
+                        <Link to="/terms-of-use" className="text-xs text-blue-300 hover:text-white transition-colors">
+                            Terms of use
+                        </Link>
                     </div>
                 </div>
             </div>
