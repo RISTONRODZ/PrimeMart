@@ -42,18 +42,7 @@ public class SellerProductController {
         Seller seller = sellerService.getSellerProfile(jwt);
         Product product = productService.createProduct(request, seller);
 
-        ProductResponse response = new ProductResponse(
-                product.getId(),
-                product.getTitle(),
-                product.getDescription(),
-                product.getSellingPrice(),
-                product.getMrpPrice(),
-                product.getDiscountPercent(),
-                product.getColor(),
-                product.getImages(),
-                product.getCategory().getCategoryId(),
-                product.getSeller().getSellerName()
-        );
+        ProductResponse response = new ProductResponse(product);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
