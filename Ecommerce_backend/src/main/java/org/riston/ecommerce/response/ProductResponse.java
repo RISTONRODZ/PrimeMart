@@ -34,7 +34,14 @@ public record ProductResponse(
         String categoryName,
 
         @Schema(description = "Name of the seller", example = "Nike Official Store")
-        String sellerName
+        String sellerName,
+
+        @Schema(description = "Available clothing or shoe sizes", example = "S, M, L, XL")
+        String sizes,
+
+        @Schema(description = "Total number of ratings received for the product", example = "1250")
+        int numRatings
+
 ) {
     public ProductResponse(Product p) {
         this(
@@ -47,7 +54,9 @@ public record ProductResponse(
                 p.getColor(),
                 p.getImages(),
                 (p.getCategory() != null) ? p.getCategory().getCategoryId() : "N/A",
-                (p.getSeller() != null) ? p.getSeller().getSellerName() : "Unknown"
+                (p.getSeller() != null) ? p.getSeller().getSellerName() : "Unknown",
+                p.getSizes(),
+                p.getNumRatings()
         );
     }
 }
