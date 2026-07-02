@@ -31,19 +31,19 @@ const menu = [
     },
     {
         name: "Add Product",
-        path: "/seller/add-product",
+        path: "/seller/products/add",
         icon: <AddIcon className="text-blue-700" />,
         activeIcon: <AddIcon className="text-white" />,
     },
     {
         name: "Payment",
-        path: "/seller/payment",
+        path: "/seller/payments",
         icon: <AccountBalanceWallet className="text-blue-700" />,
         activeIcon: <AccountBalanceWallet className="text-white" />,
     },
     {
         name: "Transaction",
-        path: "/seller/transaction",
+        path: "/seller/transactions",
         icon: <Receipt className="text-blue-700" />,
         activeIcon: <Receipt className="text-white" />,
     },
@@ -59,7 +59,7 @@ const menu2 = [
 
     {
         name: "Account",
-        path: "/seller/account",
+        path: "/seller/profile",
         icon: <AccountBox className="text-blue-700" />,
         activeIcon: <AccountBox className="text-white" />,
     },

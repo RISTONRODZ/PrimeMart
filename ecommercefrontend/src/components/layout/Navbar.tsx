@@ -1,10 +1,12 @@
-import {Avatar, Box, Button, IconButton, useMediaQuery, useTheme} from "@mui/material";
+import {Avatar, Box, Button, IconButton, useMediaQuery, useTheme, Drawer, List, ListItemButton, ListItemText, Collapse} from "@mui/material";
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import MenuIcon from '@mui/icons-material/Menu'
 import SearchIcon from '@mui/icons-material/Search';
 import {AddShoppingCart, FavoriteBorder, Storefront} from "@mui/icons-material";
 import {Logo} from "./Logo.tsx";
 import CategorySheet, {type CategoryKey} from "../../features/customer/home/categories/CategorySheet.tsx";
-import {mainCategory} from "../../features/customer/data/category/mainCategory.ts";
+import {mainCategory, type MainCategory, type SubCategory} from "../../features/customer/data/category/mainCategory.ts";
 import {useRef, useState} from "react";
 import {Link} from "react-router-dom";
 
@@ -14,7 +16,21 @@ const Navbar = () => {
     const isSmall = useMediaQuery(theme.breakpoints.up("sm"));
     const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("men");
     const [showCategorySheet, setShowCategorySheet] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
     const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const toggleCategory = (categoryId: string) => {
+        setExpandedCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(categoryId)) {
+                newSet.delete(categoryId);
+            } else {
+                newSet.add(categoryId);
+            }
+            return newSet;
+        });
+    };
     const handleMouseEnter = () => {
         if (hideTimeout.current) clearTimeout(hideTimeout.current);
         setShowCategorySheet(true);
@@ -30,7 +46,7 @@ const Navbar = () => {
             <div className={'mr-3'}>
                 <div className={'flex items-center justify-between'}>
                     <div className={'flex items-center gap-2 ml-2'}>
-                        {!isLarge && <IconButton>
+                        {!isLarge && <IconButton onClick={() => setMobileMenuOpen(true)}>
                             <MenuIcon/>
                         </IconButton>}
                         <Logo/>
@@ -104,6 +120,64 @@ const Navbar = () => {
                 </div>
             </div>
         </Box>
+        <Drawer
+            anchor="left"
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+        >
+            <Box sx={{ width: 280 }} role="presentation">
+                <List>
+                    {mainCategory.map((item: MainCategory) => {
+                        const subcategories: SubCategory[] = item.levelTwoCategory || item.levelTowCategory || [];
+                        const hasSubcategories = subcategories.length > 0;
+                        const isExpanded = expandedCategories.has(item.categoryId);
+
+                        return (
+                            <div key={item.categoryId}>
+                                <ListItemButton
+                                    onClick={() => {
+                                        if (hasSubcategories) {
+                                            toggleCategory(item.categoryId);
+                                        } else {
+                                            setSelectedCategory(item.categoryId as CategoryKey);
+                                            setShowCategorySheet(true);
+                                            setMobileMenuOpen(false);
+                                        }
+                                    }}
+                                >
+                                    <ListItemText primary={item.name} />
+                                    {hasSubcategories && (
+                                        isExpanded ? <ExpandLess /> : <ExpandMore />
+                                    )}
+                                </ListItemButton>
+                                {hasSubcategories && (
+                                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            {subcategories.map((sub: SubCategory) => (
+                                                <ListItemButton
+                                                    key={sub.categoryId}
+                                                    sx={{ pl: 4 }}
+                                                    onClick={() => {
+                                                        setSelectedCategory(item.categoryId as CategoryKey);
+                                                        setShowCategorySheet(true);
+                                                        setMobileMenuOpen(false);
+                                                    }}
+                                                >
+                                                    <ListItemText
+                                                        primary={sub.name}
+                                                        sx={{ '& .MuiTypography-root': { fontSize: '0.875rem', color: 'text.secondary' } }}
+                                                    />
+                                                </ListItemButton>
+                                            ))}
+                                        </List>
+                                    </Collapse>
+                                )}
+                            </div>
+                        );
+                    })}
+                </List>
+            </Box>
+        </Drawer>
     </>);
 };
 

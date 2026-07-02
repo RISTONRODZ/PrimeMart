@@ -22,7 +22,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
         return (
             <Link to={item.path} onClick={toggleDrawer} key={item.name}>
                 <div className="pr-9 cursor-pointer">
-                    <p
+                    <div
                         className={`
             ${isActive ? "text-black bg-blue-400" : "text-blue-700"} 
             hover:bg-blue-200 transition-colors duration-200 
@@ -33,7 +33,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
                             {isActive ? item.activeIcon : item.icon}
                         </ListItemIcon>
                         <ListItemText primary={item.name}/>
-                    </p>
+                    </div>
                 </div>
             </Link>
         );
@@ -41,7 +41,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
 
     return (
         <div className="h-full">
-            <div className="flex flex-col justify-between h-full w-75 border-r py-5">
+            <div className="flex flex-col justify-between h-full w-full border-r py-5 px-2">
                 <div className="space-y-2">
                     {menu.map((item) => renderMenuItem(item))}
                 </div>
