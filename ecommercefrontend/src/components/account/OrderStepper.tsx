@@ -21,7 +21,7 @@ const OrderStepper = ({ orderStatus }: { orderStatus: string }) => {
     const currentStepIndex = statusSteps.findIndex((s) => s.value === orderStatus);
 
     return (
-        <Box className="max-w-sm mx-auto p-6 bg-white">
+        <Box className="max-w-sm mx-auto p-4 sm:p-6 bg-white">
             {statusSteps.map((step, index) => {
                 const isCompleted = index < currentStepIndex;
                 const isActive = index === currentStepIndex;

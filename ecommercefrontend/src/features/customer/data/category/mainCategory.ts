@@ -1,4 +1,19 @@
-export const mainCategory = [
+export interface SubCategory {
+  name: string;
+  categoryId: string;
+  parentCategoryId: string;
+  level: number;
+}
+
+export interface MainCategory {
+  name: string;
+  categoryId: string;
+  level: number;
+  levelTwoCategory?: SubCategory[];
+  levelTowCategory?: SubCategory[];
+}
+
+export const mainCategory: MainCategory[] = [
   {
     name: "Men",
     categoryId: "men",
@@ -120,7 +135,80 @@ export const mainCategory = [
     name: "Home & Furniture",
     categoryId: "home_furniture",
     level: 1,
+    levelTwoCategory:[
+        {
+            "name": "Furniture",
+            "categoryId": "home_furniture_furniture",
+            "parentCategoryId":"home_furniture",
+            "level":2
+        },
+        {
+            "name": "Decor",
+            "categoryId": "home_furniture_decor",
+            "parentCategoryId":"home_furniture",
+            "level":2
+        },
+        {
+            "name": "Kitchen & Dining",
+            "categoryId": "home_furniture_kitchen_dining",
+            "parentCategoryId":"home_furniture",
+            "level":2
+        },
+        {
+            "name": "Bedding",
+            "categoryId": "home_furniture_bedding",
+            "parentCategoryId":"home_furniture",
+            "level":2
+        },
+        {
+            "name": "Bath",
+            "categoryId": "home_furniture_bath",
+            "parentCategoryId":"home_furniture",
+            "level":2
+        }
+    ]
   },
-  
-  { name: "Electronics", categoryId: "electronics",level:1 },
+  {
+    name: "Electronics",
+    categoryId: "electronics",
+    level: 1,
+    levelTwoCategory:[
+        {
+            "name": "Mobiles",
+            "categoryId": "electronics_mobiles",
+            "parentCategoryId":"electronics",
+            "level":2
+        },
+        {
+            "name": "Laptops",
+            "categoryId": "electronics_laptops",
+            "parentCategoryId":"electronics",
+            "level":2
+        },
+        {
+            "name": "Audio",
+            "categoryId": "electronics_audio",
+            "parentCategoryId":"electronics",
+            "level":2
+        },
+        {
+            "name": "Cameras",
+            "categoryId": "electronics_cameras",
+            "parentCategoryId":"electronics",
+            "level":2
+        },
+        {
+            "name": "Gaming",
+            "categoryId": "electronics_gaming",
+            "parentCategoryId":"electronics",
+            "level":2
+        },
+        {
+            "name": "Accessories",
+            "categoryId": "electronics_accessories",
+            "parentCategoryId":"electronics",
+            "level":2
+        }
+    ]
+  },
 ];
