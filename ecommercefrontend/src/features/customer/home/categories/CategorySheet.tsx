@@ -7,6 +7,7 @@ import { electronicsLevelThree } from "../../data/category/level three/electroni
 import { Box } from "@mui/material";
 import { electronicsLevelTwo } from "../../data/category/level two/electronicsLavelTwo.ts";
 import { furnitureLevelTwo } from "../../data/category/level two/furnitureLevleTwo.ts";
+import {Link} from "react-router-dom";
 
 export type CategoryKey = "men" | "women" | "electronics" | "home_furniture";
 
@@ -58,9 +59,11 @@ const CategorySheet = ({ selectedCategory }: CategorySheetProps) => {
                             {childCategory(categoryThree[selectedCategory] || [], item.categoryId).map((child) => (
                                 <li
                                     key={child.categoryId}
-                                    className="text-slate-700 hover:text-blue-800 cursor-pointer pl-2 text-sm hover:underline hover:underline-offset-4"
+                                    className="pl-2 text-sm"
                                 >
-                                    {child.name}
+                                    <Link to={'/product/'+child.categoryId} className="text-slate-700 hover:text-blue-800 cursor-pointer hover:underline hover:underline-offset-4">
+                                        {child.name}
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
