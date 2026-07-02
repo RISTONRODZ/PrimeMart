@@ -18,7 +18,7 @@ const footerLinks = {
     ],
     company: [
         { label: "About us", to: "/about" },
-        { label: "Become a seller", to: "/become-a-seller" },
+        { label: "Become a seller", to: "/become-seller" },
     ],
 };
 
