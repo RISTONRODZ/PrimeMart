@@ -1,10 +1,16 @@
-import {Avatar, Box, Button, IconButton, useMediaQuery, useTheme} from "@mui/material";
+import {Avatar, Box, Button, IconButton, useMediaQuery, useTheme, Drawer, List, ListItemButton, ListItemText, Collapse, Grid} from "@mui/material";
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 import MenuIcon from '@mui/icons-material/Menu'
 import SearchIcon from '@mui/icons-material/Search';
 import {AddShoppingCart, FavoriteBorder, Storefront} from "@mui/icons-material";
 import {Logo} from "./Logo.tsx";
 import CategorySheet, {type CategoryKey} from "../../features/customer/home/categories/CategorySheet.tsx";
-import {mainCategory} from "../../features/customer/data/category/mainCategory.ts";
+import {mainCategory, type MainCategory, type SubCategory} from "../../features/customer/data/category/mainCategory.ts";
+import {menLevelThree} from "../../features/customer/data/category/level three/menLevelThree.ts";
+import {womenLevelThree} from "../../features/customer/data/category/level three/womenLevelThree.ts";
+import {furnitureLevelThree} from "../../features/customer/data/category/level three/furnitureLevelThree.ts";
+import {electronicsLevelThree} from "../../features/customer/data/category/level three/electronicsLevelThree.ts";
 import {useRef, useState} from "react";
 import {Link} from "react-router-dom";
 
@@ -14,7 +20,48 @@ const Navbar = () => {
     const isSmall = useMediaQuery(theme.breakpoints.up("sm"));
     const [selectedCategory, setSelectedCategory] = useState<CategoryKey>("men");
     const [showCategorySheet, setShowCategorySheet] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+    const [expandedSubCategories, setExpandedSubCategories] = useState<Set<string>>(new Set());
     const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const toggleCategory = (categoryId: string) => {
+        setExpandedCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(categoryId)) {
+                newSet.delete(categoryId);
+            } else {
+                newSet.add(categoryId);
+            }
+            return newSet;
+        });
+    };
+
+    const toggleSubCategory = (subCategoryId: string) => {
+        setExpandedSubCategories(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(subCategoryId)) {
+                newSet.delete(subCategoryId);
+            } else {
+                newSet.add(subCategoryId);
+            }
+            return newSet;
+        });
+    };
+
+    const getLevelThreeCategories = (parentCategoryId: string, mainCategoryId: string) => {
+        let levelThreeData: any[] = [];
+        if (mainCategoryId === "men") {
+            levelThreeData = menLevelThree.filter(item => item.parentCategoryId === parentCategoryId);
+        } else if (mainCategoryId === "women") {
+            levelThreeData = womenLevelThree.filter(item => item.parentCategoryId === parentCategoryId);
+        } else if (mainCategoryId === "home_furniture") {
+            levelThreeData = furnitureLevelThree.filter(item => item.parentCategoryId === parentCategoryId);
+        } else if (mainCategoryId === "electronics") {
+            levelThreeData = electronicsLevelThree.filter(item => item.parentCategoryId === parentCategoryId);
+        }
+        return levelThreeData;
+    };
     const handleMouseEnter = () => {
         if (hideTimeout.current) clearTimeout(hideTimeout.current);
         setShowCategorySheet(true);
@@ -30,7 +77,7 @@ const Navbar = () => {
             <div className={'mr-3'}>
                 <div className={'flex items-center justify-between'}>
                     <div className={'flex items-center gap-2 ml-2'}>
-                        {!isLarge && <IconButton>
+                        {!isLarge && <IconButton onClick={() => setMobileMenuOpen(true)}>
                             <MenuIcon/>
                         </IconButton>}
                         <Logo/>
@@ -104,6 +151,118 @@ const Navbar = () => {
                 </div>
             </div>
         </Box>
+        <Drawer
+            anchor="left"
+            open={mobileMenuOpen}
+            onClose={() => setMobileMenuOpen(false)}
+        >
+            <Box sx={{ width: 320 }} role="presentation">
+                <List>
+                    {mainCategory.map((item: MainCategory) => {
+                        const subcategories: SubCategory[] = item.levelTwoCategory || item.levelTowCategory || [];
+                        const hasSubcategories = subcategories.length > 0;
+                        const isExpanded = expandedCategories.has(item.categoryId);
+
+                        return (
+                            <div key={item.categoryId}>
+                                <ListItemButton
+                                    onClick={() => {
+                                        if (hasSubcategories) {
+                                            toggleCategory(item.categoryId);
+                                        } else {
+                                            setSelectedCategory(item.categoryId as CategoryKey);
+                                            setShowCategorySheet(true);
+                                            setMobileMenuOpen(false);
+                                        }
+                                    }}
+                                >
+                                    <ListItemText primary={item.name} />
+                                    {hasSubcategories && (
+                                        isExpanded ? <ExpandLess /> : <ExpandMore />
+                                    )}
+                                </ListItemButton>
+                                {hasSubcategories && (
+                                    <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            {subcategories.map((sub: SubCategory) => {
+                                                const levelThreeItems = getLevelThreeCategories(sub.categoryId, item.categoryId);
+                                                const hasLevelThree = levelThreeItems.length > 0;
+                                                const isSubExpanded = expandedSubCategories.has(sub.categoryId);
+
+                                                return (
+                                                    <div key={sub.categoryId}>
+                                                        <ListItemButton
+                                                            sx={{ pl: 4 }}
+                                                            onClick={() => {
+                                                                if (hasLevelThree) {
+                                                                    toggleSubCategory(sub.categoryId);
+                                                                } else {
+                                                                    setSelectedCategory(item.categoryId as CategoryKey);
+                                                                    setShowCategorySheet(true);
+                                                                    setMobileMenuOpen(false);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <ListItemText
+                                                                primary={sub.name}
+                                                                sx={{ '& .MuiTypography-root': { fontSize: '0.875rem', color: 'text.secondary' } }}
+                                                            />
+                                                            {hasLevelThree && (
+                                                                isSubExpanded ? <ExpandLess /> : <ExpandMore />
+                                                            )}
+                                                        </ListItemButton>
+                                                        {hasLevelThree && (
+                                                            <Collapse in={isSubExpanded} timeout="auto" unmountOnExit>
+                                                                <Box sx={{ pl: 6, pr: 2, py: 1 }}>
+                                                                    <Grid container spacing={1}>
+                                                                        {levelThreeItems.map((levelThreeItem) => (
+                                                                            <Grid item xs={6} key={levelThreeItem.categoryId}>
+                                                                                <ListItemButton
+                                                                                    sx={{ 
+                                                                                        py: 0.5, 
+                                                                                        px: 1,
+                                                                                        borderRadius: 1,
+                                                                                        '&:hover': {
+                                                                                            backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                                                                                        }
+                                                                                    }}
+                                                                                    onClick={() => {
+                                                                                        setSelectedCategory(item.categoryId as CategoryKey);
+                                                                                        setShowCategorySheet(true);
+                                                                                        setMobileMenuOpen(false);
+                                                                                    }}
+                                                                                >
+                                                                                    <ListItemText
+                                                                                        primary={levelThreeItem.name}
+                                                                                        sx={{ 
+                                                                                            '& .MuiTypography-root': { 
+                                                                                                fontSize: '0.75rem', 
+                                                                                                color: 'text.secondary',
+                                                                                                whiteSpace: 'nowrap',
+                                                                                                overflow: 'hidden',
+                                                                                                textOverflow: 'ellipsis'
+                                                                                            } 
+                                                                                        }}
+                                                                                    />
+                                                                                </ListItemButton>
+                                                                            </Grid>
+                                                                        ))}
+                                                                    </Grid>
+                                                                </Box>
+                                                            </Collapse>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </List>
+                                    </Collapse>
+                                )}
+                            </div>
+                        );
+                    })}
+                </List>
+            </Box>
+        </Drawer>
     </>);
 };
 

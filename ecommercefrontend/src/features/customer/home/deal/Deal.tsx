@@ -17,7 +17,6 @@ const Deal = () => {
                 }}
                 navigation={true}
                 autoplay={{delay: 3000, disableOnInteraction: false}}
-                onSlideChange={() => console.log('slide change')}
             >
                 {Array.from({length: 10}).map((_, i) => (<SwiperSlide key={i}>
                     <DealCard/>

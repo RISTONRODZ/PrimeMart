@@ -1,5 +1,8 @@
 import {Divider, ListItemIcon, ListItemText} from "@mui/material";
-import {Link, useLocation} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import {logout} from "../state/slice/AuthSlice.ts";
+import {useAppDispatch} from "../state/hooks.ts";
+import {clearSellerProfile} from "../state/seller/SellerSlice.ts";
 
 interface menuItem {
     name: string;
@@ -16,13 +19,49 @@ interface DrawerListProp {
 
 const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
     const location = useLocation();
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     const renderMenuItem = (item: menuItem) => {
         const isActive = location.pathname === item.path;
+        const isLogout = item.name === "Logout";
+
+        const handleClick = (e: React.MouseEvent) => {
+            if (isLogout) {
+                e.preventDefault();
+                dispatch(logout(undefined));
+                dispatch(clearSellerProfile());
+                navigate("/");
+                return;
+            }
+            toggleDrawer();
+        };
+
+        if (isLogout) {
+            return (
+                <div onClick={handleClick} key={item.name}>
+                    <div className="pr-9 cursor-pointer">
+                        <div
+                            className={`
+                ${isActive ? "text-black bg-blue-400" : "text-blue-700"}
+                hover:bg-blue-200 transition-colors duration-200
+                rounded-r-4xl px-2 py-2 flex items-center
+              `}
+                        >
+                            <ListItemIcon className="min-w-10">
+                                {isActive ? item.activeIcon : item.icon}
+                            </ListItemIcon>
+                            <ListItemText primary={item.name}/>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         return (
-            <Link to={item.path} onClick={toggleDrawer} key={item.name}>
+            <Link to={item.path} onClick={handleClick} key={item.name}>
                 <div className="pr-9 cursor-pointer">
-                    <p
+                    <div
                         className={`
             ${isActive ? "text-black bg-blue-400" : "text-blue-700"} 
             hover:bg-blue-200 transition-colors duration-200 
@@ -33,7 +72,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
                             {isActive ? item.activeIcon : item.icon}
                         </ListItemIcon>
                         <ListItemText primary={item.name}/>
-                    </p>
+                    </div>
                 </div>
             </Link>
         );
@@ -41,7 +80,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
 
     return (
         <div className="h-full">
-            <div className="flex flex-col justify-between h-full w-75 border-r py-5">
+            <div className="flex flex-col justify-between h-full w-full border-r py-5 px-2">
                 <div className="space-y-2">
                     {menu.map((item) => renderMenuItem(item))}
                 </div>

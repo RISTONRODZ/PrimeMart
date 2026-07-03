@@ -14,7 +14,11 @@ import {
     type SelectChangeEvent
 } from "@mui/material";
 import { FilterAlt } from "@mui/icons-material";
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import {useAppDispatch} from "../../../../state/hooks.ts";
+import {useSearchParams} from "react-router";
+import {getAllProducts} from "../../../../state/customer/ProductSlice.ts";
+import {useParams} from "react-router-dom";
 
 const Product = () => {
     const theme = useTheme();
@@ -23,7 +27,8 @@ const Product = () => {
     const [sort, setSort] = useState("");
     const [openFilter, setOpenFilter] = useState(false);
     const [pageChange, setPageChange] = useState(1);
-
+    const [search, setSearch] = useSearchParams();
+    const {categoryId} = useParams();
     const handleSortChange = (event: SelectChangeEvent) => {
         setSort(event.target.value);
     };
@@ -31,7 +36,12 @@ const Product = () => {
     function handlePageChange(value: number) {
         setPageChange(value);
     }
-
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        const [minPrice,maxPrice] = search.get("price")?.split("-") || [null, null];
+        const sortValue = sort === "price_low" ? "price,asc" : sort === "price_high" ? "price,desc" : undefined;
+        dispatch(getAllProducts({categoryId, minPrice, maxPrice, sort: sortValue}));
+    }, [categoryId, sort, search]);
     return (
         <div className="mt-10">
             <h1 className="text-3xl text-center font-bold text-gray-700 pb-5 px-9">
