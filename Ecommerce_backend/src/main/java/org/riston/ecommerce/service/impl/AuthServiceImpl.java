@@ -174,7 +174,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("OTP has expired");
         }
 
-//        verificationCodeRepository.delete(verificationCode);
+        verificationCodeRepository.delete(verificationCode);
 
         USER_ROLE role;
         if (isSeller) {
