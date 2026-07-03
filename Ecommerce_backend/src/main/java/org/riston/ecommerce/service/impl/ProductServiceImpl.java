@@ -3,7 +3,7 @@ package org.riston.ecommerce.service.impl;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.ProductException;
 import org.riston.ecommerce.model.Category;
@@ -81,18 +81,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long productId) {
         Product product = findProductById(productId);
         productRepository.delete(product);
     }
 
     @Override
-    public Product updateProduct(Long productId, Product product) {
-        findProductById(productId);
-        product.setId(productId);
-        return productRepository.save(product);
+    @Transactional
+    public Product updateProduct(Long productId, Product productDetails) {
+        Product existingProduct = findProductById(productId);
+        if (productDetails.getQuantity() != 0) {
+            existingProduct.setQuantity(productDetails.getQuantity());
+        }
+        return productRepository.save(existingProduct);
     }
-
     @Override
     public Product findProductById(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found with id: " + productId));

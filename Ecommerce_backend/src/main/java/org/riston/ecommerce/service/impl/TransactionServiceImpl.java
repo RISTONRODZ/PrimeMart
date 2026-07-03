@@ -8,6 +8,7 @@ import org.riston.ecommerce.repository.SellerRepository;
 import org.riston.ecommerce.repository.TransactionRepository;
 import org.riston.ecommerce.service.TransactionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final SellerRepository sellerRepository;
 
     @Override
+    @Transactional
     public Transaction createTransaction(Order order) {
         Seller seller = sellerRepository.findById(order.getSellerId())
                 .orElseThrow(() -> new RuntimeException("Seller not found with ID: " + order.getSellerId()));

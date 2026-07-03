@@ -1,7 +1,7 @@
 package org.riston.ecommerce.service.impl;
 
 import io.github.bucket4j.Bucket;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.config.JwtProvider;
@@ -109,6 +109,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public AuthResponseDto registerUser(SignupRequest req) {
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.email());
 

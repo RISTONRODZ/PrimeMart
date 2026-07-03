@@ -16,8 +16,10 @@ public class CloudinaryController {
     private final CloudinaryService cloudinaryService;
 
     @PostMapping("/image")
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = cloudinaryService.uploadImage(file);
+    public ResponseEntity<String> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "folder", defaultValue = "general") String folder) throws IOException {
+        String url = cloudinaryService.uploadImage(file, folder);
         return ResponseEntity.ok(url);
     }
 }

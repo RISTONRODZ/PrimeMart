@@ -8,6 +8,7 @@ import org.riston.ecommerce.repository.CartItemRepository;
 import org.riston.ecommerce.service.CartItemService;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,7 @@ public class CartItemServiceImpl implements CartItemService {
     private final CartItemRepository cartItemRepository;
 
     @Override
+    @Transactional
     public CartItem updateCartItem(Long userId, Long id, CartItem cartItem) throws AccessDeniedException {
         CartItem item = findCartItemById(id);
         User cartItemUser = item.getCart().getUser();
@@ -30,6 +32,7 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
     public void removeCartItem(Long userId, Long cartItemId) {
         CartItem item = findCartItemById(cartItemId);
         User cartItemUser = item.getCart().getUser();

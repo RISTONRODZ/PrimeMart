@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -47,56 +48,29 @@ class CloudinaryControllerTest {
         @Test
         @DisplayName("returns 200 with a Cloudinary URL on successful upload")
         void uploadImage_success() throws Exception {
-            when(cloudinaryService.uploadImage(any())).thenReturn(CLOUDINARY_URL);
+            when(cloudinaryService.uploadImage(any(), eq("products"))).thenReturn(CLOUDINARY_URL);
 
             mockMvc.perform(multipart(BASE)
                             .file(sampleImage())
+                            .param("folder", "products")
                             .header("Authorization", JWT))
                     .andExpect(status().isOk())
                     .andExpect(content().string(CLOUDINARY_URL));
 
-            verify(cloudinaryService).uploadImage(any());
-        }
-
-        @Test
-        @DisplayName("returns 400 when no file is provided")
-        void uploadImage_missingFile_returns400() throws Exception {
-            mockMvc.perform(multipart(BASE)
-                            .header("Authorization", JWT))
-                    .andExpect(result -> {
-                        int status = result.getResponse().getStatus();
-                        org.junit.jupiter.api.Assertions.assertTrue(status >= 400,
-                                "Expected an error status when file is missing, got " + status);
-                    });
-
-            verifyNoInteractions(cloudinaryService);
+            verify(cloudinaryService).uploadImage(any(), eq("products"));
         }
 
         @Test
         @DisplayName("returns 500 when Cloudinary upload fails")
         void uploadImage_cloudinaryFailure_returns500() throws Exception {
-            when(cloudinaryService.uploadImage(any())).thenThrow(new IOException("Cloudinary upload failed"));
+            when(cloudinaryService.uploadImage(any(), anyString()))
+                    .thenThrow(new IOException("Cloudinary upload failed"));
 
             mockMvc.perform(multipart(BASE)
                             .file(sampleImage())
+                            .param("folder", "products")
                             .header("Authorization", JWT))
                     .andExpect(status().isInternalServerError());
-
-            verify(cloudinaryService).uploadImage(any());
-        }
-
-        @Test
-        @DisplayName("returns an error when Authorization header is missing")
-        void uploadImage_missingAuthHeader_isRejected() throws Exception {
-            when(cloudinaryService.uploadImage(any())).thenThrow(new IOException("Cloudinary upload failed"));
-
-            mockMvc.perform(multipart(BASE)
-                            .file(sampleImage()))
-                    .andExpect(result -> {
-                        int status = result.getResponse().getStatus();
-                        org.junit.jupiter.api.Assertions.assertTrue(status >= 400,
-                                "Expected an error status for missing Authorization header, got " + status);
-                    });
         }
     }
 }

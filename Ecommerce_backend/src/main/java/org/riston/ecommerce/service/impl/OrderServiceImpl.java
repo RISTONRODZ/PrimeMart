@@ -1,6 +1,5 @@
 package org.riston.ecommerce.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.domain.OrderStatus;
 import org.riston.ecommerce.domain.PaymentStatus;
@@ -16,6 +15,7 @@ import org.riston.ecommerce.service.SellerReportService;
 import org.riston.ecommerce.service.SellerService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +31,7 @@ public class OrderServiceImpl implements OrderService {
     private final SellerReportService sellerReportService;
 
     @Override
+    @Transactional
     public Set<Order> createOrder(User user, Address shippingAddress, Cart cart) {
         if (!user.getAddresses().contains(shippingAddress)) {
             user.getAddresses().add(shippingAddress);
@@ -90,6 +91,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Order updateOrderStatus(String orderId, OrderStatus orderStatus) {
         Order order = findOrderByOrderId(orderId);
         order.setOrderStatus(orderStatus);
@@ -97,6 +99,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void cancelOrder(String orderId, User user) {
         Order order = findOrderByOrderId(orderId);
         if (!user.getId().equals(order.getUser().getId())) {

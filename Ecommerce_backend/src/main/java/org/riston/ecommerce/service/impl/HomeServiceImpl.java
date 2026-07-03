@@ -9,7 +9,9 @@ import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.repository.DealRepository;
 import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.service.HomeService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,8 +20,10 @@ import java.util.stream.Collectors;
 public class HomeServiceImpl implements HomeService {
     private final DealRepository dealRepository;
     private final ProductRepository productRepository;
+    private final @Lazy HomeService self;
 
     @Override
+    @Transactional
     public Home createHomePageData(List<HomeCategory> allCategories) {
         Map<HomeCategorySection, List<HomeCategory>> categorized = allCategories.stream()
                 .filter(cat -> cat.getSection() != null)
@@ -27,7 +31,7 @@ public class HomeServiceImpl implements HomeService {
 
         List<Deal> deals = dealRepository.findAll();
         if (deals.isEmpty()) {
-            deals = initializeDeals(categorized.getOrDefault(HomeCategorySection.DEALS, List.of()));
+            deals = self.initializeDeals(categorized.getOrDefault(HomeCategorySection.DEALS, List.of()));
         }
 
         Home home = new Home();
@@ -40,7 +44,9 @@ public class HomeServiceImpl implements HomeService {
         return home;
     }
 
-    private List<Deal> initializeDeals(List<HomeCategory> dealCategories) {
+    @Override
+    @Transactional
+    public List<Deal> initializeDeals(List<HomeCategory> dealCategories) {
         List<Deal> deals = dealCategories.stream().map(cat -> {
             int maxDiscount = productRepository.findByCategoryId(cat.getId()).stream()
                     .mapToInt(Product::getDiscountPercent).max().orElse(0);
