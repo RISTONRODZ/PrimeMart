@@ -1,12 +1,10 @@
-
 import {Outlet} from "react-router-dom";
 import {useState} from "react";
 import {Menu} from "@mui/icons-material";
 import {IconButton} from "@mui/material";
-import SellerDrawerList from "../../components/SellerDrawerList.tsx";
+import AdminDrawerList from "../../components/AdminDrawerList.tsx";
 
-
-const SellerDashboard = () => {
+const AdminDashboard = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
 
     const toggleDrawer = () => {
@@ -17,7 +15,7 @@ const SellerDashboard = () => {
         <div className="min-h-screen text-slate-800">
             <section className="lg:flex lg:h-[90vh]">
                 <div className={`lg:block fixed inset-y-0 left-0 z-50 w-64 bg-white transform transition-transform duration-300 ease-in-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:inset-auto`}>
-                    <SellerDrawerList toggleDrawer={toggleDrawer}/>
+                    <AdminDrawerList toggleDrawer={toggleDrawer}/>
                 </div>
                 {mobileOpen && (
                     <div 
@@ -38,4 +36,4 @@ const SellerDashboard = () => {
     );
 };
 
-export default SellerDashboard;
+export default AdminDashboard;
