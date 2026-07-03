@@ -9,6 +9,7 @@ import org.riston.ecommerce.repository.HomeCategoryRepository;
 import org.riston.ecommerce.request.DealRequestDto;
 import org.riston.ecommerce.service.DealService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @Transactional
     public Deal createDeal(DealRequestDto request) {
         HomeCategory category = homeCategoryRepository.findById(request.homeCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));Deal deal = new Deal();
@@ -33,6 +35,7 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
+    @Transactional
     public Deal updateDeal(DealRequestDto request, Long id) {
         Deal existingDeal = dealRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Deal not found"));
@@ -50,6 +53,7 @@ public class DealServiceImpl implements DealService {
         return dealRepository.save(existingDeal);
     }
     @Override
+    @Transactional
     public void deleteDeal(Long id) {
         Deal deal = dealRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("deal not found"));
         dealRepository.delete(deal);

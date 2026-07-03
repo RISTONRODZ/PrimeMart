@@ -1,6 +1,6 @@
 package org.riston.ecommerce.service.impl;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.AccountStatus;
@@ -73,6 +73,7 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
+    @Transactional
     public Seller updateSeller(Long id, Seller seller) {
         Seller existingSeller = sellerRepository.findById(id)
                 .orElseThrow(() -> new SellerNotFoundException("Seller not found with id: " + id));
@@ -108,6 +109,7 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
+    @Transactional
     public void deleteSeller(Long id) {
         Seller seller = getSellerById(id);
         sellerRepository.delete(seller);
@@ -123,6 +125,7 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
+    @Transactional
     public Seller updateSellerAccountStatus(Long sellerId, AccountStatus status) {
         Seller seller = getSellerById(sellerId);
         seller.setAccountStatus(status);

@@ -30,10 +30,14 @@ public class SellerProductController {
     private final SellerService sellerService;
 
     @GetMapping()
-    public ResponseEntity<List<Product>> getProductBySellerId(@RequestHeader("Authorization") String jwt) {
+    public ResponseEntity<List<ProductResponse>> getProductBySellerId(@RequestHeader("Authorization") String jwt) {
         Seller seller = sellerService.getSellerProfile(jwt);
         List<Product> products = productService.getProductBySellerId(seller.getId());
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<ProductResponse> responseList = products.stream()
+                .map(ProductResponse::new)
+                .toList();
+
+        return new ResponseEntity<>(responseList, HttpStatus.OK);
     }
 
     @PostMapping

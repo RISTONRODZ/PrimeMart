@@ -6,6 +6,7 @@ import org.riston.ecommerce.model.SellerReport;
 import org.riston.ecommerce.repository.SellerReportRepository;
 import org.riston.ecommerce.service.SellerReportService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +15,7 @@ public class SellerReportServiceImpl implements SellerReportService {
     private final SellerReportRepository sellerReportRepository;
 
     @Override
+    @Transactional
     public SellerReport getSellerReport(Seller seller) {
         SellerReport sr = sellerReportRepository.findBySellerId(seller.getId());
 
@@ -26,6 +28,7 @@ public class SellerReportServiceImpl implements SellerReportService {
     }
 
     @Override
+    @Transactional
     public SellerReport updateSellerReport(SellerReport sellerReport) {
         return sellerReportRepository.save(sellerReport);
     }

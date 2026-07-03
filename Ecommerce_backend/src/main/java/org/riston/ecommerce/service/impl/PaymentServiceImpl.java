@@ -4,7 +4,7 @@ import com.razorpay.Payment;
 import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
@@ -38,6 +38,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final SellerReportService sellerReportService;
 
     @Override
+    @Transactional
     public PaymentOrder createOrder(User user, Set<Order> orders) {
         long amount = orders.stream()
                 .mapToLong(Order::getTotalSellingPrice)
@@ -140,6 +141,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentLink createRazorpayPaymentLink(User user, Long amount, Long orderId) {
         if (amount == null || amount <= 0) {
             throw new PaymentValidationException("Invalid payment amount: " + amount);

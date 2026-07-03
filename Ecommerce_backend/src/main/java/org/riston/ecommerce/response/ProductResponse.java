@@ -40,7 +40,9 @@ public record ProductResponse(
         String sizes,
 
         @Schema(description = "Total number of ratings received for the product", example = "1250")
-        int numRatings
+        int numRatings,
+        @Schema(description = "Available quantity of the product", example = "100")
+        int quantity
 
 ) {
     public ProductResponse(Product p) {
@@ -56,7 +58,8 @@ public record ProductResponse(
                 (p.getCategory() != null) ? p.getCategory().getCategoryId() : "N/A",
                 (p.getSeller() != null) ? p.getSeller().getSellerName() : "Unknown",
                 p.getSizes(),
-                p.getNumRatings()
+                p.getNumRatings(),
+                p.getQuantity()
         );
     }
 }

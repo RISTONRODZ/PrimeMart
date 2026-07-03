@@ -47,6 +47,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public Cart findUserCart(User user) {
         Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {

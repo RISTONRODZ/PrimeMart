@@ -10,6 +10,7 @@ import org.riston.ecommerce.repository.DealRepository;
 import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.service.HomeService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class HomeServiceImpl implements HomeService {
     private final ProductRepository productRepository;
 
     @Override
+    @Transactional
     public Home createHomePageData(List<HomeCategory> allCategories) {
         Map<HomeCategorySection, List<HomeCategory>> categorized = allCategories.stream()
                 .filter(cat -> cat.getSection() != null)

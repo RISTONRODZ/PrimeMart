@@ -1,6 +1,6 @@
 package org.riston.ecommerce.service.impl;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.ResourceNotFoundException;
 import org.riston.ecommerce.model.HomeCategory;
@@ -16,6 +16,7 @@ public class HomeCategoryServiceImpl implements HomeCategoryService {
     private final HomeCategoryRepository homeCategoryRepository;
     private final DealRepository dealRepository;
 
+    @Transactional
     public List<HomeCategory> createCategories(List<HomeCategory> homeCategories) {
         for (HomeCategory cat : homeCategories) {
             if (cat.getCategoryId() == null) {
@@ -26,6 +27,7 @@ public class HomeCategoryServiceImpl implements HomeCategoryService {
     }
 
     @Override
+    @Transactional
     public HomeCategory updateHomeCategory(HomeCategory category, Long id) {
         HomeCategory existingCategory = homeCategoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));

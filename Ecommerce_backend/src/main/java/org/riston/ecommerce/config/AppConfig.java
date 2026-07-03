@@ -89,7 +89,8 @@ public class AppConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/reviews/**").hasAuthority("ROLE_CUSTOMER")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/{reviewId}").hasAuthority("ROLE_CUSTOMER")
 
-                        .requestMatchers(HttpMethod.POST, "/api/v1/upload/**").hasAuthority("ROLE_CUSTOMER")
+                        // for user reviews and seller product images
+                        .requestMatchers(HttpMethod.POST, "/api/v1/upload/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_SELLER")
                         // 5. User Profile - Customer Only
                         .requestMatchers("/api/v1/users/**").hasAuthority("ROLE_CUSTOMER")
 

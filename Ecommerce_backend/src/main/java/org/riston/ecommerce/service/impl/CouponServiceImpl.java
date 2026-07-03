@@ -1,6 +1,5 @@
 package org.riston.ecommerce.service.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.*;
 import org.riston.ecommerce.mapper.CouponMapper;
@@ -9,6 +8,7 @@ import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.response.CouponResponseDto;
 import org.riston.ecommerce.service.CouponService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -20,6 +20,7 @@ public class CouponServiceImpl implements CouponService {
     private final CouponMapper couponMapper;
 
     @Override
+    @Transactional
     public Cart applyCoupon(String code, double orderValue, User user) {
         Coupon coupon = couponRepository.findByCode(code);
         Cart cart = cartRepository.findByUserId(user.getId());
@@ -51,6 +52,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    @Transactional
     public Cart removeCoupon(String code, User user) {
         Coupon coupon = couponRepository.findByCode(code);
         if (coupon == null) {
@@ -73,6 +75,7 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    @Transactional
     public Coupon createCoupon(Coupon coupon) {
         return couponRepository.save(coupon);
     }
