@@ -6,7 +6,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Button, FormControl, Menu, MenuItem, Select, SelectChangeEvent, styled } from "@mui/material";
+import { Button, FormControl, Menu, MenuItem, Select, styled } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material/Select";
 interface Seller {
     id: number;
     sellerName: string;

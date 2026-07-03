@@ -5,7 +5,7 @@ import { AddShoppingCart, FavoriteBorder, LocalShipping, Shield, WorkspacePremiu
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SimilarProduct from "./SimilarProduct.tsx";
-import ReviewCard from "../../../../components/review/ReviewCard.tsx";
+import ReviewCard from "../../../../components/review/ReviewCard.tsx";;
 
 const ProductDetails = () => {
     const images = [

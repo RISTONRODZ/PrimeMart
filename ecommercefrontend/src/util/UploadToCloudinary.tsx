@@ -1,23 +1,23 @@
-export const uploadToCloudinary = async (pics: File) => {
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+import { API_URL } from "../config/Api";
 
+export const uploadToCloudinary = async (pics: File, folder: 'products' | 'reviews') => {
+    const jwt = localStorage.getItem("jwt");
     const data = new FormData();
     data.append("file", pics);
-    data.append("upload_preset", uploadPreset);
+    data.append("folder", folder);
 
-    const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        {
-            method: "POST",
-            body: data,
-        }
-    );
+    const res = await fetch(`${API_URL}/upload/image`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${jwt}`,
+        },
+        body: data,
+    });
 
     if (!res.ok) {
-        throw new Error("Image upload failed");
+        const errorData = await res.text().catch(() => "Unknown error");
+        throw new Error(`Image upload failed: ${res.statusText}`);
     }
 
-    const fileData = await res.json();
-    return fileData.secure_url;
+    return await res.text();
 };

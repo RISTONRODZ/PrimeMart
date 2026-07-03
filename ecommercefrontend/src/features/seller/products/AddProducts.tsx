@@ -10,8 +10,8 @@ import {
     Grid,
     CircularProgress,
     IconButton,
-    // Snackbar,
-    // Alert,
+    Snackbar,
+    Alert,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import CloseIcon from "@mui/icons-material/Close";
@@ -26,7 +26,8 @@ import { furnitureLevelTwo } from "../../customer/data/category/level two/furnit
 import { electronicsLevelTwo } from "../../customer/data/category/level two/electronicsLavelTwo";
 import { uploadToCloudinary } from "../../../util/UploadToCloudinary";
 import { mainCategory } from "../../customer/data/category/mainCategory";
-
+import { useAppDispatch, useAppSelector } from "../../../state/hooks.ts";
+import { createProduct } from "../../../state/seller/SellerProductSlice.ts";
 
 interface CategoryItem {
     categoryId: string;
@@ -59,7 +60,9 @@ const categoryThree: Record<string, CategoryItem[]> = {
 
 const ProductForm = () => {
     const [uploadImage, setUploadingImage] = useState(false);
-
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const dispatch = useAppDispatch();
+    const { loading, error } = useAppSelector((state) => state.sellerProduct);
 
     const formik = useFormik({
         initialValues: {
@@ -75,18 +78,33 @@ const ProductForm = () => {
             category3: "",
             sizes: "",
         },
-        onSubmit: async (values) => {
-
+        onSubmit: async (values, { resetForm }) => {
+            const jwt = localStorage.getItem("jwt") || "";
+            dispatch(createProduct({ request: values, jwt }))
+                .unwrap()
+                .then(() => {
+                    resetForm();
+                    setSnackbarOpen(true);
+                })
+                .catch(() => {
+                    setSnackbarOpen(true);
+                });
         },
     });
 
     const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
         setUploadingImage(true);
-        const image = await uploadToCloudinary(file);
-        await formik.setFieldValue("images", [...formik.values.images, image]);
-        setUploadingImage(false);
+        try {
+            const uploadPromises = Array.from(files).map(file => uploadToCloudinary(file, 'products'));
+            const uploadedImages = await Promise.all(uploadPromises);
+            await formik.setFieldValue("images", [...formik.values.images, ...uploadedImages]);
+        } catch (error) {
+            alert("Failed to upload image.");
+        } finally {
+            setUploadingImage(false);
+        }
     };
 
     const handleRemoveImage = (index: number) => {
@@ -99,6 +117,7 @@ const ProductForm = () => {
         return category.filter((child) => child.parentCategoryId === parentCategoryId);
     };
 
+    const handleCloseSnackbar = () => setSnackbarOpen(false);
 
     return (
         <div>
@@ -109,15 +128,14 @@ const ProductForm = () => {
                             type="file"
                             accept="image/*"
                             id="fileInput"
+                            multiple
                             style={{ display: "none" }}
-                            onChange={(e) => {
-                                void handleImageChange(e);
-                            }}
+                            onChange={(e) => void handleImageChange(e)}
                         />
                         <label className="relative" htmlFor="fileInput">
-              <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-400">
-                <AddPhotoAlternateIcon className="text-gray-700" />
-              </span>
+                            <span className="w-24 h-24 cursor-pointer flex items-center justify-center p-3 border rounded-md border-gray-400">
+                                <AddPhotoAlternateIcon className="text-gray-700" />
+                            </span>
                             {uploadImage && (
                                 <div className="absolute left-0 right-0 top-0 bottom-0 w-24 h-24 flex justify-center items-center">
                                     <CircularProgress />
@@ -141,62 +159,21 @@ const ProductForm = () => {
                         </div>
                     </Grid>
                     <Grid size={12}>
-                        <TextField
-                            fullWidth
-                            id="title"
-                            name="title"
-                            label="Title"
-                            value={formik.values.title}
-                            onChange={formik.handleChange}
-                            required
-                        />
+                        <TextField fullWidth id="title" name="title" label="Title" value={formik.values.title} onChange={formik.handleChange} required />
                     </Grid>
                     <Grid size={12}>
-                        <TextField
-                            multiline
-                            rows={4}
-                            fullWidth
-                            id="description"
-                            name="description"
-                            label="Description"
-                            value={formik.values.description}
-                            onChange={formik.handleChange}
-                            required
-                        />
+                        <TextField multiline rows={4} fullWidth id="description" name="description" label="Description" value={formik.values.description} onChange={formik.handleChange} required />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                        <TextField
-                            fullWidth
-                            id="mrpPrice"
-                            name="mrpPrice"
-                            label="MRP Price"
-                            type="number"
-                            value={formik.values.mrpPrice}
-                            onChange={formik.handleChange}
-                            required
-                        />
+                        <TextField fullWidth id="mrpPrice" name="mrpPrice" label="MRP Price" type="number" value={formik.values.mrpPrice} onChange={formik.handleChange} required />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                        <TextField
-                            fullWidth
-                            id="sellingPrice"
-                            name="sellingPrice"
-                            label="Selling Price"
-                            type="number"
-                            value={formik.values.sellingPrice}
-                            onChange={formik.handleChange}
-                            required
-                        />
+                        <TextField fullWidth id="sellingPrice" name="sellingPrice" label="Selling Price" type="number" value={formik.values.sellingPrice} onChange={formik.handleChange} required />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <FormControl fullWidth required>
                             <InputLabel>Color</InputLabel>
-                            <Select
-                                name="color"
-                                value={formik.values.color}
-                                onChange={formik.handleChange}
-                                label="Color"
-                            >
+                            <Select name="color" value={formik.values.color} onChange={formik.handleChange} label="Color">
                                 {colors.map((color) => (
                                     <MenuItem key={color.name} value={color.name}>
                                         <div className="flex gap-3">
@@ -211,12 +188,7 @@ const ProductForm = () => {
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <FormControl fullWidth required>
                             <InputLabel>Sizes</InputLabel>
-                            <Select
-                                name="sizes"
-                                value={formik.values.sizes}
-                                onChange={formik.handleChange}
-                                label="Sizes"
-                            >
+                            <Select name="sizes" value={formik.values.sizes} onChange={formik.handleChange} label="Sizes">
                                 {["FREE", "S", "M", "L", "XL"].map((size) => (
                                     <MenuItem key={size} value={size}>{size}</MenuItem>
                                 ))}
@@ -226,12 +198,7 @@ const ProductForm = () => {
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <FormControl fullWidth required>
                             <InputLabel>Category</InputLabel>
-                            <Select
-                                name="category"
-                                value={formik.values.category}
-                                onChange={formik.handleChange}
-                                label="Category"
-                            >
+                            <Select name="category" value={formik.values.category} onChange={formik.handleChange} label="Category">
                                 {mainCategory.map((item) => (
                                     <MenuItem key={item.categoryId} value={item.categoryId}>{item.name}</MenuItem>
                                 ))}
@@ -241,12 +208,7 @@ const ProductForm = () => {
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <FormControl fullWidth required>
                             <InputLabel>Second Category</InputLabel>
-                            <Select
-                                name="category2"
-                                value={formik.values.category2}
-                                onChange={formik.handleChange}
-                                label="Second Category"
-                            >
+                            <Select name="category2" value={formik.values.category2} onChange={formik.handleChange} label="Second Category">
                                 {categoryTwo[formik.values.category]?.map((item) => (
                                     <MenuItem key={item.categoryId} value={item.categoryId}>{item.name}</MenuItem>
                                 ))}
@@ -256,12 +218,7 @@ const ProductForm = () => {
                     <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                         <FormControl fullWidth required>
                             <InputLabel>Third Category</InputLabel>
-                            <Select
-                                name="category3"
-                                value={formik.values.category3}
-                                onChange={formik.handleChange}
-                                label="Third Category"
-                            >
+                            <Select name="category3" value={formik.values.category3} onChange={formik.handleChange} label="Third Category">
                                 {childCategory(categoryThree[formik.values.category] || [], formik.values.category2).map((item) => (
                                     <MenuItem key={item.categoryId} value={item.categoryId}>{item.name}</MenuItem>
                                 ))}
@@ -269,28 +226,22 @@ const ProductForm = () => {
                         </FormControl>
                     </Grid>
                     <Grid size={12}>
-                        <Button
-                            sx={{ p: "14px" }}
-                            variant="contained"
-                            fullWidth
-                            type="submit"
-                            // disabled={sellerProduct.loading}
-                        >
-                            {false? <CircularProgress size={24} /> : "Add Product"}
+                        <Button sx={{ p: "14px" }} variant="contained" fullWidth type="submit" disabled={loading}>
+                            {loading ? <CircularProgress size={24} /> : "Add Product"}
                         </Button>
                     </Grid>
                 </Grid>
             </form>
-            {/*<Snackbar*/}
-            {/*    anchorOrigin={{ vertical: "top", horizontal: "right" }}*/}
-            {/*    open={snackbarOpen}*/}
-            {/*    autoHideDuration={6000}*/}
-            {/*    onClose={handleCloseSnackbar}*/}
-            {/*>*/}
-            {/*    <Alert onClose={handleCloseSnackbar} severity={true? "error" : "success"} variant="filled">*/}
-            {/*        {sellerProduct.error ? sellerProduct.error : "Product created successfully"}*/}
-            {/*    </Alert>*/}
-            {/*</Snackbar>*/}
+            <Snackbar
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                open={snackbarOpen}
+                autoHideDuration={6000}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={error ? "error" : "success"} variant="filled">
+                    {error ? error : "Product created successfully"}
+                </Alert>
+            </Snackbar>
         </div>
     );
 };
