@@ -6,13 +6,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import {AddShoppingCart, FavoriteBorder, Storefront} from "@mui/icons-material";
 import {Logo} from "./Logo.tsx";
 import CategorySheet, {type CategoryKey} from "../../features/customer/home/categories/CategorySheet.tsx";
-import {mainCategory, type MainCategory, type SubCategory} from "../../features/customer/data/category/mainCategory.ts";
-import {menLevelThree} from "../../features/customer/data/category/level three/menLevelThree.ts";
-import {womenLevelThree} from "../../features/customer/data/category/level three/womenLevelThree.ts";
-import {furnitureLevelThree} from "../../features/customer/data/category/level three/furnitureLevelThree.ts";
-import {electronicsLevelThree} from "../../features/customer/data/category/level three/electronicsLevelThree.ts";
+import {mainCategory} from "../../features/customer/data/category/mainCategory.ts";
 import {useRef, useState} from "react";
 import {Link} from "react-router-dom";
+import {mainCategory} from "../../features/customer/data/category/mainCategory.ts";
 
 const Navbar = () => {
     const theme = useTheme();
@@ -218,8 +215,8 @@ const Navbar = () => {
                                                                         {levelThreeItems.map((levelThreeItem) => (
                                                                             <Grid item xs={6} key={levelThreeItem.categoryId}>
                                                                                 <ListItemButton
-                                                                                    sx={{ 
-                                                                                        py: 0.5, 
+                                                                                    sx={{
+                                                                                        py: 0.5,
                                                                                         px: 1,
                                                                                         borderRadius: 1,
                                                                                         '&:hover': {
@@ -234,14 +231,14 @@ const Navbar = () => {
                                                                                 >
                                                                                     <ListItemText
                                                                                         primary={levelThreeItem.name}
-                                                                                        sx={{ 
-                                                                                            '& .MuiTypography-root': { 
-                                                                                                fontSize: '0.75rem', 
+                                                                                        sx={{
+                                                                                            '& .MuiTypography-root': {
+                                                                                                fontSize: '0.75rem',
                                                                                                 color: 'text.secondary',
                                                                                                 whiteSpace: 'nowrap',
                                                                                                 overflow: 'hidden',
                                                                                                 textOverflow: 'ellipsis'
-                                                                                            } 
+                                                                                            }
                                                                                         }}
                                                                                     />
                                                                                 </ListItemButton>
