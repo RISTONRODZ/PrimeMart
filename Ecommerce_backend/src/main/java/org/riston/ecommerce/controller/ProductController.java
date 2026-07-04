@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.response.ProductResponse;
 import org.riston.ecommerce.service.ProductService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -37,20 +38,33 @@ public class ProductController {
                 .map(ProductResponse::new));
     }
     @GetMapping
-    @Operation(summary = "Filter products", description = "Retrieves a paginated list of products based on comprehensive filter criteria including price range, brand, and discounts.")
+    @Operation(summary = "Filter products", description = "Retrieves a paginated list of products based on comprehensive filter criteria.")
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String color,
-            @RequestParam(required = false) String productSize, 
+            @RequestParam(required = false) String productSize,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) Integer minDiscount,
             @RequestParam(required = false) String stock,
             @PageableDefault(size = 10, sort = "sellingPrice", direction = Sort.Direction.DESC) Pageable pageable) {
 
+        Pageable sanitizedPageable = sanitizePageable(pageable);
+
         return ResponseEntity.ok(productService.getAllProducts(category, brand, color, productSize,
-                        minPrice, maxPrice, minDiscount, stock, pageable)
+                        minPrice, maxPrice, minDiscount, stock, sanitizedPageable)
                 .map(ProductResponse::new));
+    }
+
+    private Pageable sanitizePageable(Pageable pageable) {
+        Sort sanitizedSort = Sort.by(pageable.getSort().stream()
+                .map(order -> {
+                    String property = order.getProperty().equalsIgnoreCase("price") ? "sellingPrice" : order.getProperty();
+                    return new Sort.Order(order.getDirection(), property);
+                })
+                .toList());
+
+        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sanitizedSort);
     }
 }
