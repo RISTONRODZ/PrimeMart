@@ -9,7 +9,6 @@ import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.repository.DealRepository;
 import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.service.HomeService;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 public class HomeServiceImpl implements HomeService {
     private final DealRepository dealRepository;
     private final ProductRepository productRepository;
-    private final @Lazy HomeService self;
 
     @Override
     @Transactional
@@ -31,7 +29,7 @@ public class HomeServiceImpl implements HomeService {
 
         List<Deal> deals = dealRepository.findAll();
         if (deals.isEmpty()) {
-            deals = self.initializeDeals(categorized.getOrDefault(HomeCategorySection.DEALS, List.of()));
+            deals = initializeDeals(categorized.getOrDefault(HomeCategorySection.DEALS, List.of()));
         }
 
         Home home = new Home();
