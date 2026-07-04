@@ -21,9 +21,8 @@ public interface ProductService {
             Integer minPrice,
             Integer maxPrice,
             Integer minDiscount,
-            String sort,
             String stock,
-            Integer pageNumber
+            Pageable pageable
     );
 
     List<Product> getProductBySellerId(Long sellerId);
