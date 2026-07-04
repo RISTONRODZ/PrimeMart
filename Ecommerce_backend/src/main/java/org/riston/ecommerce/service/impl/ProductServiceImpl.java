@@ -14,9 +14,7 @@ import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.request.CreateProductRequestDto;
 import org.riston.ecommerce.service.ProductService;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -100,13 +98,13 @@ public class ProductServiceImpl implements ProductService {
     public Product findProductById(Long productId) {
         return productRepository.findById(productId).orElseThrow(() -> new ProductException("product not found with id: " + productId));
     }
-
     @Override
-    public Page<Product> getAllProducts(String category, String brand, String colors, String size, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber) {
-        Pageable pageable = createPageable(sort, pageNumber);
-
+    public Page<Product> getAllProducts(String category, String brand, String colors, String size,
+                                        Integer minPrice, Integer maxPrice, Integer minDiscount,
+                                        String stock, Pageable pageable) {
         return productRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
             if (category != null && !category.isEmpty()) {
                 Join<Product, Category> categoryJoin = root.join("category", JoinType.LEFT);
                 predicates.add(cb.equal(categoryJoin.get("categoryId"), category));
@@ -126,10 +124,10 @@ public class ProductServiceImpl implements ProductService {
             if (size != null && !size.isEmpty()) {
                 predicates.add(cb.equal(root.get("sizes"), size));
             }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);
     }
-
     @Override
     public List<Product> getProductBySellerId(Long sellerId) {
         return productRepository.findBySellerId(sellerId);
@@ -153,11 +151,4 @@ public class ProductServiceImpl implements ProductService {
         }, pageable);
     }
 
-    private Pageable createPageable(String sort, Integer pageNumber) {
-        int page = (pageNumber != null) ? pageNumber : 0;
-        Sort sortOrder = Sort.unsorted();
-        if ("price_low".equals(sort)) sortOrder = Sort.by("sellingPrice").ascending();
-        if ("price_high".equals(sort)) sortOrder = Sort.by("sellingPrice").descending();
-        return PageRequest.of(page, 10, sortOrder);
-    }
 }
