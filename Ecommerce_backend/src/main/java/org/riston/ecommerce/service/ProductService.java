@@ -26,6 +26,7 @@ public interface ProductService {
     );
 
     List<Product> getProductBySellerId(Long sellerId);
-    Page<Product> searchAndFilter(String query, String category, Pageable pageable);
+    Page<Product> searchAndFilter(String query, String category, String color,
+                                  Integer minPrice, Integer maxPrice, Integer minDiscount, Pageable pageable);
 
 }

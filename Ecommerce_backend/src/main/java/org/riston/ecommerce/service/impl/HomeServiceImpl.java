@@ -7,6 +7,7 @@ import org.riston.ecommerce.model.Home;
 import org.riston.ecommerce.model.HomeCategory;
 import org.riston.ecommerce.model.Product;
 import org.riston.ecommerce.repository.DealRepository;
+import org.riston.ecommerce.repository.HomeCategoryRepository;
 import org.riston.ecommerce.repository.ProductRepository;
 import org.riston.ecommerce.service.HomeService;
 import org.springframework.stereotype.Service;
@@ -14,15 +15,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class HomeServiceImpl implements HomeService {
     private final DealRepository dealRepository;
     private final ProductRepository productRepository;
+    private final HomeCategoryRepository homeCategoryRepository;
 
     @Override
     @Transactional
     public Home createHomePageData(List<HomeCategory> allCategories) {
+        return buildHome(allCategories);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Home getHomePageData() {
+        List<HomeCategory> allCategories = homeCategoryRepository.findAll();
+        return buildHome(allCategories);
+    }
+
+    private Home buildHome(List<HomeCategory> allCategories) {
         Map<HomeCategorySection, List<HomeCategory>> categorized = allCategories.stream()
                 .filter(cat -> cat.getSection() != null)
                 .collect(Collectors.groupingBy(HomeCategory::getSection));

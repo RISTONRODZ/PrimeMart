@@ -52,6 +52,9 @@ public class CartServiceImplTest {
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation ->
             invocation.<CartItem>getArgument(0)
         );
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation ->
+            invocation.<Cart>getArgument(0)
+        );
 
         CartItem result = cartService.addCartItem(user, product, "L", 2);
 
@@ -87,13 +90,15 @@ public class CartServiceImplTest {
 
         when(cartRepository.findByUserId(101L)).thenReturn(cart);
         when(cartItemRepository.findByCartAndProductAndSize(cart, product, "L")).thenReturn(existingItem);
+        when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(cartRepository.save(any(Cart.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         CartItem result = cartService.addCartItem(user, product, "L", 2);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(5L);
-        verify(cartItemRepository, never()).save(any());
-        verify(cartRepository, never()).save(any());
+        verify(cartItemRepository, times(1)).save(any());
+        verify(cartRepository, times(1)).save(any());
     }
 
     @Test

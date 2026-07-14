@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -25,6 +26,7 @@ import java.util.Collections;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableSpringDataWebSupport(pageSerializationMode = EnableSpringDataWebSupport.PageSerializationMode.VIA_DTO)
 @RequiredArgsConstructor
 public class AppConfig {
 
@@ -40,7 +42,7 @@ public class AppConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/deals").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/home-categories").permitAll()
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/home").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/api/v1/home", "/api/v1/home-page").permitAll()
                         .requestMatchers("/api/v1/seller/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews").permitAll()
                         .requestMatchers("/api/v1/ai/**").permitAll()
@@ -49,14 +51,15 @@ public class AppConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/v1/home-categories/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/admin/seller/{sellerId}/status/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/coupons/create").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/coupons/create").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/coupons/delete/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/v1/admin/deals/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/coupons/all").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/deals/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/admin/deals/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/deals/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/coupons/all").hasAnyAuthority("ROLE_ADMIN")
 
                         // 3. Seller-Only Endpoints
                         .requestMatchers(HttpMethod.GET, "/api/v1/seller/**").hasAnyAuthority("ROLE_SELLER", "ROLE_ADMIN")
@@ -90,7 +93,7 @@ public class AppConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/{reviewId}").hasAuthority("ROLE_CUSTOMER")
 
                         // for user reviews and seller product images
-                        .requestMatchers(HttpMethod.POST, "/api/v1/upload/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_SELLER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/upload/**").hasAnyAuthority("ROLE_CUSTOMER", "ROLE_SELLER", "ROLE_ADMIN")
                         // 5. User Profile - Customer Only
                         .requestMatchers("/api/v1/users/**").hasAuthority("ROLE_CUSTOMER")
 

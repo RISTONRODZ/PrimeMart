@@ -24,7 +24,6 @@ import org.riston.ecommerce.request.SellerRequestDto;
 import org.riston.ecommerce.request.SignupRequest;
 import org.riston.ecommerce.response.AuthResponseDto;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -47,8 +46,8 @@ public class AuthServiceImplTest {
     private EmailServiceImpl emailServiceImpl;
     @Mock
     private JwtProvider jwtProvider;
-    @Mock
-    private CustomUserServiceImpl customUserService;
+//    @Mock
+//    private CustomUserServiceImpl customUserService;
     @Mock
     private SellerRepository sellerRepository;
     @Spy
@@ -210,13 +209,11 @@ public class AuthServiceImplTest {
     @DisplayName("loginUser should authenticate and login customer successfully")
     void loginUser_Customer_Success() {
         LoginRequestDto request = new LoginRequestDto("customer@gmail.com", "123456");
-        UserDetails mockUserDetails = mock(UserDetails.class);
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("customer@gmail.com");
         mockCode.setOtp("123456");
         mockCode.setExpiryDate(LocalDateTime.now().plusMinutes(15));
 
-        when(customUserService.loadUserByUsername("customer@gmail.com")).thenReturn(mockUserDetails);
         when(verificationCodeRepository.findByEmail("customer@gmail.com")).thenReturn(mockCode);
         when(jwtProvider.generateToken(any())).thenReturn("customer-jwt");
 
@@ -233,13 +230,11 @@ public class AuthServiceImplTest {
     @DisplayName("loginUser should authenticate and login seller successfully via prefix")
     void loginUser_Seller_Success() {
         LoginRequestDto request = new LoginRequestDto("seller_store@gmail.com", "123456");
-        UserDetails mockUserDetails = mock(UserDetails.class);
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("store@gmail.com");
         mockCode.setOtp("123456");
         mockCode.setExpiryDate(LocalDateTime.now().plusMinutes(15));
 
-        when(customUserService.loadUserByUsername("seller_store@gmail.com")).thenReturn(mockUserDetails);
         when(verificationCodeRepository.findByEmail("store@gmail.com")).thenReturn(mockCode);
         when(jwtProvider.generateToken(any())).thenReturn("seller-jwt");
 
@@ -254,13 +249,11 @@ public class AuthServiceImplTest {
     @DisplayName("loginUser should authenticate and login admin successfully")
     void loginUser_Admin_Success() {
         LoginRequestDto request = new LoginRequestDto("admin@primemart.com", "123456");
-        UserDetails mockUserDetails = mock(UserDetails.class);
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("admin@primemart.com");
         mockCode.setOtp("123456");
         mockCode.setExpiryDate(LocalDateTime.now().plusMinutes(15));
 
-        when(customUserService.loadUserByUsername("admin@primemart.com")).thenReturn(mockUserDetails);
         when(verificationCodeRepository.findByEmail("admin@primemart.com")).thenReturn(mockCode);
         when(jwtProvider.generateToken(any())).thenReturn("admin-jwt");
 
@@ -275,12 +268,10 @@ public class AuthServiceImplTest {
     @DisplayName("loginUser should throw BadCredentialsException when verification token code is missing or mismatch")
     void loginUser_InvalidOtp_ThrowsBadCredentialsException() {
         LoginRequestDto request = new LoginRequestDto("customer@gmail.com", "wrong");
-        UserDetails mockUserDetails = mock(UserDetails.class);
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("customer@gmail.com");
         mockCode.setOtp("123456");
 
-        when(customUserService.loadUserByUsername("customer@gmail.com")).thenReturn(mockUserDetails);
         when(verificationCodeRepository.findByEmail("customer@gmail.com")).thenReturn(mockCode);
 
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () ->
@@ -294,13 +285,11 @@ public class AuthServiceImplTest {
     @DisplayName("loginUser should throw BadCredentialsException when verification token has expired")
     void loginUser_ExpiredOtp_ThrowsBadCredentialsException() {
         LoginRequestDto request = new LoginRequestDto("customer@gmail.com", "123456");
-        UserDetails mockUserDetails = mock(UserDetails.class);
         VerificationCode mockCode = new VerificationCode();
         mockCode.setEmail("customer@gmail.com");
         mockCode.setOtp("123456");
         mockCode.setExpiryDate(LocalDateTime.now().minusMinutes(1));
 
-        when(customUserService.loadUserByUsername("customer@gmail.com")).thenReturn(mockUserDetails);
         when(verificationCodeRepository.findByEmail("customer@gmail.com")).thenReturn(mockCode);
 
         BadCredentialsException exception = assertThrows(BadCredentialsException.class, () ->
@@ -314,7 +303,19 @@ public class AuthServiceImplTest {
     @Test
     @DisplayName("should register a seller with pending account status status configuration verification")
     void registerSeller_Success() {
-        SellerRequestDto request = new SellerRequestDto("Seller Corp", "seller@corp.com", "securePass", "9876543210", "GSTIN12345");
+        SellerRequestDto.BusinessDetailsDto businessDetails = new SellerRequestDto.BusinessDetailsDto(
+                "Business Name", "business@corp.com", "9876543211", "123 Business St", "logo.png", "banner.png"
+        );
+        SellerRequestDto.BankDetailsDto bankDetails = new SellerRequestDto.BankDetailsDto(
+                "1234567890", "Account Holder", "IFSC1234"
+        );
+        SellerRequestDto.AddressDto pickupAddress = new SellerRequestDto.AddressDto(
+                "Pickup Name", "Pickup Locality", "456 Pickup St", "Pickup City", "Pickup State", "123456", "9876543212"
+        );
+        SellerRequestDto request = new SellerRequestDto(
+                "Seller Corp", "seller@corp.com", "securePass", "9876543210", "GSTIN12345",
+                businessDetails, bankDetails, pickupAddress
+        );
         when(passwordEncoder.encode("securePass")).thenReturn("encodedPass");
         when(sellerRepository.save(any(Seller.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

@@ -18,13 +18,25 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SellerServiceImpl implements SellerService {
+
+    private static final String SELLER_PREFIX = "seller_";
     private final SellerRepository sellerRepository;
     private final JwtProvider jwtProvider;
     private final PasswordEncoder passwordEncoder;
+
+    private String cleanEmailAddress(String email) {
+        if (email == null) return null;
+        if (email.startsWith(SELLER_PREFIX)) {
+            return email.substring(SELLER_PREFIX.length());
+        }
+        return email;
+    }
+
     @Override
     public Seller getSellerProfile(String jwt) {
         String email = jwtProvider.getEmailFromJwtToken(jwt);
-        return this.getSellerByEmail(email);
+        String cleanEmail = cleanEmailAddress(email);
+        return this.getSellerByEmail(cleanEmail);
     }
 
     @Override

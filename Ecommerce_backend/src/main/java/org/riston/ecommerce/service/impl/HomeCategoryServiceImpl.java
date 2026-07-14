@@ -1,5 +1,6 @@
 package org.riston.ecommerce.service.impl;
 
+import org.riston.ecommerce.domain.HomeCategorySection;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.exception.ResourceNotFoundException;
@@ -23,9 +24,22 @@ public class HomeCategoryServiceImpl implements HomeCategoryService {
                 throw new IllegalArgumentException("Category ID cannot be null");
             }
         }
+
+        long incomingGridCount = homeCategories.stream()
+                .filter(c -> c.getSection() == HomeCategorySection.GRID)
+                .count();
+
+        if (incomingGridCount > 0) {
+            long existingGridCount = homeCategoryRepository.countBySection(HomeCategorySection.GRID);
+            if (existingGridCount + incomingGridCount > 6) {
+                throw new IllegalArgumentException(
+                        "Grid section can only contain exactly 6 categories (currently has "
+                                + existingGridCount + ", tried to add " + incomingGridCount + ")");
+            }
+        }
+
         return homeCategoryRepository.saveAll(homeCategories);
     }
-
     @Override
     @Transactional
     public HomeCategory updateHomeCategory(HomeCategory category, Long id) {
@@ -38,6 +52,10 @@ public class HomeCategoryServiceImpl implements HomeCategoryService {
 
         if (category.getCategoryId() != null) {
             existingCategory.setCategoryId(category.getCategoryId());
+        }
+
+        if (category.getSection() != null) {
+            existingCategory.setSection(category.getSection());
         }
 
         return homeCategoryRepository.save(existingCategory);

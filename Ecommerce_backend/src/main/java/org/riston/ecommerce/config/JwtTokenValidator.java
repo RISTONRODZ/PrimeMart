@@ -31,6 +31,10 @@ public class JwtTokenValidator extends OncePerRequestFilter {
 
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
+            if (token.isEmpty() || token.equals("null")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             log.info("JWT received by validator: {}", token);
             try {
                 Claims claims = Jwts.parser()
@@ -43,8 +47,13 @@ public class JwtTokenValidator extends OncePerRequestFilter {
                 String authorities = String.valueOf(claims.get("authorities"));
                 List<GrantedAuthority> auth = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
 
+                log.info("JWT Email: {}, Authorities: {}", email, authorities);
+                log.info("Request URI: {}", request.getRequestURI());
+                log.info("Authentication authorities: {}", auth);
+
                 Authentication authentication = new UsernamePasswordAuthenticationToken(email, null, auth);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Authentication set in SecurityContext: {}", SecurityContextHolder.getContext().getAuthentication());
             } catch (Exception e) {
                 log.error("JWT validation failed", e);
                 SecurityContextHolder.clearContext();

@@ -274,7 +274,9 @@ class AuthControllerTest {
         @DisplayName("returns 201 with wrapped seller response on successful registration")
         void signupSeller_success() throws Exception {
             SellerRequestDto request = new SellerRequestDto(
-                    "Nike Official Store", "seller_nike@example.com", "P@ssw0rd!", "9988776655", "27AAAAA0000A1Z5");
+                    "Nike Official Store", "seller_nike@example.com", "P@ssw0rd!", "9988776655", "27AAAAA0000A1Z5",
+                    null, null, null
+            );
 
             Seller savedSeller = new Seller();
             savedSeller.setId(1L);
@@ -323,7 +325,9 @@ class AuthControllerTest {
         @DisplayName("unrecognized service exception (e.g. duplicate email) falls through to catch-all 500")
         void signupSeller_duplicateEmail_returns500ViaCatchAll() throws Exception {
             SellerRequestDto request = new SellerRequestDto(
-                    "Dupe Store", "dupe@example.com", "password1", "9000000000", "27AAAAA0000A1Z5");
+                    "Dupe Store", "dupe@example.com", "password1", "9000000000", "27AAAAA0000A1Z5",
+                    null, null, null
+            );
 
             when(authService.registerSeller(request))
                     .thenThrow(new RuntimeException("Email already registered"));

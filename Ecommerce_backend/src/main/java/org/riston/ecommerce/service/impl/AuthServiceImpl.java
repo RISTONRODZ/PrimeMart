@@ -8,6 +8,9 @@ import org.riston.ecommerce.config.JwtProvider;
 import org.riston.ecommerce.domain.AccountStatus;
 import org.riston.ecommerce.domain.USER_ROLE;
 import org.riston.ecommerce.model.*;
+import org.riston.ecommerce.model.Address;
+import org.riston.ecommerce.model.BusinessDetails;
+import org.riston.ecommerce.model.BankDetails;
 import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.request.LoginRequestDto;
 import org.riston.ecommerce.request.SellerRequestDto;
@@ -22,7 +25,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProvider jwtProvider;
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailServiceImpl emailServiceImpl;
-    private final CustomUserServiceImpl customUserService;
+//    private final CustomUserServiceImpl customUserService;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
     private final SellerRepository sellerRepository;
 
@@ -120,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
             verificationCodeRepository.delete(verificationCode);
             throw new IllegalArgumentException("OTP has expired");
         }
-        verificationCodeRepository.delete(verificationCode);
+//        verificationCodeRepository.delete(verificationCode);
         User existingUser = userRepository.findByEmail(req.email());
         if (existingUser != null) {
             throw new IllegalArgumentException("User already exists with this email");
@@ -163,7 +165,6 @@ public class AuthServiceImpl implements AuthService {
         boolean isSeller = email != null && email.startsWith(SELLER_PREFIX);
         boolean isAdmin = email != null && email.equalsIgnoreCase(adminEmail);
 
-        UserDetails userDetails = customUserService.loadUserByUsername(email);
         VerificationCode verificationCode = verificationCodeRepository.findByEmail(cleanEmail);
 
         if (verificationCode == null || !verificationCode.getOtp().equals(otp)) {
@@ -186,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role.toString()));
-        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+        return new UsernamePasswordAuthenticationToken(cleanEmail, null, authorities);
     }
 
     @Override
@@ -198,7 +199,43 @@ public class AuthServiceImpl implements AuthService {
         seller.setPassword(passwordEncoder.encode(request.password()));
         seller.setMobile(request.mobile());
         seller.setGSTIN(request.gstin());
+        seller.setRole(USER_ROLE.ROLE_SELLER);
         seller.setAccountStatus(AccountStatus.PENDING_VERIFICATION);
+
+        // Set Business Details only if provided
+        if (request.businessDetails() != null) {
+            BusinessDetails businessDetails = new BusinessDetails();
+            businessDetails.setBusinessName(request.businessDetails().businessName());
+            businessDetails.setBusinessEmail(request.businessDetails().businessEmail());
+            businessDetails.setBusinessMobile(request.businessDetails().businessMobile());
+            businessDetails.setBusinessAddress(request.businessDetails().businessAddress());
+            businessDetails.setLogo(request.businessDetails().logo());
+            businessDetails.setBanner(request.businessDetails().banner());
+            seller.setBusinessDetails(businessDetails);
+        }
+
+        // Set Bank Details only if provided
+        if (request.bankDetails() != null) {
+            BankDetails bankDetails = new BankDetails();
+            bankDetails.setAccountNumber(request.bankDetails().accountNumber());
+            bankDetails.setAccountHolderName(request.bankDetails().accountHolderName());
+            bankDetails.setIfscCode(request.bankDetails().ifscCode());
+            seller.setBankDetails(bankDetails);
+        }
+
+        // Set Pickup Address only if provided
+        if (request.pickupAddress() != null) {
+            Address pickupAddress = new Address();
+            pickupAddress.setName(request.pickupAddress().name());
+            pickupAddress.setLocality(request.pickupAddress().locality());
+            pickupAddress.setAddress(request.pickupAddress().address());
+            pickupAddress.setCity(request.pickupAddress().city());
+            pickupAddress.setState(request.pickupAddress().state());
+            pickupAddress.setPinCode(request.pickupAddress().pinCode());
+            pickupAddress.setMobileNumber(request.pickupAddress().mobileNumber());
+            seller.setPickupAddress(pickupAddress);
+        }
+
         return sellerRepository.save(seller);
     }
 }

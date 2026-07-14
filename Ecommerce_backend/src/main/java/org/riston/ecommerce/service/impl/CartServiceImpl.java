@@ -22,28 +22,29 @@ public class CartServiceImpl implements CartService {
     public CartItem addCartItem(User user, Product product, String size, int quantity) {
         Cart cart = findUserCart(user);
 
-        CartItem isPresent = cartItemRepository.findByCartAndProductAndSize(cart, product, size);
-        if (isPresent == null) {
-            CartItem cartItem = new CartItem();
+        CartItem cartItem = cartItemRepository.findByCartAndProductAndSize(cart, product, size);
+
+        if (cartItem == null) {
+            cartItem = new CartItem();
             cartItem.setProduct(product);
-            cartItem.setQuantity(quantity);
             cartItem.setUserId(user.getId());
             cartItem.setSize(size);
-
-            int totalPrice = quantity * product.getSellingPrice();
-            cartItem.setSellingPrice(totalPrice);
-            cartItem.setMrpPrice(quantity * product.getMrpPrice());
             cartItem.setCart(cart);
-
-            CartItem savedItem = cartItemRepository.save(cartItem);
-
-            cart.getCartItems().add(savedItem);
-            recalculateCartTotals(cart);
-            cartRepository.save(cart);
-
-            return savedItem;
+            cartItem.setQuantity(quantity);
+        } else {
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
         }
-        return isPresent;
+
+        int newTotalPrice = cartItem.getQuantity() * product.getSellingPrice();
+        int newMrpPrice = cartItem.getQuantity() * product.getMrpPrice();
+
+        cartItem.setSellingPrice(newTotalPrice);
+        cartItem.setMrpPrice(newMrpPrice);
+        CartItem savedItem = cartItemRepository.save(cartItem);
+        cart.getCartItems().add(savedItem);
+        recalculateCartTotals(cart);
+        cartRepository.save(cart);
+        return savedItem;
     }
 
     @Override

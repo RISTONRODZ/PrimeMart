@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.PaymentOrderRepository;
@@ -30,6 +31,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(
         name = "Order Management",
         description = "Endpoints for creating, retrieving, and managing orders"
@@ -56,13 +58,21 @@ public class OrderController {
             @RequestBody Address shippingAddress,
             @RequestHeader("Authorization") String jwt
     ) {
+        log.info("Creating order for user with JWT token");
         User user = userService.findUserByJwtToken(jwt);
+        log.info("User found: {}", user.getId());
+        
         Cart cart = cartService.findUserCart(user);
+        log.info("User cart found with {} items", cart.getCartItems().size());
 
         Set<Order> orders = orderService.createOrder(user, shippingAddress, cart);
+        log.info("Created {} orders", orders.size());
+        
         PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
+        log.info("Payment order created with ID: {}", paymentOrder.getId());
 
         PaymentLink payment = paymentService.createRazorpayPaymentLink(user, paymentOrder.getAmount(), paymentOrder.getId());
+        log.info("Razorpay payment link created successfully");
 
         PaymentLinkResponseDto res = new PaymentLinkResponseDto(
                 Objects.toString(payment.get("short_url"), null),
@@ -72,6 +82,7 @@ public class OrderController {
         paymentOrder.setPaymentLinkId(Objects.toString(payment.get("id"), null));
 
         paymentOrderRepository.save(paymentOrder);
+        log.info("Payment order updated with payment link ID: {}", paymentOrder.getPaymentLinkId());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.success("Order created successfully", res));
     }

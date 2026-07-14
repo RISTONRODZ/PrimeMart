@@ -68,7 +68,7 @@ public class AdminController {
         @RequestParam(required = false) AccountStatus status
     ) {
         List<SellerResponseDto> responses = sellerService.getAllSellers(status).stream()
-                .map(s -> new SellerResponseDto(s.getId(), s.getSellerName(), s.getEmail(), s.getMobile(), s.getGSTIN(), s.getAccountStatus(), s.getEmailVerified()))
+                .map(SellerResponseDto::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
