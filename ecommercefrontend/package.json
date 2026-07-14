@@ -20,6 +20,7 @@
     "dayjs": "^1.11.21",
     "embla-carousel-react": "^8.6.0",
     "formik": "^2.4.9",
+    "jwt-decode": "^4.0.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-redux": "^9.3.0",

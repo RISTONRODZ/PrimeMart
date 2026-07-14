@@ -1,80 +1,71 @@
-import { Box, Typography, Avatar, Rating, IconButton } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-
-export interface Review {
-    id: number;
-    userName: string;
-    avatarUrl: string;
-    rating: number;
-    date: string;
-    reviewText: string;
-    photoUrl?: string;
-}
+import StarIcon from '@mui/icons-material/Star';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import EditIcon from '@mui/icons-material/Edit';
+import { IconButton } from "@mui/material";
+import { useAppSelector } from "../../state/hooks.ts";
+import type {Review} from "../../state/customer/ReviewSlice.ts";
 
 interface ReviewCardProps {
     review: Review;
-    onDelete?: (id: number) => void;
+    onDelete: (id: number) => void;
+    onEdit: (review: Review) => void;
 }
 
-const ReviewCard = ({ review, onDelete }: ReviewCardProps) => {
+const ReviewCard = ({ review, onDelete, onEdit }: ReviewCardProps) => {
+    const { user } = useAppSelector((state) => state.auth);
+    const isOwner = user?.id === review.user.id;
+
+    const formattedDate = new Date(review.createdAt).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+
     return (
-        <Box className={'text-slate-800'} sx={{
-            p: { xs: 1.5, sm: 2 },
-            borderBottom: "1px solid #e0e0e0",
-            mb: 2
-        }}>
-            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <Avatar
-                        src={review.avatarUrl}
-                        alt={review.userName}
-                        sx={{ mr: 2, width: { xs: 35, sm: 40 }, height: { xs: 35, sm: 40 } }}
-                    />
-                    <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: "bold", fontSize: { xs: "0.9rem", sm: "1rem" } }}>
-                            {review.userName}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                            {review.date}
-                        </Typography>
-                    </Box>
-                </Box>
-                    <IconButton
-                        onClick={() => onDelete?.(review.id)}
-                        size="small"
-                        sx={{
-                            "&:hover": {
-                                backgroundColor: "error.light",
-                            }
-                        }}
-                    >
-                        <DeleteIcon fontSize="small" color="error" />
-                    </IconButton>
-            </Box>
-
-            <Rating value={review.rating} readOnly size="small" sx={{ mb: 1 }} />
-
-            <Typography variant="body2" sx={{ mb: 1.5, color: "text.primary", fontSize: { xs: "0.85rem", sm: "0.875rem" } }}>
-                {review.reviewText}
-            </Typography>
-
-            {review.photoUrl && (
-                <Box
-                    component="img"
-                    src={review.photoUrl}
-                    alt="Review attachment"
-                    sx={{
-                        width: { xs: 80, sm: 100 },
-                        height: { xs: 80, sm: 100 },
-                        borderRadius: 2,
-                        objectFit: "cover",
-                        border: "1px solid #eee",
-                        mt: 1,
-                        display: "block"
-                    }}
-                />
-            )}
-        </Box>
+        <div className='py-6 border-b border-gray-100 flex gap-4'>
+            <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(review.user.fullName)}`}
+                alt={review.user.fullName}
+                className='w-10 h-10 rounded-full flex-shrink-0'
+            />
+            <div className='flex-1'>
+                <div className='flex items-center justify-between'>
+                    <div>
+                        <p className='font-semibold text-gray-800'>{review.user.fullName}</p>
+                        <div className='flex items-center gap-2 mt-0.5'>
+                            <div className='flex items-center gap-0.5 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded text-xs font-semibold'>
+                                <span>{review.rating}</span>
+                                <StarIcon sx={{ fontSize: '14px' }} />
+                            </div>
+                            <span className='text-xs text-gray-400'>{formattedDate}</span>
+                        </div>
+                    </div>
+                    {isOwner && (
+                        <div className="flex gap-1">
+                            <IconButton size="small" onClick={() => onEdit(review)}>
+                                <EditIcon fontSize="small" sx={{ color: '#9ca3af' }} />
+                            </IconButton>
+                            <IconButton size="small" onClick={() => onDelete(review.id)}>
+                                <DeleteOutlineOutlinedIcon fontSize="small" sx={{ color: '#9ca3af' }} />
+                            </IconButton>
+                        </div>
+                    )}
+                </div>
+                <p className='text-gray-600 text-sm mt-2 leading-relaxed'>{review.reviewText}</p>
+                {review.productImages?.length > 0 && (
+                    <div className='flex gap-2 mt-3'>
+                        {review.productImages.map((img, index) => (
+                            <img
+                                key={index}
+                                src={img}
+                                alt={`Review photo ${index + 1}`}
+                                className='w-16 h-16 object-cover rounded-lg border border-gray-200'
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
 

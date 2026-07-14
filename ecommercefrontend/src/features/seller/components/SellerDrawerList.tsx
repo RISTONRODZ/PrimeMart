@@ -11,12 +11,12 @@ import {
 import DrawerList from "../../../components/DrawerList.tsx";
 
 const menu = [
-    {
-        name: "Dashboard",
-        path: "/seller",
-        icon: <Dashboard className="text-blue-700" />,
-        activeIcon: <Dashboard className="text-white" />,
-    },
+    // {
+    //     name: "Dashboard",
+    //     path: "/seller",
+    //     icon: <Dashboard className="text-blue-700" />,
+    //     activeIcon: <Dashboard className="text-white" />,
+    // },
     {
         name: "Orders",
         path: "/seller/orders",
@@ -35,12 +35,12 @@ const menu = [
         icon: <AddIcon className="text-blue-700" />,
         activeIcon: <AddIcon className="text-white" />,
     },
-    {
-        name: "Payment",
-        path: "/seller/payments",
-        icon: <AccountBalanceWallet className="text-blue-700" />,
-        activeIcon: <AccountBalanceWallet className="text-white" />,
-    },
+    // {
+    //     name: "Payment",
+    //     path: "/seller/payments",
+    //     icon: <AccountBalanceWallet className="text-blue-700" />,
+    //     activeIcon: <AccountBalanceWallet className="text-white" />,
+    // },
     {
         name: "Transaction",
         path: "/seller/transactions",

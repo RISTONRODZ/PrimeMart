@@ -1,9 +1,17 @@
+import {useNavigate} from "react-router-dom";
+import type {HomeCategory} from "../../../../../types/HomeCategory.ts";
 
-const ElectricCategoryCard = () => {
+const ElectricCategoryCard = ({category}: {category: HomeCategory}) => {
+    const navigate = useNavigate();
+    
+    const handleCategoryClick = () => {
+        navigate(`/product/${category.name}`);
+    };
+    
     return (
-        <div>
-            <img className={'object-contain h-10'} alt={'Laptop'} src={'https://i.dell.com/is/image/DellContent/content/dam/ss2/product-images/dell-client-products/notebooks/alienware-notebooks/da15260/media-gallery/notebook-alienware-15-da15260-mb3-intel-black-gallery-1.psd?fmt=png-alpha&pscan=auto&scl=1&hei=320&wid=441&qlt=100,1&resMode=sharp2&size=441,320&chrss=full'}/>
-            <h2 className={'font-semibold'}>Laptop</h2>
+        <div onClick={handleCategoryClick} className="cursor-pointer">
+            <img className={'object-fit w-40 h-30 '} alt={category.name || 'Category'} src={category.imageUrl}/>
+            <h2 className={'font-semibold text-center'}>{category.name}</h2>
         </div>
     );
 };

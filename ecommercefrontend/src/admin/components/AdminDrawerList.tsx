@@ -50,13 +50,13 @@ const AdminDrawerList = ({toggleDrawer}: {toggleDrawer: () => void}) => {
     ];
 
     const menu2 = [
-
-        {
-            name: "Account",
-            path: "/seller/account",
-            icon: <AccountBox className="text-blue-700" />,
-            activeIcon: <AccountBox className="text-white" />,
-        },
+        // future implementation
+        // {
+        //     name: "Account",
+        //     path: "/admin/account",
+        //     icon: <AccountBox className="text-blue-700" />,
+        //     activeIcon: <AccountBox className="text-white" />,
+        // },
         {
             name: "Logout",
             path: "/",

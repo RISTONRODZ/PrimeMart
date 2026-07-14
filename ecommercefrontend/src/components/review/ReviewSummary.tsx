@@ -1,15 +1,5 @@
-import { Box, Typography, LinearProgress } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-
-export interface Review {
-    id: number;
-    userName: string;
-    avatarUrl: string;
-    rating: number;
-    date: string;
-    reviewText: string;
-    photoUrl?: string;
-}
+import StarIcon from '@mui/icons-material/Star';
+import type { Review } from "../../state/customer/ReviewSlice.ts";
 
 interface ReviewSummaryProps {
     reviews: Review[];
@@ -17,76 +7,50 @@ interface ReviewSummaryProps {
 
 const ReviewSummary = ({ reviews }: ReviewSummaryProps) => {
     const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0
+        ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+        : 0;
+
+    const distribution = [5, 4, 3, 2, 1].map((star) => {
+        const count = reviews.filter((r) => r.rating === star).length;
+        const percent = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+        return { star, count, percent };
+    });
 
     if (totalReviews === 0) {
-        return null;
+        return (
+            <div className='py-4'>
+                <p className='text-sm text-gray-500'>No reviews yet</p>
+            </div>
+        );
     }
 
-    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
-
-    const ratingCounts = {
-        5: reviews.filter(r => r.rating === 5).length,
-        4: reviews.filter(r => r.rating === 4).length,
-        3: reviews.filter(r => r.rating === 3).length,
-        2: reviews.filter(r => r.rating === 2).length,
-        1: reviews.filter(r => r.rating === 1).length,
-    };
-
-    const ratingPercentages = {
-        5: (ratingCounts[5] / totalReviews) * 100,
-        4: (ratingCounts[4] / totalReviews) * 100,
-        3: (ratingCounts[3] / totalReviews) * 100,
-        2: (ratingCounts[2] / totalReviews) * 100,
-        1: (ratingCounts[1] / totalReviews) * 100,
-    };
-
     return (
-        <Box sx={{ p: { xs: 2, sm: 3 }, border: "1px solid #e0e0e0", borderRadius: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-                <Box sx={{ textAlign: "center" }}>
-                    <Typography variant="h3" sx={{ fontWeight: "bold", color: "#1a1a1a" }}>
-                        {averageRating.toFixed(1)}
-                    </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <StarIcon sx={{ fontSize: 20, color: "#FFA500" }} />
-                        <StarIcon sx={{ fontSize: 20, color: "#FFA500" }} />
-                        <StarIcon sx={{ fontSize: 20, color: "#FFA500" }} />
-                        <StarIcon sx={{ fontSize: 20, color: "#FFA500" }} />
-                        <StarIcon sx={{ fontSize: 20, color: "#FFA500" }} />
-                    </Box>
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                    {[5, 4, 3, 2, 1].map((star) => (
-                        <Box key={star} sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                            <Typography variant="body2" sx={{ minWidth: 20, fontSize: "0.875rem" }}>
-                                {star}
-                            </Typography>
-                            <StarIcon sx={{ fontSize: 16, color: "#FFA500" }} />
-                            <LinearProgress
-                                variant="determinate"
-                                value={ratingPercentages[star as keyof typeof ratingPercentages]}
-                                sx={{
-                                    flex: 1,
-                                    height: 8,
-                                    borderRadius: 4,
-                                    backgroundColor: "#e0e0e0",
-                                    "& .MuiLinearProgress-bar": {
-                                        backgroundColor: "#FFA500",
-                                        borderRadius: 4,
-                                    },
-                                }}
-                            />
-                            <Typography variant="body2" sx={{ minWidth: 45, textAlign: "right", fontSize: "0.875rem", color: "#666" }}>
-                                {Math.round(ratingPercentages[star as keyof typeof ratingPercentages])}%
-                            </Typography>
-                        </Box>
+        <div className='py-4 space-y-3'>
+            <div className='flex items-center gap-2'>
+                <span className='text-3xl font-bold text-gray-900'>{averageRating.toFixed(1)}</span>
+                <div className='flex items-center gap-0.5'>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <StarIcon
+                            key={star}
+                            sx={{ fontSize: '20px', color: star <= Math.round(averageRating) ? '#facc15' : '#e5e7eb' }}
+                        />
                     ))}
-                </Box>
-            </Box>
-            <Typography variant="body2" sx={{ color: "#666", fontSize: "0.875rem" }}>
-                {totalReviews} global ratings
-            </Typography>
-        </Box>
+                </div>
+            </div>
+            <p className='text-sm text-gray-500'>{totalReviews} review{totalReviews !== 1 ? 's' : ''}</p>
+            <div className='space-y-1.5'>
+                {distribution.map(({ star, count, percent }) => (
+                    <div key={star} className='flex items-center gap-2'>
+                        <span className='text-xs text-gray-600 w-10'>{star} star</span>
+                        <div className='flex-1 h-2 bg-gray-100 rounded-full overflow-hidden'>
+                            <div className='h-full bg-yellow-400' style={{ width: `${percent}%` }} />
+                        </div>
+                        <span className='text-xs text-gray-400 w-6 text-right'>{count}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
 

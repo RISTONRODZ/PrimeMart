@@ -1,18 +1,25 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { Box, Grid, Paper, Typography } from '@mui/material';
 import CartItem from './CartItem.tsx';
 import PricingCard from './PricingCard.tsx';
 import Coupon, {type CouponResult} from "../coupon/Coupon.tsx";
 import { Link } from "react-router-dom";
-
-const ITEM_PRICE = 19.99;
+import {useAppDispatch, useAppSelector} from "../../state/hooks.ts";
+import {fetchUserCart} from "../../state/customer/CartSlice.ts";
 
 const Cart = () => {
     const [coupon, setCoupon] = useState<CouponResult | null>(null);
+    const dispatch = useAppDispatch();
 
-    const subtotal = ITEM_PRICE;
+    useEffect(() => {
+        dispatch(fetchUserCart(localStorage.getItem("jwt") || ""));
+    }, [dispatch]);
 
-    const discount = coupon
+    const cart = useAppSelector(store => store.cart.cart);
+
+    const subtotal = cart?.cartItems?.reduce((acc, item) => acc + (item.sellingPrice * item.quantity), 0) || 0;
+
+    const discount = coupon && cart
         ? coupon.discountType === 'percentage'
             ? (subtotal * coupon.discountValue) / 100
             : Math.min(coupon.discountValue, subtotal)
@@ -24,12 +31,14 @@ const Cart = () => {
                 My Cart
             </Typography>
 
-            <Grid sx={{spacing:3,alignItems:"flex-start"}} >
-                <Grid sx={{xs:12,md:7}}>
-                    <CartItem />
+            <Grid container sx={{ gap: 3, alignItems: "flex-start" }}>
+                <Grid sx={{ flexGrow: 1, flexBasis: { xs: '100%', md: '58%' } }}>
+                    {cart?.cartItems?.map((item: any) => (
+                        <CartItem key={item.id} item={item} />
+                    ))}
                 </Grid>
 
-                <Grid sx={{xs:12,md:5}} >
+                <Grid sx={{ flexGrow: 1, flexBasis: { xs: '100%', md: '35%' } }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <Paper
                             elevation={0}
@@ -40,7 +49,7 @@ const Cart = () => {
                                 onRemove={() => setCoupon(null)}
                             />
                         </Paper>
-                        <Link to="/checkout">
+                        <Link to="/checkout" style={{ textDecoration: 'none' }}>
                             <PricingCard
                                 subtotal={subtotal}
                                 discount={discount}

@@ -11,7 +11,7 @@ const BecomeSellerFormStep3: React.FC<BecomeSellerFormStep3Props> = ({ formik })
   return (
     <div className="flex flex-col gap-5">
        
-          <TextField
+          <TextField required
             fullWidth
             name="bankDetails.accountNumber"
             label="Account Number"
@@ -22,6 +22,7 @@ const BecomeSellerFormStep3: React.FC<BecomeSellerFormStep3Props> = ({ formik })
             helperText={formik.touched.bankDetails?.accountNumber && formik.errors.bankDetails?.accountNumber}
           />
           <TextField
+              required
             fullWidth
             name="bankDetails.ifscCode"
             label="IFSC Code"
@@ -32,6 +33,7 @@ const BecomeSellerFormStep3: React.FC<BecomeSellerFormStep3Props> = ({ formik })
             helperText={formik.touched.bankDetails?.ifscCode && formik.errors.bankDetails?.ifscCode}
           />
           <TextField
+            required
             fullWidth
             name="bankDetails.accountHolderName"
             label="Account Holder Name"

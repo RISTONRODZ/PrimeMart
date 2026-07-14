@@ -1,16 +1,20 @@
 import {Outlet} from "react-router-dom";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Menu} from "@mui/icons-material";
 import {IconButton} from "@mui/material";
 import AdminDrawerList from "../../components/AdminDrawerList.tsx";
+import {useAppDispatch} from "../../../state/hooks.ts";
+import {fetchHomeCategories} from "../../../state/admin/AdminSlice.ts";
 
 const AdminDashboard = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
-
+    const dispatch = useAppDispatch();
     const toggleDrawer = () => {
         setMobileOpen(!mobileOpen);
     };
-
+    useEffect(() => {
+        dispatch(fetchHomeCategories());
+    }, [dispatch]);
     return (
         <div className="min-h-screen text-slate-800">
             <section className="lg:flex lg:h-[90vh]">
