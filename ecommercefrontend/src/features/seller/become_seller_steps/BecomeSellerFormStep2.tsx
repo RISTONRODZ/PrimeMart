@@ -13,6 +13,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
         <Grid container spacing={3}>
           <Grid size={12}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.name"
                 label="Name"
@@ -26,6 +27,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={6}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.mobile"
                 label="Mobile"
@@ -39,6 +41,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={6}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.pincode"
                 label="Pincode"
@@ -52,6 +55,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={12}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.address"
                 label="Address (House No, Building, Street)"
@@ -65,6 +69,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={12}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.locality"
                 label="Locality/Town"
@@ -78,6 +83,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={6}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.city"
                 label="City"
@@ -91,6 +97,7 @@ const BecomeSellerFormStep2: React.FC<BecomeSellerFormStep2Props> = ({ formik })
 
           <Grid size={6}>
             <TextField
+                required={true}
                 fullWidth
                 name="pickupAddress.state"
                 label="State"

@@ -1,5 +1,4 @@
 import {Route, Routes} from "react-router-dom";
-import Home from "./features/customer/home/Home.tsx";
 import AboutUs from "./components/footer/Aboutus.tsx";
 import PrivacyPolicy from "./components/footer/PrivacyPolicy.tsx";
 import TermsOfUse from "./components/footer/TermsOfUse.tsx";
@@ -20,7 +19,6 @@ import Payment from "./features/seller/payment/Payment.tsx";
 import Transaction from "./features/seller/payment/TransactionTable.tsx";
 import Profile from "./features/seller/account/Profile.tsx";
 import AddProducts from "./features/seller/products/AddProducts.tsx";
-import {Login} from "@mui/icons-material";
 import SellerDashboard from "./features/seller/pages/sellerdashbord/SellerDashboard.tsx";
 import AdminDashboard from "./admin/pages/dashboard/AdminDashboard.tsx";
 import AdminDashboardContent from "./admin/pages/dashboard/AdminDashboardContent.tsx";
@@ -31,13 +29,21 @@ import Deal from "./admin/HomePage/Deal.tsx";
 import ShopByCategory from "./admin/HomePage/ShopByCategory.tsx";
 import SellerTable from "./admin/pages/seller/SellerTable.tsx";
 import ElectronicCategory from "./admin/HomePage/ElectronicCategory.tsx";
-
+import Auth from "./components/auth/Auth.tsx";
+import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
+import PaymentSuccess from "./components/checkout/PaymentSuccess.tsx";
+import NotFound from "./components/notfound/NotFound.tsx";
+import Wishlist from "./components/wishlist/Wishlist.tsx";
+import RoleBasedRedirect from "./RoleBasedRedirect.tsx";
+import SearchResults from "./features/customer/home/product/SearchResults.tsx";
 const AppRoutes = () => {
     return (
         <div>
             <Routes>
-                <Route path="/" element={<Home />} />
+                <Route path="*" element={<NotFound />} />
+                <Route path="/" element={<RoleBasedRedirect />} />
                 <Route path="/about" element={<AboutUs />} />
+                <Route path="/wishlist" element={<Wishlist/>}/>
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-use" element={<TermsOfUse />} />
                 <Route path="/faqs" element={<FAQ />} />
@@ -45,13 +51,15 @@ const AppRoutes = () => {
                 <Route path="/shipping-info" element={<ShippingInfo />} />
                 <Route path="/account/*" element={<Account />} />
                 <Route path="/product/:category" element={<Product />} />
-                <Route path="/product-details/:categoryId/:name/:productId" element={<ProductDetails />} />
+                <Route path="/product-details/:categoryName/:name/:productId" element={<ProductDetails />} />
                 <Route path="/reviews/:productId" element={<Review/>}/>
                 <Route path="/cart" element={<Cart/>}/>
                 <Route path="/checkout" element={<Checkout/>}/>
-                <Route path="/login" element={<Login/>}/>
+                <Route path="/login" element={<Auth/>}/>
                 <Route path="/become-seller" element={<BecomeSeller/>}/>
-                <Route path="/seller" element={<SellerDashboard />}>
+                <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>}>
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<Products />} />
                     <Route path="products/add" element={<AddProducts />} />
@@ -60,7 +68,7 @@ const AppRoutes = () => {
                     <Route path="transactions" element={<Transaction />} />
                     <Route path="profile" element={<Profile />} />
                 </Route>
-                <Route path="/admin" element={<AdminDashboard />}>
+                <Route path="/admin" element={<ProtectedRoute requiredRole="ROLE_ADMIN"><AdminDashboard /></ProtectedRoute>}>
                     <Route index element={<AdminDashboardContent />} />
                     <Route path="sellers" element={<SellerTable />} />
                     <Route path="coupon" element={<Coupon />} />

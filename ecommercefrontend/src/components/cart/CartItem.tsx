@@ -1,65 +1,155 @@
-import { useState } from 'react';
-import { Box, Typography, IconButton, Paper, Stack } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { Close } from "@mui/icons-material";
+import {Box, IconButton, Paper, Stack, Typography} from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import {Close} from "@mui/icons-material";
+import {useAppDispatch} from "../../state/hooks.ts";
+import {updateCartItem} from "../../state/customer/CartSlice.ts";
+import {deleteCartItem} from "../../state/customer/CartSlice.ts";
+interface CartItemType {
+    id: number;
+    productId: number;
+    productTitle: string;
+    productImage: string;
+    size: string;
+    quantity: number;
+    mrpPrice: number;
+    sellingPrice: number;
+    sellerName: string;
+}
 
-const CartItem = () => {
-    const [quantity, setQuantity] = useState<number>(5);
-    const handleIncrement = () => setQuantity((prev) => prev + 1);
-    const handleDecrement = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+interface CartItemProps {
+    item: CartItemType;
+}
 
-    return (
-        <Paper
+const CartItemCard = ({item}: CartItemProps) => {
+    const dispatch = useAppDispatch();
+    const handleQuantityChange = (newQuantity: number) => {
+        dispatch(
+            updateCartItem({
+                jwt: localStorage.getItem("jwt") || "",
+                cartItemId: item.id,
+                cartItem: { quantity: newQuantity },
+            })
+        );
+    };
+
+    const handleDeleteItem = (cartItemId: number) => {
+        dispatch(
+            deleteCartItem({
+                jwt: localStorage.getItem("jwt") || "",
+                cartItemId,
+            })
+        );
+    };
+
+    return (<Paper
             elevation={0}
             sx={{
-                position: 'relative',   
-                display: 'flex',
+                position: "relative",
+                display: "flex",
+                flexDirection: {xs: "column", sm: "row"},
                 gap: 2,
-                p: 2,
-                border: '1px solid #e0e0e0',
+                p: {xs: 2, sm: 2.5},
+                mb: 2,
+                border: "1px solid #e0e0e0",
                 borderRadius: 2,
-                alignItems: 'center'
+                alignItems: {xs: "center", sm: "flex-start"},
             }}
         >
             <Box
                 component="img"
-                src="https://i.pinimg.com/736x/1b/2b/ea/1b2bea8eaeff7b0fe058a34bead3a342.jpg"
-                alt="Product"
-                sx={{ width: 90, height: 90, borderRadius: 1, objectFit: 'cover' }}
+                src={item.productImage}
+                alt={item.productTitle}
+                sx={{
+                    width: {xs: 120, sm: 90, md: 110},
+                    height: {xs: 120, sm: 90, md: 110},
+                    borderRadius: 2,
+                    objectFit: "cover",
+                    flexShrink: 0,
+                }}
             />
-            <Stack spacing={0.5} sx={{ flexGrow: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: "600" }}>Luis Vuitton</Typography>
-                <Typography variant="body2" color="text.secondary">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+
+            <Stack
+                spacing={1}
+                sx={{
+                    flex: 1, width: "100%", textAlign: {xs: "center", sm: "left"},
+                }}
+            >
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 600,
+                        fontSize: {
+                            xs: "1rem", sm: "1.1rem", md: "1.25rem",
+                        },
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        wordBreak: "break-word",
+                    }}
+                >
+                    {item.productTitle}
                 </Typography>
-                <Typography variant="caption" sx={{ display: "block" }}>
-                    Sold by: Natural Lifestyle Products Private Limited
+
+                <Typography variant="caption">
+                    Sold by: {item.sellerName}
                 </Typography>
-                <Stack direction="row" sx={{ alignItems: 'center', gap: 1, mt: 1 }}>
-                    <Typography variant="body2"><strong>Quantity:</strong></Typography>
-                    <IconButton size="small" onClick={handleDecrement} disabled={quantity <= 1}>
-                        <RemoveIcon fontSize="small" />
-                    </IconButton>
-                    <Typography sx={{ mx: 1, minWidth: '20px', textAlign: 'center' }}>
-                        {quantity}
+
+                <Typography variant="body2">
+                    Size: {item.size}
+                </Typography>
+
+                <Stack
+                    direction="row"
+                    sx={{
+                        alignItems: "center", justifyContent: {
+                            xs: "center", sm: "flex-start",
+                        }, gap: 1, mt: 1, flexWrap: "wrap",
+                    }}
+                >
+                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                        Quantity:
                     </Typography>
-                    <IconButton size="small" onClick={handleIncrement}>
-                        <AddIcon fontSize="small" />
+
+                    <IconButton size="small" onClick={() => handleQuantityChange(item.quantity - 1)}>
+                        <RemoveIcon fontSize="small"/>
+                    </IconButton>
+
+                    <Typography
+                        sx={{
+                            minWidth: 24, textAlign: "center", fontWeight: 500,
+                        }}
+                    >
+                        {item.quantity}
+                    </Typography>
+
+                    <IconButton size="small" onClick={() => handleQuantityChange(item.quantity + 1)}>
+                        <AddIcon fontSize="small"/>
                     </IconButton>
                 </Stack>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                    <strong>Price:</strong> $19.99
+
+                <Typography
+                    variant="body1"
+                    sx={{
+                        mt: 1, fontWeight: 600,
+                    }}
+                >
+                    ₹{(item.sellingPrice * item.quantity).toFixed(2)}
                 </Typography>
             </Stack>
 
-            <Box sx={{ position: 'absolute', top: 4, right: 4 }}>
-                <IconButton size="small">
-                    <Close sx={{ color: "#1447e6" }} />
+            <Box
+                sx={{
+                    position: "absolute", top: 8, right: 8,
+                }}
+            >
+                <IconButton size="small" onClick={() => handleDeleteItem(item.id)}>
+                    <Close sx={{color: "#1447e6"}}/>
                 </IconButton>
             </Box>
-        </Paper>
-    );
+        </Paper>);
 };
 
-export default CartItem;
+export default CartItemCard;

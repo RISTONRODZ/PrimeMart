@@ -6,7 +6,6 @@ import CreateDealForm from "./CreateDealForm";
 
 const tabs = [
     { name: "Deals" },
-    { name: "Categories" },
     { name: "Create Deal" },
 ];
 
@@ -31,9 +30,7 @@ const Deal = () => {
             <div className="mt-4 sm:mt-5">
                 {activeTab === "Deals" ? (
                     <DealTable />
-                ) : activeTab === "Categories" ? (
-                    <DealCategoryTable />
-                ) : (
+                )  : (
                     <CreateDealForm />
                 )}
             </div>

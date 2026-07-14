@@ -1,6 +1,9 @@
-import { Box, TextField, Button, Grid, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Box, TextField, Button, Grid, Typography, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { useFormik } from 'formik';
 import dayjs, { Dayjs } from 'dayjs';
+import { useAppDispatch, useAppSelector } from '../../../state/hooks.ts';
+import { createCoupon } from '../../../state/customer/couponSlice.ts';
 
 interface CouponFormValues {
     code: string;
@@ -11,6 +14,18 @@ interface CouponFormValues {
 }
 
 const AddNewCouponForm = () => {
+    const dispatch = useAppDispatch();
+    const couponState = useAppSelector((state) => state.coupon);
+    const loading = couponState?.loading || false;
+    const error = couponState?.error || null;
+    const jwt = useAppSelector((state) => state.auth.jwt);
+
+    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+        open: false,
+        message: '',
+        severity: 'success',
+    });
+
     const formik = useFormik<CouponFormValues>({
         initialValues: {
             code: '',
@@ -19,13 +34,27 @@ const AddNewCouponForm = () => {
             validityEndDate: null,
             minimumOrderValue: 0,
         },
-        onSubmit: (values) => {
+        onSubmit: async (values) => {
+            if (!jwt) {
+                setSnackbar({ open: true, message: 'Authentication required', severity: 'error' });
+                return;
+            }
+
             const formattedValues = {
                 ...values,
                 validityStartDate: values.validityStartDate ? values.validityStartDate.toISOString() : null,
                 validityEndDate: values.validityEndDate ? values.validityEndDate.toISOString() : null,
+                isActive: true,
             };
-            console.log('Form Submitted:', formattedValues);
+
+            const result = await dispatch(createCoupon({ coupon: formattedValues, jwt }));
+
+            if (createCoupon.fulfilled.match(result)) {
+                setSnackbar({ open: true, message: 'Coupon created successfully!', severity: 'success' });
+                formik.resetForm();
+            } else {
+                setSnackbar({ open: true, message: result.payload as string || 'Failed to create coupon', severity: 'error' });
+            }
         },
     });
 
@@ -86,11 +115,42 @@ const AddNewCouponForm = () => {
                     />
                 </Grid>
                 <Grid size={12}>
-                    <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>
-                        CREATE COUPON
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        fullWidth
+                        sx={{ mt: 2 }}
+                        disabled={loading}
+                        startIcon={loading ? <CircularProgress size={20} /> : null}
+                    >
+                        {loading ? 'CREATING...' : 'CREATE COUPON'}
                     </Button>
                 </Grid>
             </Grid>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                sx={{
+                    '& .MuiSnackbar-root': {
+                        borderRadius: 2,
+                    },
+                }}
+            >
+                <Alert
+                    severity={snackbar.severity}
+                    variant="filled"
+                    onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+                    sx={{
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        boxShadow: 3,
+                    }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

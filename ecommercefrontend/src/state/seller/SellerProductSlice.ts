@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { api, API_URL } from "../../config/Api.ts";
+import { api } from "../../config/Api.ts";
 import type { Product } from "../../types/ProductTypes.ts";
 
 export const fetchSellerProducts = createAsyncThunk<Product[], any>(

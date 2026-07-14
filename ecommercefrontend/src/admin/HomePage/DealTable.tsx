@@ -1,18 +1,10 @@
 import { Box, IconButton, Modal, Paper, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow } from '@mui/material';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { Delete } from '@mui/icons-material';
-
-// Dummy component to fix "Cannot find name 'UpdateDealForm'"
-const UpdateDealForm = ({ id }: { id: number }) => <div>Updating Deal {id}</div>;
-
-// Dummy data to fix "Cannot find name 'deal'"
-const dummyDeals = {
-    deals: [
-        { id: 1, discount: 20, category: { categoryId: "Electronics", image: "https://via.placeholder.com/50" } },
-        { id: 2, discount: 50, category: { categoryId: "Fashion", image: "https://via.placeholder.com/50" } },
-    ]
-};
+import {useAppDispatch, useAppSelector} from "../../state/hooks.ts";
+import {getAllDeals, deleteDeal} from "../../state/admin/DealSlice.ts";
+import UpdateDealForm from "./UpdateDealForm.tsx";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -53,14 +45,21 @@ const DealsTable = () => {
         setSelectedDealId(id);
         setOpen(true);
     };
-
+    const dispatch = useAppDispatch();
+    const {deal} = useAppSelector(store=>store)
+    const deals = deal.deals || [];
+    console.log("Deals from store:", deals);
+    console.log("Deal state:", deal);
     const handleClose = () => setOpen(false);
 
-    // Implemented missing handler
     const handleDelete = (id: number) => () => {
-        console.log("Delete deal:", id);
+        if (window.confirm("Are you sure you want to delete this deal?")) {
+            dispatch(deleteDeal(id));
+        }
     };
-
+    useEffect(() => {
+        dispatch(getAllDeals());
+    }, []);
     return (
         <>
             <TableContainer component={Paper} className="overflow-x-auto">
@@ -76,26 +75,35 @@ const DealsTable = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {dummyDeals.deals.map((deal, index: number) => (
-                            <StyledTableRow key={deal.id}>
+                        {Array.isArray(deals) && deals.map((deal, index: number) => {
+                            console.log("Mapping deal:", deal);
+                            return (
+                            <StyledTableRow key={deal.id || index}>
                                 <StyledTableCell component="th" scope="row">{index + 1}</StyledTableCell>
                                 <StyledTableCell>
-                                    <img className="w-20 rounded-md" src={deal.category.image} alt="category" />
+                                    {deal.homeCategory?.imageUrl ? (
+                                        <img className="w-20 rounded-md" src={deal.homeCategory.imageUrl} alt="category" />
+                                    ) : (
+                                        <span className="text-gray-400">No image</span>
+                                    )}
                                 </StyledTableCell>
-                                <StyledTableCell>{deal.category.categoryId}</StyledTableCell>
+                                <StyledTableCell>
+                                    {deal.homeCategory?.name || "N/A"}
+                                </StyledTableCell>
                                 <StyledTableCell>{deal.discount}%</StyledTableCell>
                                 <StyledTableCell align="right">
-                                    <IconButton onClick={handleOpen(deal.id)}>
+                                    <IconButton onClick={handleOpen(deal.id || 0)}>
                                         <EditIcon className="text-orange-400" />
                                     </IconButton>
                                 </StyledTableCell>
                                 <StyledTableCell align="right">
-                                    <IconButton onClick={handleDelete(deal.id)}>
+                                    <IconButton onClick={handleDelete(deal.id || 0)}>
                                         <Delete className="text-red-600" />
                                     </IconButton>
                                 </StyledTableCell>
                             </StyledTableRow>
-                        ))}
+                            );
+                        })}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -107,7 +115,7 @@ const DealsTable = () => {
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={style}>
-                    {selectedDealId && <UpdateDealForm id={selectedDealId} />}
+                    {selectedDealId && <UpdateDealForm id={selectedDealId} onClose={handleClose} />}
                 </Box>
             </Modal>
         </>

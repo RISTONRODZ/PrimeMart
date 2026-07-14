@@ -11,6 +11,7 @@ const BecomeSellerFormStep4 = ({ formik }: BecomeSellerFormStep4Props) => {
     <div className='flex flex-col gap-5'>
 
       <TextField
+        required
         fullWidth
         name="businessDetails.businessName"
         label="Business Name"
@@ -22,6 +23,7 @@ const BecomeSellerFormStep4 = ({ formik }: BecomeSellerFormStep4Props) => {
       />
 
       <TextField
+        required={true}
         fullWidth
         name="sellerName"
         label="Seller Name"
@@ -33,6 +35,7 @@ const BecomeSellerFormStep4 = ({ formik }: BecomeSellerFormStep4Props) => {
       />
 
       <TextField
+        required
         fullWidth
         name="email"
         label="Email"
@@ -42,7 +45,45 @@ const BecomeSellerFormStep4 = ({ formik }: BecomeSellerFormStep4Props) => {
         error={formik.touched.email && Boolean(formik.errors.email)}
         helperText={formik.touched.email && formik.errors.email}
       />
+        <TextField
+            required
+            fullWidth
+            name="businessDetails.businessEmail"
+            label="Business Email"
+            value={formik.values.businessDetails.businessEmail}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched?.businessDetails?.businessEmail && Boolean(formik.errors?.businessDetails?.businessEmail)}
+            helperText={formik.touched?.businessDetails?.businessEmail && formik.errors?.businessDetails?.businessEmail}
+        />
+
+        <TextField
+            required
+            fullWidth
+            name="businessDetails.businessMobile"
+            label="Business Mobile"
+            value={formik.values.businessDetails.businessMobile}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched?.businessDetails?.businessMobile && Boolean(formik.errors?.businessDetails?.businessMobile)}
+            helperText={formik.touched?.businessDetails?.businessMobile && formik.errors?.businessDetails?.businessMobile}
+        />
+
+        <TextField
+            required
+            fullWidth
+            multiline
+            rows={2}
+            name="businessDetails.businessAddress"
+            label="Business Address"
+            value={formik.values.businessDetails.businessAddress}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched?.businessDetails?.businessAddress && Boolean(formik.errors?.businessDetails?.businessAddress)}
+            helperText={formik.touched?.businessDetails?.businessAddress && formik.errors?.businessDetails?.businessAddress}
+        />
       <TextField
+        required
         fullWidth
         name="password"
         label="Password"

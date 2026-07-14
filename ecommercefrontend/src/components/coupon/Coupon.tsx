@@ -80,7 +80,6 @@ const Coupon = ({ onApply, onRemove }: CouponProps) => {
                         size="small"
                         sx={{
                             color: '#e8f5e9',
-                            color: '#2e7d32',
                             fontWeight: 600,
                             '& .MuiChip-deleteIcon': { color: '#2e7d32' },
                             '& .MuiChip-icon': { color: '#2e7d32' },

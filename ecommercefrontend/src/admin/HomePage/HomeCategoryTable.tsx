@@ -12,41 +12,53 @@ import {
     Typography,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
+import AddIcon from "@mui/icons-material/Add";
+import type { HomeCategory } from "../../types/HomeCategory.ts";
+import { useState } from "react";
+import HomeCategoryFormDialog from "./HomeCategoryFormDialog.tsx";
 
-const rows = [
-    {
-        id: 8,
-        image:
-            "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=200",
-        category: "women_lehenga_cholis",
-        name: "",
-    },
-    {
-        id: 9,
-        image:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200",
-        category: "men_formal_shoes",
-        name: "",
-    },
-    {
-        id: 10,
-        image:
-            "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=200",
-        category: "women_lehenga_cholis",
-        name: "",
-    },
-    {
-        id: 11,
-        image:
-            "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200",
-        category: "men_sherwanis",
-        name: "",
-    },
+const PLACEHOLDER_IMAGES = [
+    "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80", // Fashion
+    "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&q=80", // Electronics
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80", // Headphones
+    "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=600&q=80", // Clothing
+    "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600&q=80", // Shopping
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80", // Lifestyle
 ];
 
-const HomeCategoryTable = () => {
+const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; section?: string }) => {
+    const [editingCategory, setEditingCategory] = useState<HomeCategory | undefined>(undefined);
+    const [dialogOpen, setDialogOpen] = useState(false);
+
+    const handleEdit = (row: HomeCategory) => {
+        setEditingCategory(row);
+        setDialogOpen(true);
+    };
+
+    const handleAdd = () => {
+        setEditingCategory(undefined);
+        setDialogOpen(true);
+    };
+
+    const realRows = data ?? [];
+    const GRID_SLOTS = section === "GRID" ? 6 : realRows.length + 1;
+    const displayData = Array.from({ length: GRID_SLOTS }, (_, index) => {
+        const real = realRows[index];
+        if (real) {
+            return { ...real, isPlaceholder: false as const };
+        }
+        return {
+            id: `placeholder-${index}`,
+            imageUrl: PLACEHOLDER_IMAGES[index % PLACEHOLDER_IMAGES.length],
+            categoryId: "CATEGORY_NAME",
+            name: "NAME",
+            section,
+            isPlaceholder: true as const,
+        };
+    });
+
     return (
-        <Box sx={{padding: {xs: 2, sm: 3}}}>
+        <Box sx={{ padding: { xs: 2, sm: 3 } }}>
             <Paper elevation={2}>
                 <TableContainer className="overflow-x-auto">
                     <Table sx={{ minWidth: 300 }}>
@@ -68,24 +80,21 @@ const HomeCategoryTable = () => {
                                 <TableCell align="center">Action</TableCell>
                             </TableRow>
                         </TableHead>
-
                         <TableBody>
-                            {rows.map((row, index) => (
+                            {displayData.map((row, index) => (
                                 <TableRow
                                     key={row.id}
-                                    hover
-                                    sx={{
-                                        height: 90,
-                                    }}
+                                    hover={!row.isPlaceholder}
+                                    sx={{ height: 90 }}
                                 >
                                     <TableCell>{index + 1}</TableCell>
-
-                                    <TableCell>{row.id}</TableCell>
-
+                                    <TableCell>
+                                        {row.isPlaceholder ? "-" : row.id}
+                                    </TableCell>
                                     <TableCell>
                                         <Avatar
                                             variant="rounded"
-                                            src={row.image}
+                                            src={row.imageUrl}
                                             sx={{
                                                 width: 50,
                                                 height: 70,
@@ -93,19 +102,25 @@ const HomeCategoryTable = () => {
                                             }}
                                         />
                                     </TableCell>
-
                                     <TableCell>
                                         <Typography variant="body2">
-                                            {row.category}
+                                            {row.categoryId}
                                         </Typography>
                                     </TableCell>
-
                                     <TableCell>{row.name || "-"}</TableCell>
-
                                     <TableCell align="center">
-                                        <IconButton color="warning">
-                                            <EditIcon fontSize="small" />
-                                        </IconButton>
+                                        {row.isPlaceholder ? (
+                                            <IconButton color="primary" onClick={handleAdd}>
+                                                <AddIcon fontSize="small" />
+                                            </IconButton>
+                                        ) : (
+                                            <IconButton
+                                                color="warning"
+                                                onClick={() => handleEdit(row as HomeCategory)}
+                                            >
+                                                <EditIcon fontSize="small" sx={{ color: 'warning.main' }} />
+                                            </IconButton>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -113,6 +128,13 @@ const HomeCategoryTable = () => {
                     </Table>
                 </TableContainer>
             </Paper>
+            <HomeCategoryFormDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
+                onSaved={() => setDialogOpen(false)}
+                category={editingCategory}
+                section={section}
+            />
         </Box>
     );
 };

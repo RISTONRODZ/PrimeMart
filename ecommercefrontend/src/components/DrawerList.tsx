@@ -3,6 +3,7 @@ import {Link, useLocation, useNavigate} from "react-router-dom";
 import {logout} from "../state/slice/AuthSlice.ts";
 import {useAppDispatch} from "../state/hooks.ts";
 import {clearSellerProfile} from "../state/seller/SellerSlice.ts";
+import React from "react";
 
 interface menuItem {
     name: string;
@@ -26,7 +27,7 @@ const DrawerList = ({menu, menu2, toggleDrawer}: DrawerListProp) => {
         const isActive = location.pathname === item.path;
         const isLogout = item.name === "Logout";
 
-        const handleClick = (e: React.MouseEvent) => {
+        const handleClick = (e: React.MouseEvent<HTMLElement>) => {
             if (isLogout) {
                 e.preventDefault();
                 dispatch(logout(undefined));

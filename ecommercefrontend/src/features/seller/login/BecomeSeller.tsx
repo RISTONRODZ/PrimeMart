@@ -2,11 +2,15 @@ import { useState } from "react";
 import SellerLoginForm from "./SellerLoginForm.tsx";
 import SellerAccountForm from "./SellerAccountForm.tsx";
 import { Button } from "@mui/material";
+import { useAppDispatch } from "../../../state/hooks.ts";
+import { logout } from "../../../state/slice/AuthSlice";
 
 const BecomeSeller = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const dispatch = useAppDispatch();
 
     const handleLogin = () => {
+        dispatch(logout());
         setIsLoggedIn((prev) => !prev);
     };
 

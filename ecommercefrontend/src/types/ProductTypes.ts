@@ -13,7 +13,7 @@ export interface Product {
     title: string;
     description: string;
     sellingPrice: number;
-    mrpPrice: number;
+    price: number;
     discountPercent: number;
     color: string;
     images: string[];
@@ -22,4 +22,6 @@ export interface Product {
     sizes: string;
     numRatings: number;
     quantity: number;
+    rating?: number;
+    brand?: string;
 }

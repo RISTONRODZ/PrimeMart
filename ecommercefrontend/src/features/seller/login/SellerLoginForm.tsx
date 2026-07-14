@@ -4,19 +4,21 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import {login, sendOtp} from "../../../state/slice/AuthSlice.ts";
 import { useAppDispatch, useAppSelector } from "../../../state/hooks";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const SellerLoginForm = () => {
     const [isOtpSent, setIsOtpSent] = useState(false);
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const { isAuthenticated } = useAppSelector((state) => state.auth);
+    const location = useLocation();
+    const { isAuthenticated, jwt } = useAppSelector((state) => state.auth);
 
     useEffect(() => {
-        if (isAuthenticated) {
-            navigate("/seller");
+        if (isAuthenticated && jwt) {
+            const from = (location.state as any)?.from || "/seller";
+            navigate(from, { replace: true });
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, jwt, navigate, location]);
 
     const formik = useFormik({
         initialValues: { email: "", otp: "" },
