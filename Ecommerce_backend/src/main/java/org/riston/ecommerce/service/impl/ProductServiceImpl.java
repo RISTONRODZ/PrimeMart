@@ -134,17 +134,41 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> searchAndFilter(String query, String category, Pageable pageable) {
+    public Page<Product> searchAndFilter(String query, String category, String color,
+                                         Integer minPrice, Integer maxPrice, Integer minDiscount,
+                                         Pageable pageable) {
         return productRepository.findAll((root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (query != null && !query.isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("title")), "%" + query.toLowerCase() + "%"));
-            }
+            if (query != null && !query.isBlank()) {
+                String[] words = query.trim().toLowerCase().split("\\s+");
+                List<Predicate> wordPredicates = new ArrayList<>();
 
+                for (String word : words) {
+                    String likeWord = "%" + word + "%";
+                    wordPredicates.add(cb.or(
+                            cb.like(cb.lower(root.get("title")), likeWord),
+                            cb.like(cb.lower(root.get("description")), likeWord),
+                            cb.like(cb.lower(root.get("color")), likeWord)
+                    ));
+                }
+                predicates.add(cb.and(wordPredicates.toArray(new Predicate[0])));
+            }
             if (category != null && !category.isEmpty()) {
                 Join<Product, Category> categoryJoin = root.join("category", JoinType.LEFT);
                 predicates.add(cb.equal(categoryJoin.get("categoryId"), category));
+            }
+            if (color != null && !color.isEmpty()) {
+                predicates.add(cb.equal(root.get("color"), color));
+            }
+            if (minPrice != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));
+            }
+            if (maxPrice != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("sellingPrice"), maxPrice));
+            }
+            if (minDiscount != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("discountPercent"), minDiscount));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

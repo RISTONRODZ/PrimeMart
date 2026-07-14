@@ -24,5 +24,40 @@ public record SellerRequestDto(
 
         @NotBlank(message = "GSTIN cannot be blank")
         @Pattern(regexp = "^[0-9A-Z]{15}$", message = "GSTIN must be exactly 15 alphanumeric uppercase characters")
-        String gstin
-) {}
+        String gstin,
+
+        // Business Details (optional - can be updated later)
+        BusinessDetailsDto businessDetails,
+
+        // Bank Details (optional - can be updated later)
+        BankDetailsDto bankDetails,
+
+        // Pickup Address (optional - can be updated later)
+        AddressDto pickupAddress
+) {
+    public record BusinessDetailsDto(
+            String businessName,
+            @Email(message = "please enter a valid business email")
+            String businessEmail,
+            String businessMobile,
+            String businessAddress,
+            String logo,
+            String banner
+    ) {}
+
+    public record BankDetailsDto(
+            String accountNumber,
+            String accountHolderName,
+            String ifscCode
+    ) {}
+
+    public record AddressDto(
+            String name,
+            String locality,
+            String address,
+            String city,
+            String state,
+            String pinCode,
+            String mobileNumber
+    ) {}
+}

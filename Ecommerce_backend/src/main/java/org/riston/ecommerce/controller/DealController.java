@@ -6,11 +6,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
 import org.riston.ecommerce.mapper.DealMapper;
 import org.riston.ecommerce.model.Deal;
+import org.riston.ecommerce.model.HomeCategory;
+import org.riston.ecommerce.repository.DealRepository;
+import org.riston.ecommerce.repository.HomeCategoryRepository;
 import org.riston.ecommerce.request.DealRequestDto;
 import org.riston.ecommerce.response.ApiResponseDto;
 import org.riston.ecommerce.response.DealResponseDto;
@@ -28,6 +32,8 @@ import java.util.List;
 public class DealController {
     private final DealService dealService;
     private final DealMapper dealMapper;
+    private final DealRepository dealRepository;
+    private final HomeCategoryRepository homeCategoryRepository;
     @PostMapping
     @Operation(summary = "Create a new deal")
     @ApiResponse(responseCode = "201", description = "Deal created",
@@ -63,5 +69,36 @@ public class DealController {
     @ApiResponse(responseCode = "200", description = "Fetched", content = @Content(schema = @Schema(implementation = ApiResponseDto.class)))
     public ResponseEntity<ApiResponseDto<List<Deal>>> getDeals() {
         return ResponseEntity.ok(ApiResponseDto.success("Deals fetched successfully", dealService.getDeals()));
+    }
+    @PostMapping("/admin/deals")
+    @Operation(summary = "Create a new deal")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Deal created successfully",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "A deal already exists for this category",
+                    content = @Content(schema = @Schema(implementation = ApiResponseDto.class))
+            )
+    })
+    public ResponseEntity<ApiResponseDto<Deal>> createDeal(@RequestBody DealRequestDto request) {
+        if (dealRepository.existsByHomeCategoryId(request.homeCategoryId())) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(ApiResponseDto.error("A deal already exists for this category."));
+        }
+
+        HomeCategory homeCategory = homeCategoryRepository.findById(request.homeCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Home category not found with id: " + request.homeCategoryId()));
+
+        Deal deal = new Deal();
+        deal.setDiscount(request.discount());
+        deal.setHomeCategory(homeCategory);
+        dealRepository.save(deal);
+
+        return ResponseEntity.ok(ApiResponseDto.success("Deal created successfully", deal));
     }
 }

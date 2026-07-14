@@ -61,6 +61,7 @@ public class PaymentServiceImplTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(paymentService, "successUrl", "http://localhost:3000/payment-success");
+        ReflectionTestUtils.setField(paymentService, "maxAmount", 10000L);
         razorpayClient.payments = this.payments;
         razorpayClient.paymentLink = this.paymentLink;
     }

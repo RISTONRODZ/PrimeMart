@@ -69,7 +69,7 @@ class ProductControllerTest {
 
             when(productService.getAllProducts(
                     anyString(),
-                    anyString(),
+                    isNull(),
                     anyString(),
                     anyString(),
                     anyInt(),
@@ -81,7 +81,6 @@ class ProductControllerTest {
 
             mockMvc.perform(get("/api/v1/products")
                             .param("category", "T-Shirts")
-                            .param("brand", "Nike")
                             .param("color", "Red")
                             .param("productSize", "M")
                             .param("minPrice", "500")
@@ -89,12 +88,12 @@ class ProductControllerTest {
                             .param("minDiscount", "10")
                             .param("stock", "in_stock")
                             .param("page", "0")
-                            .param("size", "10") 
+                            .param("size", "10")
                             .param("sort", "sellingPrice,desc"))
                     .andExpect(status().isOk());
             verify(productService).getAllProducts(
                     eq("T-Shirts"),
-                    eq("Nike"),
+                    isNull(),
                     eq("Red"),
                     eq("M"),
                     eq(500),
