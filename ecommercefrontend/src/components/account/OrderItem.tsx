@@ -21,7 +21,7 @@ const OrderItem = ({ order }: { order: Order }) => {
         dispatch(deleteOrder(order.orderId));
     };
 
-    const canDelete = order.orderStatus === "CANCELED" || order.orderStatus === "DELIVERED";
+    // const canDelete = order.orderStatus === "CANCELED" || order.orderStatus === "DELIVERED";
 
     return (
         <div onClick={()=> {
@@ -29,15 +29,15 @@ const OrderItem = ({ order }: { order: Order }) => {
             console.log("Item ID:", item?.id);
             navigate(`/account/order/${order.orderId}/${item?.id}`)
         }} className='text-sm bg-white p-4 sm:p-5 space-y-4 border rounded-md cursor-pointer relative'>
-            {canDelete && (
-                <button
-                    onClick={handleDeleteOrder}
-                    className='absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full transition-colors'
-                    title='Remove from order history'
-                >
-                    <Close className='text-gray-500 hover:text-red-500' />
-                </button>
-            )}
+            {/*{canDelete && (*/}
+            {/*    <button*/}
+            {/*        onClick={handleDeleteOrder}*/}
+            {/*        className='absolute top-2 right-2 p-1 hover:bg-gray-100 rounded-full transition-colors'*/}
+            {/*        title='Remove from order history'*/}
+            {/*    >*/}
+            {/*        <Close className='text-gray-500 hover:text-red-500' />*/}
+            {/*    </button>*/}
+            {/*)}*/}
             <div className='flex items-center gap-3 sm:gap-5'>
                 <div>
                     <Avatar sizes='small' sx={{ color: "#2b7fff", color: "#e0ebff" }}>

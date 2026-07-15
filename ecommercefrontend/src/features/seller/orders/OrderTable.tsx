@@ -8,7 +8,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Box, Button, Menu, MenuItem, styled } from '@mui/material';
 import {useAppDispatch, useAppSelector} from "../../../state/hooks.ts";
-import {fetchSellerOrders, updateOrderStatus} from "../../../state/slice/SellerOrderSlice.ts";
+import {fetchSellerOrders, updateOrderStatus} from "../../../state/seller/SellerOrderSlice.ts";
 import type {Order, OrderItem} from "../../../types/OrderTypes.ts";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({

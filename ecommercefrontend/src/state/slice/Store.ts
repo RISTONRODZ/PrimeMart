@@ -6,7 +6,7 @@ import authSlice from "./AuthSlice.ts";
 import cartSlice from "../customer/CartSlice.ts";
 import orderSlice from "../customer/OrderSlice.ts";
 import wishlistSlice from "../customer/WishlistSlice.ts";
-import sellerOrderSlice from "./SellerOrderSlice.ts";
+import sellerOrderSlice from "../seller/SellerOrderSlice.ts";
 import transactionSlice from "./TransactionSlice.ts";
 import homeCategorySlice from "../admin/AdminSlice.ts";
 import homeSlice from "../customer/CustomerSlice.ts";

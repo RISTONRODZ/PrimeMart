@@ -11,6 +11,7 @@ import { jwtDecode } from "jwt-decode";
 import { fetchHomePageData} from "../state/customer/CustomerSlice.ts";
 import {fetchHomeCategories} from "../state/admin/AdminSlice.ts";
 import ChatWidget from "../components/Chatwidget.tsx";
+import { SnackbarProvider } from "../components/ui/Snackbar.tsx";
 
 interface JwtPayload {
     authorities: string;
@@ -49,12 +50,14 @@ const App = () => {
     }, [dispatch, jwt]);
     return (
         <ThemeProvider theme={customTheme}>
-            <div className={"text-slate-800"}>
-                <Navbar />
-                <AppRoutes />
-                <Footer />
-                <ChatWidget />
-            </div>
+            <SnackbarProvider>
+                <div className={"text-slate-800"}>
+                    <Navbar />
+                    <AppRoutes />
+                    <Footer />
+                    <ChatWidget />
+                </div>
+            </SnackbarProvider>
         </ThemeProvider>
     );
 };

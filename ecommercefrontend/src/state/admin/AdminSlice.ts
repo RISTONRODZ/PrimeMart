@@ -45,6 +45,18 @@ export const createHomeCategory = createAsyncThunk<unknown, HomeCategory>('homeC
     }
 });
 
+export const deleteHomeCategory = createAsyncThunk<number, number>('homeCategory/deleteHomeCategory', async (id, {rejectWithValue}) => {
+    try {
+        const response = await api.delete(`${API_URL}/home-categories/${id}`);
+        return id;
+    } catch (error: any) {
+        if (error.response && error.response.data) {
+            return rejectWithValue(error.response.data);
+        }
+        return rejectWithValue('An error occurred while deleting the category.');
+    }
+});
+
 interface HomeCategoryState {
     categories: HomeCategory[];
     loading: boolean;
@@ -108,6 +120,20 @@ export const homeCategorySlice = createSlice({
             state.categoryUpdated = true;
         });
         builder.addCase(createHomeCategory.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        });
+
+        // delete home category
+        builder.addCase(deleteHomeCategory.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        });
+        builder.addCase(deleteHomeCategory.fulfilled, (state, action) => {
+            state.loading = false;
+            state.categories = state.categories.filter((category) => category.id !== action.payload);
+        });
+        builder.addCase(deleteHomeCategory.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
         });

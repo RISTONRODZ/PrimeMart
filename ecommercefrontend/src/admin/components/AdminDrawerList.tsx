@@ -1,6 +1,7 @@
 import DrawerList from "../../components/DrawerList.tsx";
-import {AccountBox, Category, Dashboard, ElectricBolt, Home, IntegrationInstructions, LocalOffer, Logout} from "@mui/icons-material";
+import { Category, Dashboard, ElectricBolt, Home, IntegrationInstructions, LocalOffer, Logout} from "@mui/icons-material";
 import AddIcon from "@mui/icons-material/Add";
+import ReceiptIcon from '@mui/icons-material/Receipt';
 
 const AdminDrawerList = ({toggleDrawer}: {toggleDrawer: () => void}) => {
     const menu = [
@@ -46,6 +47,13 @@ const AdminDrawerList = ({toggleDrawer}: {toggleDrawer: () => void}) => {
             icon: <LocalOffer className="text-blue-700" />,
             activeIcon: <LocalOffer className="text-white" />,
         },
+        {
+            name: "Transactions",
+            path: "/admin/transactions",
+            icon: <ReceiptIcon className="text-blue-700" />,
+            activeIcon: <ReceiptIcon className="text-white" />,
+        },
+
 
     ];
 

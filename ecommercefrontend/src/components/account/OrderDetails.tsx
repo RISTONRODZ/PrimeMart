@@ -64,7 +64,7 @@ const OrderDetails = () => {
                     </div>
                     <Button
                         variant="outlined"
-                        onClick={() => navigate(`/reviews/${orderItem.productId}/create`)}
+                        onClick={() => navigate(`/product-details/${orderItem.categoryName}/${orderItem.title}/${orderItem.id}`)}
                         className="w-full sm:w-auto"
                     >
                         Write Review

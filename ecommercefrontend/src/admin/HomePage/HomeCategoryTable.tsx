@@ -10,12 +10,23 @@ import {
     TableHead,
     TableRow,
     Typography,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button,
+    Snackbar,
+    Alert,
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import type { HomeCategory } from "../../types/HomeCategory.ts";
 import { useState } from "react";
 import HomeCategoryFormDialog from "./HomeCategoryFormDialog.tsx";
+import { useAppDispatch } from "../../state/hooks.ts";
+import { deleteHomeCategory } from "../../state/admin/AdminSlice.ts";
+import { fetchHomePageData } from "../../state/customer/CustomerSlice.ts";
 
 const PLACEHOLDER_IMAGES = [
     "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80", // Fashion
@@ -27,8 +38,16 @@ const PLACEHOLDER_IMAGES = [
 ];
 
 const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; section?: string }) => {
+    const dispatch = useAppDispatch();
     const [editingCategory, setEditingCategory] = useState<HomeCategory | undefined>(undefined);
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [categoryToDelete, setCategoryToDelete] = useState<HomeCategory | undefined>(undefined);
+    const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
 
     const handleEdit = (row: HomeCategory) => {
         setEditingCategory(row);
@@ -38,6 +57,30 @@ const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; 
     const handleAdd = () => {
         setEditingCategory(undefined);
         setDialogOpen(true);
+    };
+
+    const handleDeleteClick = (row: HomeCategory) => {
+        setCategoryToDelete(row);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (categoryToDelete?.id) {
+            try {
+                await dispatch(deleteHomeCategory(categoryToDelete.id)).unwrap();
+                await dispatch(fetchHomePageData());
+                setSnackbar({ open: true, message: 'Category deleted successfully', severity: 'success' });
+            } catch (error) {
+                setSnackbar({ open: true, message: 'Failed to delete category', severity: 'error' });
+            }
+        }
+        setDeleteDialogOpen(false);
+        setCategoryToDelete(undefined);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setCategoryToDelete(undefined);
     };
 
     const realRows = data ?? [];
@@ -78,6 +121,7 @@ const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; 
                                 <TableCell>Category</TableCell>
                                 <TableCell>Name</TableCell>
                                 <TableCell align="center">Action</TableCell>
+                                <TableCell align="center">Delete</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -114,11 +158,24 @@ const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; 
                                                 <AddIcon fontSize="small" />
                                             </IconButton>
                                         ) : (
+                                            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                                                <IconButton
+                                                    color="warning"
+                                                    onClick={() => handleEdit(row as HomeCategory)}
+                                                >
+                                                    <EditIcon fontSize="small" sx={{ color: 'warning.main' }} />
+                                                </IconButton>
+
+                                            </Box>
+                                        )}
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        {!row.isPlaceholder && (
                                             <IconButton
-                                                color="warning"
-                                                onClick={() => handleEdit(row as HomeCategory)}
+                                                color="error"
+                                                onClick={() => handleDeleteClick(row as HomeCategory)}
                                             >
-                                                <EditIcon fontSize="small" sx={{ color: 'warning.main' }} />
+                                                <DeleteIcon fontSize="small" sx={{ color: 'error.main' }} />
                                             </IconButton>
                                         )}
                                     </TableCell>
@@ -135,6 +192,34 @@ const HomeCategoryTable = ({ data, section = "GRID" }: { data?: HomeCategory[]; 
                 category={editingCategory}
                 section={section}
             />
+            <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to delete the category "{categoryToDelete?.name || categoryToDelete?.categoryId}"?
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancel}>Cancel</Button>
+                    <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={() => setSnackbar({ ...snackbar, open: false })}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
