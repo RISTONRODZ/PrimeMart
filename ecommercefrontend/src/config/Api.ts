@@ -20,6 +20,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        console.error("API Error:", error);
+        console.error("Error response:", error.response);
+        console.error("Error data:", error.response?.data);
+        
         if (error.response?.status === 401) {
             console.log("401 ERROR ON:", error.config.url);
             console.log("AUTH HEADER SENT:", error.config.headers.Authorization);

@@ -74,10 +74,16 @@ export const deleteSeller = createAsyncThunk(
             console.log("Deleted seller:", response.data);
             return { sellerId, data: response.data };
         } catch (error: any) {
-            console.log("Error deleting seller:", error.response);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to delete seller"
-            );
+            console.log("Error deleting seller:", error);
+            console.log("Error response:", error.response);
+            console.log("Error data:", error.response?.data);
+            console.log("Error message:", error.response?.data?.message);
+            const errorMessage = error.response?.data?.message ||
+                                error.response?.data?.error || 
+                                error.message || 
+                                "Failed to delete seller";
+            
+            return rejectWithValue(errorMessage);
         }
     }
 );

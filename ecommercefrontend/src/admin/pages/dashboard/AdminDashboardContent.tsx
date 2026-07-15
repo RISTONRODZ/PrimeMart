@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -7,12 +7,13 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Button, FormControl, Menu, MenuItem, Select, styled, Alert, CircularProgress, IconButton } from "@mui/material";
+import { Button, FormControl, Menu, MenuItem, Select, styled, Alert, CircularProgress, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
 import { Delete } from "@mui/icons-material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import { useAppDispatch, useAppSelector } from "../../../state/hooks.ts";
 import { fetchSellers, updateSellerStatus, deleteSeller } from "../../../state/admin/SellerSlice.ts";
-import type { Seller } from "../../../types/SellerTypes.ts";
+// import type { Seller } from "../../../types/SellerTypes.ts";
+import { useSnackbar } from "../../../components/ui/Snackbar.tsx";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -44,15 +45,18 @@ const accountStatuses = [
 
 export default function SellersTable() {
     const dispatch = useAppDispatch();
+    const { showSnackbar } = useSnackbar();
     const adminSeller = useAppSelector((store) => store.adminSeller);
-    const { sellers, loading, error, statusUpdated } = adminSeller;
+    const { sellers, loading, error, statusUpdated, sellerDeleted } = adminSeller;
 
     const [accountStatus, setAccountStatus] = React.useState("ACTIVE");
     const [anchorEl, setAnchorEl] = React.useState<{ [key: number]: HTMLElement | null }>({});
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sellerToDelete, setSellerToDelete] = useState<number | null>(null);
 
     useEffect(() => {
         dispatch(fetchSellers(accountStatus));
-    }, [dispatch, accountStatus, statusUpdated]);
+    }, [dispatch, accountStatus, statusUpdated, sellerDeleted]);
 
     const handleAccountStatusChange = (event: SelectChangeEvent<string>) => {
         setAccountStatus(event.target.value);
@@ -72,9 +76,52 @@ export default function SellersTable() {
     };
 
     const handleDeleteSeller = (sellerId: number) => {
-        if (window.confirm("Are you sure you want to delete this seller permanently? This action cannot be undone.")) {
-            dispatch(deleteSeller(sellerId));
+        setSellerToDelete(sellerId);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (sellerToDelete) {
+            try {
+                const result = await dispatch(deleteSeller(sellerToDelete));
+                
+                // Check Redux state for errors
+                const currentState = adminSeller;
+                
+                if (deleteSeller.fulfilled.match(result)) {
+                    showSnackbar("Seller deleted successfully", "success");
+                } else {
+                    console.error("Delete seller error:", result);
+                    console.error("Current error state:", currentState.error);
+                    
+                    // Check both the result payload and the Redux state error
+                    const errorMessage = (result.payload as string) || currentState.error || "Failed to delete seller";
+                    const errorString = String(errorMessage).toLowerCase();
+                    
+                    if (errorString.includes("foreign key") || errorString.includes("constraint") || errorString.includes("seller_report")) {
+                        showSnackbar("Cannot delete seller: Seller has associated reports. Please delete reports first.", "error");
+                    } else {
+                        showSnackbar(errorMessage, "error");
+                    }
+                }
+            } catch (error: any) {
+                console.error("Unexpected error in handleConfirmDelete:", error);
+                const errorString = String(error?.message || error).toLowerCase();
+                
+                if (errorString.includes("foreign key") || errorString.includes("constraint") || errorString.includes("seller_report")) {
+                    showSnackbar("Cannot delete seller: Seller has associated reports. Please delete reports first.", "error");
+                } else {
+                    showSnackbar(error?.message || "Failed to delete seller", "error");
+                }
+            }
         }
+        setDeleteDialogOpen(false);
+        setSellerToDelete(null);
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteDialogOpen(false);
+        setSellerToDelete(null);
     };
 
     return (
@@ -112,7 +159,7 @@ export default function SellersTable() {
                                 {/*<StyledTableCell>Business Name</StyledTableCell>*/}
                                 <StyledTableCell align="right">Account Status</StyledTableCell>
                                 <StyledTableCell align="right">Change Status</StyledTableCell>
-                                <StyledTableCell align="right">Delete</StyledTableCell>
+                                {/*<StyledTableCell align="right">Delete</StyledTableCell>*/}
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -144,11 +191,11 @@ export default function SellersTable() {
                                                 ))}
                                             </Menu>
                                         </StyledTableCell>
-                                        <StyledTableCell align="right">
-                                            <IconButton onClick={() => handleDeleteSeller(seller.id || 0)} color="error">
-                                                <Delete />
-                                            </IconButton>
-                                        </StyledTableCell>
+                                        {/*<StyledTableCell align="right">*/}
+                                        {/*    <IconButton onClick={() => handleDeleteSeller(seller.id || 0)} color="error">*/}
+                                        {/*        <Delete />*/}
+                                        {/*    </IconButton>*/}
+                                        {/*</StyledTableCell>*/}
                                     </StyledTableRow>
                                 ))
                             ) : (
@@ -162,6 +209,30 @@ export default function SellersTable() {
                     </Table>
                 </TableContainer>
             )}
+
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={handleCancelDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    Delete Seller
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this seller permanently? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelDelete} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }

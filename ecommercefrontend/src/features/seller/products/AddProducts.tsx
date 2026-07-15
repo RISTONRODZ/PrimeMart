@@ -10,11 +10,10 @@ import {
     Grid,
     CircularProgress,
     IconButton,
-    Snackbar,
-    Alert,
 } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import CloseIcon from "@mui/icons-material/Close";
+import { useSnackbar } from "../../../components/ui/Snackbar.tsx";
 
 import { electronicsLevelThree } from "../../customer/data/category/level three/electronicsLevelThree";
 import { furnitureLevelThree } from "../../customer/data/category/level three/furnitureLevelThree";
@@ -60,7 +59,7 @@ const categoryThree: Record<string, CategoryItem[]> = {
 
 const ProductForm = () => {
     const [uploadImage, setUploadingImage] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const { showSnackbar } = useSnackbar();
     const dispatch = useAppDispatch();
     const { loading, error } = useAppSelector((state) => state.sellerProduct);
 
@@ -84,10 +83,10 @@ const ProductForm = () => {
                 .unwrap()
                 .then(() => {
                     resetForm();
-                    setSnackbarOpen(true);
+                    showSnackbar("Product created successfully", "success");
                 })
                 .catch(() => {
-                    setSnackbarOpen(true);
+                    showSnackbar(error || "Failed to create product", "error");
                 });
         },
     });
@@ -101,7 +100,7 @@ const ProductForm = () => {
             const uploadedImages = await Promise.all(uploadPromises);
             await formik.setFieldValue("images", [...formik.values.images, ...uploadedImages]);
         } catch (error) {
-            alert("Failed to upload image.");
+            showSnackbar("Failed to upload image.", "error");
         } finally {
             setUploadingImage(false);
         }
@@ -116,8 +115,6 @@ const ProductForm = () => {
     const childCategory = (category: CategoryItem[], parentCategoryId: string) => {
         return category.filter((child) => child.parentCategoryId === parentCategoryId);
     };
-
-    const handleCloseSnackbar = () => setSnackbarOpen(false);
 
     return (
         <div>
@@ -232,16 +229,6 @@ const ProductForm = () => {
                     </Grid>
                 </Grid>
             </form>
-            <Snackbar
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                open={snackbarOpen}
-                autoHideDuration={6000}
-                onClose={handleCloseSnackbar}
-            >
-                <Alert onClose={handleCloseSnackbar} severity={error ? "error" : "success"} variant="filled">
-                    {error ? error : "Product created successfully"}
-                </Alert>
-            </Snackbar>
         </div>
     );
 };

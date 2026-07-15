@@ -29,6 +29,7 @@ import Deal from "./admin/HomePage/Deal.tsx";
 import ShopByCategory from "./admin/HomePage/ShopByCategory.tsx";
 import SellerTable from "./admin/pages/seller/SellerTable.tsx";
 import ElectronicCategory from "./admin/HomePage/ElectronicCategory.tsx";
+import TransactionsTable from "./admin/components/Transactionstable.tsx";
 import Auth from "./components/auth/Auth.tsx";
 import ProtectedRoute from "./components/auth/ProtectedRoute.tsx";
 import PaymentSuccess from "./components/checkout/PaymentSuccess.tsx";
@@ -49,7 +50,7 @@ const AppRoutes = () => {
                 <Route path="/faqs" element={<FAQ />} />
                 <Route path="/contact-support" element={<ContactSupport />} />
                 <Route path="/shipping-info" element={<ShippingInfo />} />
-                <Route path="/account/*" element={<Account />} />
+                <Route path="/account/*" element={<ProtectedRoute><Account /></ProtectedRoute>} />
                 <Route path="/product/:category" element={<Product />} />
                 <Route path="/product-details/:categoryName/:name/:productId" element={<ProductDetails />} />
                 <Route path="/reviews/:productId" element={<Review/>}/>
@@ -59,6 +60,7 @@ const AppRoutes = () => {
                 <Route path="/become-seller" element={<BecomeSeller/>}/>
                 <Route path="/payment-success/:orderId" element={<PaymentSuccess />} />
                 <Route path="/search" element={<SearchResults />} />
+                <Route path="/transactions" element={<ProtectedRoute><Transaction /></ProtectedRoute>} />
                 <Route path="/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>}>
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<Products />} />
@@ -77,6 +79,7 @@ const AppRoutes = () => {
                     <Route path="electronics-category" element={< ElectronicCategory/>} />
                     <Route path="shop-by-category" element={<ShopByCategory />} />
                     <Route path="deals" element={<Deal />} />
+                    <Route path="transactions" element={<TransactionsTable />} />
                     <Route path="account" element={<Account />} />
                 </Route>
             </Routes>

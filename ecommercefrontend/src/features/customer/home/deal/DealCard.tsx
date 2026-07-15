@@ -1,9 +1,22 @@
 import type {Deal} from "../../../../types/DealTypes.ts";
-
+import {useNavigate} from "react-router-dom";
 
 const DealCard = ({item}:{item:Deal}) => {
+    const navigate = useNavigate();
+    
+    const handleCardClick = () => {
+        const categoryName = item.homeCategory?.name || item.homeCategory?.categoryId;
+        if (categoryName) {
+            const formattedName = categoryName.toLowerCase().replace(/\s+/g, '_');
+            navigate(`/product/${formattedName}`);
+        }
+    };
+
     return (
-        <div className="w-full rounded-2xl overflow-hidden border border-blue-100 shadow-sm">
+        <div 
+            onClick={handleCardClick}
+            className="w-full rounded-2xl overflow-hidden border border-blue-100 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+        >
             <div className="relative">
                 {item.homeCategory?.imageUrl ? (
                     <img

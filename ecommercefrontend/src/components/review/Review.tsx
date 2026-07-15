@@ -10,6 +10,7 @@ import type { Review as ReviewType } from "../../state/customer/ReviewSlice.ts";
 import ReviewCard from "./ReviewCard.tsx";
 import ReviewSummary from "./ReviewSummary.tsx";
 import {fetchUserProfile} from "../../state/slice/AuthSlice.ts";
+import { useSnackbar } from "../ui/Snackbar.tsx";
 
 const formatPrice = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 
@@ -19,6 +20,7 @@ const Review = () => {
     const { product } = useAppSelector((state) => state.product);
     const { reviews, actionLoading, actionError } = useAppSelector((state) => state.review);
     const { user, jwt, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { showSnackbar } = useSnackbar();
 
     const myReview = user ? reviews.find((r) => r.user.id === user.id) : undefined;
 
@@ -126,7 +128,7 @@ const Review = () => {
                     <button
                         onClick={() => {
                             if (!isAuthenticated) {
-                                alert("Please login to write a review");
+                                showSnackbar("Please login to write a review", "warning");
                                 return;
                             }
                             setShowReviewForm(true);

@@ -1,4 +1,4 @@
-import { Box, IconButton, Modal, Paper, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Modal, Paper, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow } from '@mui/material';
 import {useEffect, useState} from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import { Delete } from '@mui/icons-material';
@@ -40,6 +40,8 @@ const style = {
 const DealsTable = () => {
     const [selectedDealId, setSelectedDealId] = useState<number>();
     const [open, setOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [dealToDelete, setDealToDelete] = useState<number>();
 
     const handleOpen = (id: number) => () => {
         setSelectedDealId(id);
@@ -53,9 +55,21 @@ const DealsTable = () => {
     const handleClose = () => setOpen(false);
 
     const handleDelete = (id: number) => () => {
-        if (window.confirm("Are you sure you want to delete this deal?")) {
-            dispatch(deleteDeal(id));
+        setDealToDelete(id);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (dealToDelete) {
+            dispatch(deleteDeal(dealToDelete));
         }
+        setDeleteDialogOpen(false);
+        setDealToDelete(undefined);
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteDialogOpen(false);
+        setDealToDelete(undefined);
     };
     useEffect(() => {
         dispatch(getAllDeals());
@@ -118,6 +132,30 @@ const DealsTable = () => {
                     {selectedDealId && <UpdateDealForm id={selectedDealId} onClose={handleClose} />}
                 </Box>
             </Modal>
+
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={handleCancelDelete}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    Delete Deal
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Are you sure you want to delete this deal? This action cannot be undone.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelDelete} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleConfirmDelete} color="error" variant="contained" autoFocus>
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 };

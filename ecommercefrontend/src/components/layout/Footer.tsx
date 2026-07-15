@@ -2,15 +2,15 @@ import {Link} from "react-router-dom";
 
 const footerLinks = {
     shop: [
-        { label: "Men's fashion", to: "#" },
-        { label: "Women's fashion", to: "#" },
-        { label: "Electronics", to: "#" },
-        { label: "Home & furniture", to: "#" },
-        { label: "Beauty & care", to: "#" },
-        { label: "Sports & outdoors", to: "#" },
+        { label: "Men's fashion", to: "/product/mens-fashion" },
+        { label: "Women's fashion", to: "/product/womens-fashion" },
+        { label: "Electronics", to: "/product/electronics" },
+        { label: "Home & furniture", to: "/product/home-furniture" },
+        { label: "Beauty & care", to: "/product/beauty-care" },
+        { label: "Sports & outdoors", to: "/product/sports-outdoors" },
     ],
     help: [
-        { label: "Track your order", to: "#" },
+        { label: "Track your order", to: "/account/orders" },
         { label: "Shipping info", to: "/shipping-info" },
         { label: "FAQs", to: "/faqs" },
         { label: "Contact support", to: "/contact-support" },

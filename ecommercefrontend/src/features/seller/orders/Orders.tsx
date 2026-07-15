@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Box, Button, Menu, MenuItem } from '@mui/material';
 import { useAppDispatch, useAppSelector } from "../../../state/hooks";
-import { fetchSellerOrders, updateOrderStatus } from "../../../state/slice/SellerOrderSlice";
+import { fetchSellerOrders, updateOrderStatus } from "../../../state/seller/SellerOrderSlice.ts";
 import {OrderStatus} from "../../../types/OrderTypes.ts";
 
 interface SellerOrder {
