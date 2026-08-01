@@ -41,7 +41,7 @@ const sections = [
     },
     {
         title: "12. Contact Us",
-        content: `If you have questions about these Terms of Use, please contact us at support@primemart.in or write to PrimeMart Pvt. Ltd., Mumbai, Maharashtra, India.`,
+        content: `If you have questions about these Terms of Use, please contact us at ristontechnology@gmail.com or write to PrimeMart Pvt. Ltd., Mumbai, Maharashtra, India.`,
     },
 ];
 
@@ -95,10 +95,10 @@ const TermsOfUse = () => {
             <div className="bg-blue-700 text-white py-10 px-6 text-center">
                 <p className="text-blue-100 text-sm mb-1">Questions about these terms?</p>
                 <a
-                    href="mailto:support@primemart.in"
+                    href="mailto:ristontechnology@gmail.com"
                     className="text-white font-semibold underline underline-offset-4 hover:text-blue-200 transition-colors"
                 >
-                    support@primemart.in
+                    ristontechnology@gmail.com
                 </a>
             </div>
         </div>

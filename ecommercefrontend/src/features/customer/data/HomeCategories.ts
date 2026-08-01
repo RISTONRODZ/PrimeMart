@@ -4,7 +4,7 @@ export const homeCategories = [
         section: "ELECTRIC_CATEGORIES",
         name: "Gaming Laptop",
         imageUrl:
-            "https://rukminim2.flixcart.com/imageUrl/312/312/xif0q/computer/x/9/j/-original-imahyjzh7m2zsqdg.jpeg?q=70",
+            "https://rukminim2.flixcart.com/image/2304/2304/xif0q/computer/a/y/4/-original-imahzphnrysufg9t.jpeg?q=90",
     },
     {
         categoryId: "mobiles",

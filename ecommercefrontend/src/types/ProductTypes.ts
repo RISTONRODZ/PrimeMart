@@ -13,7 +13,7 @@ export interface Product {
     title: string;
     description: string;
     sellingPrice: number;
-    price: number;
+    mrpPrice: number;
     discountPercent: number;
     color: string;
     images: string[];

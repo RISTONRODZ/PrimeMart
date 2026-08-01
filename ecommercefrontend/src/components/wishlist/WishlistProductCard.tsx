@@ -68,7 +68,7 @@ const WishlistProductCard: React.FC<ProductCardProps> = ({ item }) => {
                         ₹{item.sellingPrice}
                     </span>
                     <span className="text-xs sm:text-sm line-through text-gray-400">
-                        ₹{item.price}
+                        ₹{item.mrpPrice}
                     </span>
                     {item.discountPercent > 0 && (
                         <span className="text-xs sm:text-sm font-semibold text-blue-700">

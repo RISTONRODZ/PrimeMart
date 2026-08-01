@@ -7,9 +7,9 @@ const contactMethods = [
             </svg>
         ),
         label: "Email",
-        value: "support@primemart.in",
+        value: "ristontechnology@gmail.com",
         note: "We respond within 24 business hours",
-        href: "mailto:support@primemart.in",
+        href: "ristontechnology@gmail.com",
     },
 ];
 
@@ -123,10 +123,10 @@ const ContactSupport = () => {
             <div className="bg-blue-700 text-white py-10 px-6 text-center">
                 <p className="text-blue-100 text-sm mb-1">We typically respond within 24 business hours.</p>
                 <a
-                    href="mailto:support@primemart.in"
+                    href="mailto:ristontechnology@gmail.com"
                     className="text-white font-semibold underline underline-offset-4 hover:text-blue-200 transition-colors"
                 >
-                    support@primemart.in
+                    ristontechnology@gmail.com
                 </a>
             </div>
         </div>

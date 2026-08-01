@@ -11,7 +11,7 @@ const BecomeASeller = () => {
                     className="w-full h-auto block"
                 />
                 <div
-                    className="absolute top-[60%] md:top-[62%] lg:top-[55%] lg:left-[22%] md:left-[22%] s:left-[22%] left-[20%] -translate-y-1/2">
+                    className="absolute top-[60%] md:top-[62%] lg:top-[55%] lg:left-[22%] md:left-[22%] s:left-[22%] left-[15%] -translate-y-1/2">
                     <Button
                         startIcon={<Storefront/>}
                         variant="contained"
