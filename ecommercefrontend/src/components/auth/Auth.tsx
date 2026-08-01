@@ -1,9 +1,11 @@
 import {useState} from "react";
+import {useSearchParams} from "react-router-dom";
 import LoginForm from "./LoginForm.tsx";
 import SignupForm from "./SignupForm.tsx";
 import {Button} from "@mui/material";
 const Auth = () => {
-    const [isLogin, setIsLogin] = useState(true);
+    const [searchParams] = useSearchParams();
+    const [isLogin, setIsLogin] = useState(searchParams.get('mode') !== 'signup');
     return (
        <div className={'flex flex-col items-center min-h-screen pt-16 pb-16'}>
             <div className={'max-w-md w-full h-auto bg-white rounded-lg shadow-lg p-6'}>

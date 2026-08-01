@@ -82,7 +82,14 @@ const ChatWidget = () => {
                 },
             );
 
-            if (!response.ok || !response.body) {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('AI_UNAVAILABLE');
+                }
+                throw new Error('Assistant request failed');
+            }
+
+            if (!response.body) {
                 throw new Error('Assistant request failed');
             }
 
@@ -103,13 +110,19 @@ const ChatWidget = () => {
                 });
             }
         } catch (err) {
-            setError('Something went wrong. Please try again.');
+            const errorMessage = err instanceof Error && err.message === 'AI_UNAVAILABLE'
+                ? 'AI assistant is currently unavailable. This feature is only available in local development environments.'
+                : 'Something went wrong. Please try again.';
+            
+            setError(errorMessage);
             console.log(err);
             setMessages((prev) => {
                 const updated = [...prev];
                 updated[updated.length - 1] = {
                     role: 'assistant',
-                    content: "Sorry, I couldn't process that. Please try again.",
+                    content: err instanceof Error && err.message === 'AI_UNAVAILABLE'
+                        ? "I apologize, but the AI assistant is currently disabled. This feature is only available in local development environments."
+                        : "Sorry, I couldn't process that. Please try again.",
                 };
                 return updated;
             });

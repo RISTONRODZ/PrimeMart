@@ -7,13 +7,13 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import SimilarProduct from "./SimilarProduct.tsx";
+// import SimilarProduct from "./SimilarProduct.tsx";
 import ReviewCard from "../../../../components/review/ReviewCard.tsx";
 import { useAppDispatch, useAppSelector } from "../../../../state/hooks.ts";
 import { fetchProductById } from "../../../../state/customer/ProductSlice.ts";
 import { addProductToWishlist } from "../../../../state/customer/WishlistSlice.ts";
 import { addItemToCart } from "../../../../state/customer/CartSlice.ts";
-import { fetchReviewsByProductId, deleteReview, updateReview, type Review} from "../../../../state/customer/ReviewSlice.ts";
+import { fetchReviewsByProductId, deleteReview, type Review} from "../../../../state/customer/ReviewSlice.ts";
 import ReviewForm from "../../../../components/review/ReviewForm.tsx";
 
 const ProductDetails = () => {
@@ -77,6 +77,7 @@ const ProductDetails = () => {
             setActiveImage(product.images[0]);
             isInitialized.current = true;
         }
+        console.log("Product details fetched from backend:", product);
     }, [product]);
 
     const handleDeleteReview = async (id: number) => {
@@ -149,9 +150,13 @@ const ProductDetails = () => {
                             <span className='text-3xl font-bold text-gray-900'>
                                 &#x20B9;{product.sellingPrice}
                             </span>
+                            <span className='text-lg font-medium text-gray-500 line-through'>
+                                ₹{product.mrpPrice}
+                            </span>
                             <span className='text-green-600 font-semibold text-lg bg-green-50 px-2 py-0.5 rounded'>
                                 {product.discountPercent}% off
                             </span>
+
                         </div>
                         <div className='mt-6 space-y-3.5 text-gray-600 text-sm font-medium'>
                             <div className='flex items-center gap-3.5'>
@@ -179,7 +184,7 @@ const ProductDetails = () => {
                     <div className='mt-8 space-y-4'>
                         <div className='flex gap-4'>
                             <Button onClick={handleAddToCart} variant='contained' startIcon={<AddShoppingCart/>}
-                                    fullWidth sx={{py: 1.5, color: '#2b2b2b'}}>Add to Cart</Button>
+                                    fullWidth sx={{py: 1.5, color: '#ffffff'}}>Add to Cart</Button>
                             <Button onClick={handleWishlist} variant='outlined' startIcon={<FavoriteBorder/>} fullWidth
                                     sx={{py: 1.5}}>Wishlist</Button>
                         </div>

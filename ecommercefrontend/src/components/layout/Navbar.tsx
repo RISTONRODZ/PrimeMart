@@ -171,8 +171,8 @@ const Navbar = () => {
                                 )}
                                 {isCustomer && (
                                     <>
-                                        <IconButton onClick={() => navigate("/wishlist")}><FavoriteBorder className="text-blue-700" /></IconButton>
-                                        <IconButton component={Link} to="/cart"><AddShoppingCart className="text-blue-700" /></IconButton>
+                                        <IconButton onClick={() => auth.isAuthenticated ? navigate("/wishlist") : navigate("/login?mode=signup")}><FavoriteBorder className="text-blue-700" /></IconButton>
+                                        <IconButton onClick={() => auth.isAuthenticated ? navigate("/cart") : navigate("/login?mode=signup")}><AddShoppingCart className="text-blue-700" /></IconButton>
                                         {isSmall && (
                                             <Button component={Link} to="/become-seller" startIcon={<Storefront />} variant="outlined">Become Seller</Button>
                                         )}
