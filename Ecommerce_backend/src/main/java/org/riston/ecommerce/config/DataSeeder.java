@@ -8,6 +8,7 @@ import org.riston.ecommerce.domain.*;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.service.impl.EmbeddingIngestionServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,7 +47,8 @@ public class DataSeeder implements CommandLineRunner {
 
     private final Faker faker = new Faker();
     private final Random random = new Random();
-
+    @Value("${app.rag.enabled}")
+    private boolean ragEnabled;
     @Override
     public void run(String @NonNull ... args) {
         if (productRepository.count() == 0) {
@@ -80,7 +82,7 @@ public class DataSeeder implements CommandLineRunner {
         } else {
             log.info("Core data detected. Seeding skipped.");
         }
-        if (vectorStoreIsEmpty()) {
+        if (vectorStoreIsEmpty() && ragEnabled) {
             log.info("Starting embedding ingestion...");
             embeddingIngestionServiceImpl.ingestProducts(productRepository.findAll());
             log.info("Embeddings ingested into pgvector!");
