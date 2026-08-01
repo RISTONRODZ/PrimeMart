@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {api, API_URL} from "../../config/Api.ts";
 import type {HomeCategory} from "../../types/HomeCategory.ts";
+import axios from "axios";
 
 
 export const updateHomeCategory = createAsyncThunk<HomeCategory, {
@@ -11,37 +12,44 @@ export const updateHomeCategory = createAsyncThunk<HomeCategory, {
         const response = await api.patch(`${API_URL}/home-categories/${id}`, data);
         console.log("category updated ", response)
         return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("SAVE ERROR:", error);
-        // setError(typeof error === "string" ? error : "Save failed.");
-        if (error.response && error.response.data) {
-
+        const errorMessage = axios.isAxiosError(error)
+            ? error.message || 'An error occurred while updating the category.'
+            : 'An error occurred while updating the category.';
+        if (axios.isAxiosError(error) && error.response?.data) {
             return rejectWithValue(error.response.data);
         } else {
-            return rejectWithValue('An error occurred while updating the category.');
+            return rejectWithValue(errorMessage);
         }
     }
 });
 
-export const fetchHomeCategories = createAsyncThunk<HomeCategory[]>('homeCategory/fetchHomeCategories', async (_, {rejectWithValue}) => {
+export const fetchHomeCategories = createAsyncThunk<HomeCategory[], void, { rejectValue: string }>('homeCategory/fetchHomeCategories', async (_, {rejectWithValue}) => {
     try {
         const response = await api.get(`${API_URL}/home-categories`);
         console.log(" categories ", response.data)
         return response.data.data;
-    } catch (error: any) {
-        console.log("error ", error.response)
-        return rejectWithValue(error.response?.data?.message || 'Failed to fetch categories');
+    } catch (error: unknown) {
+        console.log("error ", error)
+        const errorMessage = axios.isAxiosError(error)
+            ? error.message || 'Failed to fetch categories'
+            : 'Failed to fetch categories';
+        return rejectWithValue(errorMessage);
     }
 });
 export const createHomeCategory = createAsyncThunk<unknown, HomeCategory>('homeCategory/createHomeCategory', async (data, {rejectWithValue}) => {
     try {
         const response = await api.post(`${API_URL}/home-categories`, [data]);
         return response.data.data;
-    } catch (error: any) {
-        if (error.response && error.response.data) {
+    } catch (error: unknown) {
+        const errorMessage = axios.isAxiosError(error)
+            ? error.message || 'An error occurred while creating the category.'
+            : 'An error occurred while creating the category.';
+        if (axios.isAxiosError(error) && error.response?.data) {
             return rejectWithValue(error.response.data);
         }
-        return rejectWithValue('An error occurred while creating the category.');
+        return rejectWithValue(errorMessage);
     }
 });
 
@@ -49,11 +57,14 @@ export const deleteHomeCategory = createAsyncThunk<number, number>('homeCategory
     try {
         const response = await api.delete(`${API_URL}/home-categories/${id}`);
         return id;
-    } catch (error: any) {
-        if (error.response && error.response.data) {
+    } catch (error: unknown) {
+        const errorMessage = axios.isAxiosError(error)
+            ? error.message || 'An error occurred while deleting the category.'
+            : 'An error occurred while deleting the category.';
+        if (axios.isAxiosError(error) && error.response?.data) {
             return rejectWithValue(error.response.data);
         }
-        return rejectWithValue('An error occurred while deleting the category.');
+        return rejectWithValue(errorMessage);
     }
 });
 

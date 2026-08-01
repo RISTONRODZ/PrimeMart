@@ -3,6 +3,11 @@ import { useAppSelector } from "../../../state/hooks.ts";
 const ShopByCategory = () => {
     const { home } = useAppSelector((store) => store);
 
+    console.log("ShopByCategory - homePageData:", home.homePageData);
+    console.log("ShopByCategory - shopByCategories:", home.homePageData?.shopByCategories);
+    console.log("ShopByCategory - loading:", home.loading);
+    console.log("ShopByCategory - error:", home.error);
+
     if (home.loading) {
         return <div className="px-4 sm:px-6 py-6">Loading categories...</div>;
     }

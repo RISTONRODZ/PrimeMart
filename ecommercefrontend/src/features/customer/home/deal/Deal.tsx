@@ -13,24 +13,27 @@ const Deal = () => {
     const {home, deal} = useAppSelector(store=>store);
 
     useEffect(() => {
-        try {
-            dispatch(getAllDeals());
-        } catch (error) {
-            console.error("Error fetching deals:", error);
+        const token = localStorage.getItem("jwt");
+        if (token) {
+            try {
+                dispatch(getAllDeals());
+            } catch (error) {
+                console.error("Error fetching deals:", error);
+            }
         }
     }, [dispatch]);
 
-    // console.log("Deal component - homePageData:", home.homePageData);
-    // console.log("Deal component - home deals:", home.homePageData?.deals);
-    // console.log("Deal component - deal slice deals:", deal.deals);
-    // console.log("Deal component - deal loading:", deal.loading);
-    // console.log("Deal component - home loading:", home.loading);
-    // console.log("Deal component - deal error:", deal.error);
-    // console.log("Deal component - home error:", home.error);
+    console.log("Deal component - homePageData:", home.homePageData);
+    console.log("Deal component - home deals:", home.homePageData?.deals);
+    console.log("Deal component - deal slice deals:", deal.deals);
+    console.log("Deal component - deal loading:", deal.loading);
+    console.log("Deal component - home loading:", home.loading);
+    console.log("Deal component - deal error:", deal.error);
+    console.log("Deal component - home error:", home.error);
 
     const deals = (Array.isArray(deal.deals) && deal.deals.length > 0) ? deal.deals : Array.isArray(home.homePageData?.deals) ? home.homePageData.deals : [];
-    // console.log("Deal component - final deals array:", deals);
-    // console.log("Deal component - deals length:", deals.length);
+    console.log("Deal component - final deals array:", deals);
+    console.log("Deal component - deals length:", deals.length);
 
     if (deal.loading || home.loading) return <div className="px-6 md:px-10 py-6">Loading deals...</div>;
     if (deal.error || home.error) {

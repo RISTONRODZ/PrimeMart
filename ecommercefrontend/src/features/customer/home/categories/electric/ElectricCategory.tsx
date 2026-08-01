@@ -3,6 +3,11 @@ import {useAppSelector} from "../../../../../state/hooks.ts";
 const ElectricCategory = () => {
     const {home} = useAppSelector((store) => store)
 
+    console.log("ElectricCategory - homePageData:", home.homePageData);
+    console.log("ElectricCategory - electricCategories:", home.homePageData?.electricCategories);
+    console.log("ElectricCategory - loading:", home.loading);
+    console.log("ElectricCategory - error:", home.error);
+
     if (home.loading) {
         return <div className="py-10 lg:px-20 border-b-2 border-slate-400 px-4">Loading categories...</div>;
     }
@@ -16,6 +21,8 @@ const ElectricCategory = () => {
     }
 
     const categories = home.homePageData?.electricCategories || [];
+    console.log("ElectricCategory - final categories array:", categories);
+    console.log("ElectricCategory - categories length:", categories.length);
 
     if (categories.length === 0) {
         return (

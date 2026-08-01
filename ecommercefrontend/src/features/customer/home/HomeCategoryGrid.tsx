@@ -12,6 +12,11 @@ const PLACEHOLDER_IMAGES = [
 const HomeCategoryGrid = () => {
     const { home } = useAppSelector((store) => store);
 
+    console.log("HomeCategoryGrid - homePageData:", home.homePageData);
+    console.log("HomeCategoryGrid - grid data:", home.homePageData?.grid);
+    console.log("HomeCategoryGrid - loading:", home.loading);
+    console.log("HomeCategoryGrid - error:", home.error);
+
     const displayData =
         home.homePageData?.grid && home.homePageData.grid.length > 0
             ? home.homePageData.grid
@@ -22,6 +27,8 @@ const HomeCategoryGrid = () => {
                 name: "NAME",
                 section: "GRID",
             }));
+
+    console.log("HomeCategoryGrid - final displayData:", displayData);
 
     return (
         <div className="hidden md:grid grid-cols-4 grid-rows-2 gap-4 px-20 h-200 py-10">
