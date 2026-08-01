@@ -19,6 +19,8 @@ import org.springframework.ai.rag.advisor.RetrievalAugmentationAdvisor;
 import org.springframework.ai.rag.generation.augmentation.ContextualQueryAugmenter;
 import org.springframework.ai.rag.retrieval.search.VectorStoreDocumentRetriever;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Primary
+@ConditionalOnProperty(name = "app.rag.enabled", havingValue = "true", matchIfMissing = true)
 public class RagServiceImpl implements RagService {
 
     private final CartService cartService;
@@ -39,7 +43,6 @@ public class RagServiceImpl implements RagService {
     private final JdbcChatMemoryRepository chatMemoryRepository;
 
     private static final String SYSTEM_PROMPT = """
-        /no_think
         Do not use chain-of-thought reasoning. Answer directly and concisely based only on the provided context.
         You are a precise e-commerce assistant for an online store.
 
@@ -224,7 +227,6 @@ public class RagServiceImpl implements RagService {
         try {
             String rewritten = rewriteClient.prompt()
                     .system("""
-                            /no_think
                             You are an AI query analyzer. Analyze the Conversation History and the Current Question.
                             If the Current Question depends on context from the history (uses pronouns like it, this, that, they, or requests modifications/follow-ups like 'how much?', 'any other?', 'compare'), rewrite it into a single, complete, standalone search query.
                             If the Current Question is already specific and complete on its own, output it exactly as provided without changing any words.
