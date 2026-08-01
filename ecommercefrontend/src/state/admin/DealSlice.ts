@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
 import {api} from "../../config/Api.ts";
 import type {DealsState} from "../../types/DealTypes.ts";
+import axios from "axios";
 
 const initialState: DealsState = {
     deals: [],
@@ -23,11 +24,12 @@ export const createDeal = createAsyncThunk(
             });
             console.log("created deal", response.data);
             return response.data;
-        } catch (error: any) {
-            console.log("error ", error.response);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to create deal"
-            );
+        } catch (error: unknown) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.message || "Failed to create deal"
+                : "Failed to create deal";
+            console.log("error ", errorMessage);
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -44,11 +46,12 @@ export const getAllDeals = createAsyncThunk(
             });
             console.log("get all deal", response.data);
             return response.data;
-        } catch (error: any) {
-            console.log("error ", error.response);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to create deal"
-            );
+        } catch (error: unknown) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.message || "Failed to fetch deals"
+                : "Failed to fetch deals";
+            console.log("error ", errorMessage);
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -65,11 +68,12 @@ export const deleteDeal = createAsyncThunk<any, number>(
                 },
             });
             return response.data;
-        } catch (error: any) {
-            console.log("error ", error.response);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to delete deal"
-            );
+        } catch (error: unknown) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.message || "Failed to delete deal"
+                : "Failed to delete deal";
+            console.log("error ", errorMessage);
+            return rejectWithValue(errorMessage);
         }
     }
 );
@@ -86,11 +90,12 @@ export const updateDeal = createAsyncThunk<any, { id: number; deal: any }>(
             });
             console.log("updated deal", response.data);
             return response.data;
-        } catch (error: any) {
-            console.log("error ", error.response);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to update deal"
-            );
+        } catch (error: unknown) {
+            const errorMessage = axios.isAxiosError(error)
+                ? error.message || "Failed to update deal"
+                : "Failed to update deal";
+            console.log("error ", errorMessage);
+            return rejectWithValue(errorMessage);
         }
     }
 );

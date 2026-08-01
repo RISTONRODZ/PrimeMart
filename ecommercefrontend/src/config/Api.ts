@@ -23,8 +23,10 @@ api.interceptors.response.use(
         console.error("API Error:", error);
         console.error("Error response:", error.response);
         console.error("Error data:", error.response?.data);
-        
-        if (error.response?.status === 401) {
+
+        if (error.code === 'ERR_NETWORK' || !error.response) {
+            error.message = 'Network Error: Unable to connect to the server. Please check your internet connection.';
+        } else if (error.response?.status === 401) {
             console.log("401 ERROR ON:", error.config.url);
             console.log("AUTH HEADER SENT:", error.config.headers.Authorization);
             const jwt = localStorage.getItem("jwt");

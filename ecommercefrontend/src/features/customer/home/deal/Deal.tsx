@@ -33,7 +33,21 @@ const Deal = () => {
     // console.log("Deal component - deals length:", deals.length);
 
     if (deal.loading || home.loading) return <div className="px-6 md:px-10 py-6">Loading deals...</div>;
-    if (deal.error || home.error) return <div className="px-6 md:px-10 py-6 text-red-500">Error: {deal.error || home.error}</div>;
+    if (deal.error || home.error) {
+        return (
+            <div className="px-6 md:px-10 py-16 flex flex-col items-center justify-center text-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+                    <LocalOfferIcon sx={{ fontSize: 28, color: '#9ca3af' }} />
+                </div>
+                <p className="text-gray-700 font-medium">
+                    No deals live right now
+                </p>
+                <p className="text-gray-400 text-sm max-w-xs">
+                    Great offers are on the way — check back soon.
+                </p>
+            </div>
+        );
+    }
     if (deals.length === 0) {
         return (
             <div className="px-6 md:px-10 py-16 flex flex-col items-center justify-center text-center gap-3">
