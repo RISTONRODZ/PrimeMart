@@ -123,7 +123,7 @@ public class AppConfig {
     CorsConfigurationSource corsConfigurationSource() {
         return (HttpServletRequest request) -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","http://192.168.0.227:5173","https://ecommerce-gbmrulxhu-ristonrodz1-4485s-projects.vercel.app"));
+            config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","http://192.168.0.227:5173","https://ecommerce-five-blush-38.vercel.app","https://ecommerce-*-ristonrodz1-4485s-projects.vercel.app"));
             config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowCredentials(true);
