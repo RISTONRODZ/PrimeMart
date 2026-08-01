@@ -3,11 +3,13 @@ package org.riston.ecommerce.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
+import org.jspecify.annotations.NonNull;
 import org.riston.ecommerce.domain.*;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.*;
 import org.riston.ecommerce.service.impl.EmbeddingIngestionServiceImpl;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,7 @@ import java.util.*;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@Order(2)
 public class DataSeeder implements CommandLineRunner {
 
     private final AddressRepository addressRepository;
@@ -27,14 +30,14 @@ public class DataSeeder implements CommandLineRunner {
     private final CouponRepository couponRepository;
     private final DealRepository dealRepository;
     private final HomeCategoryRepository homeCategoryRepository;
-    private final OrderItemRepository orderItemRepository;
-    private final OrderRepository orderRepository;
-    private final PaymentOrderRepository paymentOrderRepository;
+//    private final OrderItemRepository orderItemRepository;
+//    private final OrderRepository orderRepository;
+//    private final PaymentOrderRepository paymentOrderRepository;
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
     private final SellerReportRepository sellerReportRepository;
     private final SellerRepository sellerRepository;
-    private final TransactionRepository transactionRepository;
+//    private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final VerificationCodeRepository verificationCodeRepository;
     private final WishlistRepository wishlistRepository;
@@ -45,8 +48,8 @@ public class DataSeeder implements CommandLineRunner {
     private final Random random = new Random();
 
     @Override
-    public void run(String... args) {
-        if (userRepository.count() == 0) {
+    public void run(String @NonNull ... args) {
+        if (productRepository.count() == 0) {
             log.info("Starting full database seed process using Datafaker...");
 
             // 1. Independent Core Tables
