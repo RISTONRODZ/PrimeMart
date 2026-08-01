@@ -37,6 +37,8 @@ public class AppConfig {
         http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        // Allow CORS preflight requests through
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // 1. Public Endpoints - No Authentication Required
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/products/**").permitAll()
@@ -121,7 +123,7 @@ public class AppConfig {
     CorsConfigurationSource corsConfigurationSource() {
         return (HttpServletRequest request) -> {
             CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","http://192.168.0.227:5173"));
+            config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173","http://192.168.0.227:5173","https://ecommerce-five-blush-38.vercel.app"));
             config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowCredentials(true);

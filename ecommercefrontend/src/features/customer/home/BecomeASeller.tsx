@@ -1,12 +1,12 @@
 import {Storefront} from "@mui/icons-material";
 import {Button} from "@mui/material";
-
+import becomeASellerImg from "../../assets/become_a_seller.png";
 const BecomeASeller = () => {
     return (
         <div className={'flex justify-center'}>
             <div className="w-[90vw] relative rounded-2xl overflow-hidden">
                 <img
-                    src="src/assets/become_a_seller.png"
+                    src={becomeASellerImg}
                     alt="Become a seller background"
                     className="w-full h-auto block"
                 />
