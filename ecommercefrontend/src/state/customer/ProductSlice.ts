@@ -133,8 +133,8 @@ const productSlice = createSlice({
                 state.error = null;
             })
             .addCase(searchProduct.fulfilled, (state, action: PayloadAction<PaginatedProductResponse>) => {
-                state.searchProducts = action.payload.content;
-                state.searchTotalPages = action.payload.page.totalPages;
+                state.searchProducts = action.payload.content || [];
+                state.searchTotalPages = action.payload.page?.totalPages || 1;
                 state.loading = false;
             })
             .addCase(searchProduct.rejected, (state, action) => {
@@ -147,8 +147,8 @@ const productSlice = createSlice({
             })
             .addCase(getAllProducts.fulfilled, (state, action: PayloadAction<PaginatedProductResponse>) => {
                 state.paginatedProducts = action.payload;
-                state.products = action.payload.content;
-                state.totalPages = action.payload.page.totalPages;
+                state.products = action.payload.content || [];
+                state.totalPages = action.payload.page?.totalPages || 1;
                 state.loading = false;
             })
             .addCase(getAllProducts.rejected, (state, action) => {

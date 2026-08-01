@@ -1,7 +1,9 @@
 import {Storefront} from "@mui/icons-material";
 import {Button} from "@mui/material";
-import becomeASellerImg from "../../assets/become_a_seller.png";
+import {useNavigate} from "react-router-dom";
+import becomeASellerImg from "../../../assets/become_a_seller.png";
 const BecomeASeller = () => {
+    const navigate = useNavigate();
     return (
         <div className={'flex justify-center'}>
             <div className="w-[90vw] relative rounded-2xl overflow-hidden">
@@ -15,6 +17,7 @@ const BecomeASeller = () => {
                     <Button
                         startIcon={<Storefront/>}
                         variant="contained"
+                        onClick={() => navigate("/become-seller")}
                         sx={{
                             backgroundColor: 'white',
                             color: '#1e3a8a',
