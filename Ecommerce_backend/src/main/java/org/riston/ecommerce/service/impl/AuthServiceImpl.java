@@ -122,7 +122,7 @@ public class AuthServiceImpl implements AuthService {
             verificationCodeRepository.delete(verificationCode);
             throw new IllegalArgumentException("OTP has expired");
         }
-//        verificationCodeRepository.delete(verificationCode);
+        verificationCodeRepository.delete(verificationCode);
         User existingUser = userRepository.findByEmail(req.email());
         if (existingUser != null) {
             throw new IllegalArgumentException("User already exists with this email");
