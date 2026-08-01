@@ -105,6 +105,8 @@ public class AppConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        // Actuator
+                        .requestMatchers("/actuator/health").permitAll()
                         // 7. Secure-by-default Catch-all
                         .anyRequest().authenticated()
                 )
