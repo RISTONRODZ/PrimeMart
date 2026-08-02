@@ -1,4 +1,4 @@
-import {Button, Step, StepLabel, Stepper} from "@mui/material";
+import {Button, Step, StepLabel, Stepper, Alert, AlertTitle} from "@mui/material";
 import {useState} from "react";
 import BecomeSellerFormStep1 from "../become_seller_steps/BecomeSellerFormStep1.tsx";
 import {useFormik} from "formik";
@@ -31,6 +31,7 @@ const steps = [
 
 const SellerAccountForm = () => {
     const [activeStep, setActiveStep] = useState(0);
+    const [validationError, setValidationError] = useState<string | null>(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { loading, error } = useSelector((state: any) => state.auth);
@@ -47,6 +48,8 @@ const SellerAccountForm = () => {
     };
 
     const handleNext = async () => {
+        setValidationError(null);
+        
         if (activeStep === steps.length - 1) {
             const errors = await fullFormSchema.validate(formik.values, { abortEarly: false })
                 .then(() => ({}))
@@ -66,6 +69,7 @@ const SellerAccountForm = () => {
                     {}
                 );
                 formik.setTouched(touchedFields, true);
+                setValidationError("Please fix all validation errors before submitting.");
                 return;
             }
 
@@ -79,6 +83,7 @@ const SellerAccountForm = () => {
                     {}
                 );
                 formik.setTouched(touchedFields, true);
+                setValidationError("Please fix the validation errors before proceeding.");
                 return;
             }
             handleStep(1);
@@ -172,14 +177,21 @@ const SellerAccountForm = () => {
                     </Button>
                 )}
             </div>
+            {validationError && (
+                <Alert severity="warning" className="mt-4" onClose={() => setValidationError(null)}>
+                    <AlertTitle>Validation Error</AlertTitle>
+                    {validationError}
+                </Alert>
+            )}
             {error && (
-                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                <Alert severity="error" className="mt-4">
+                    <AlertTitle>Registration Error</AlertTitle>
                     {error.includes("duplicate key value violates unique constraint") && error.includes("seller_email_key")
                         ? "This email is already registered. Please use a different email or login to your existing account."
                         : error.includes("duplicate key value violates unique constraint")
                         ? "A record with this information already exists."
                         : error}
-                </div>
+                </Alert>
             )}
         </div>
     );

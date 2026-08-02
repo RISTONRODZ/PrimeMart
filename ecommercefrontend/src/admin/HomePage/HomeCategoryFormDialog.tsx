@@ -21,7 +21,7 @@ const HomeCategoryFormDialog = ({ open, onClose, onSaved, category, section }: P
     const dispatch = useAppDispatch();
     const [name, setName] = useState(category?.name ?? "");
     const [imageUrl, setImageUrl] = useState(category?.imageUrl ?? "");
-    const [categoryId, setCategoryId] = useState(category?.categoryId ?? "");
+    const [categoryId, setCategoryId] = useState(category?.categoryId ?? (section === "ELECTRIC_CATEGORIES" ? "ELECTRIC_CATEGORIES" : ""));
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -101,7 +101,7 @@ const HomeCategoryFormDialog = ({ open, onClose, onSaved, category, section }: P
                     onChange={(e) => setName(e.target.value)}
                     fullWidth
                 />
-                {!isEdit && (
+                {!isEdit && section !== "ELECTRIC_CATEGORIES" && (
                     <TextField
                         label="Category Name"
                         value={categoryId}
