@@ -104,7 +104,7 @@ export default function OrderTable() {
                                                 <div className='flex flex-col justify-between py-2'>
                                                     <h1>Title: {orderItem.product.title}</h1>
                                                     <h1>Price: Rs.{orderItem.product.sellingPrice}</h1>
-                                                    <h1>Color: {orderItem.product.color}</h1>
+                                                    <h1>Color: {orderItem.product.colors?.join(", ") || "N/A"}</h1>
                                                     <h1>Size: {orderItem.size}</h1>
                                                 </div>
                                             </div>

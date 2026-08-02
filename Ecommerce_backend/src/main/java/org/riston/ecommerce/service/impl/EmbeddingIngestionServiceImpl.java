@@ -26,7 +26,7 @@ public class EmbeddingIngestionServiceImpl implements EmbeddingIngestionService 
                     + ". Category: " + p.getCategory().getName()
                     + ". Selling Price: " + p.getSellingPrice()
                     + ". MRP: " + p.getMrpPrice()
-                    + ". Color: " + p.getColor()
+                    + ". Colors: " + String.join(", ", p.getColors())
                     + ". Description: " + p.getDescription();
             Map<String, Object> meta = Map.of("type", "product", "id", p.getId().toString());
             return new Document(content, meta);

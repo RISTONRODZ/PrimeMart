@@ -23,5 +23,5 @@ public record CreateProductRequestDto(
 
         @NotBlank(message = "Available sizes must be specified (e.g., S,M,L)") String sizes,
 
-        @NotBlank(message = "Product color is required") String color) {
+        @NotEmpty(message = "At least one product color must be provided") List<String> colors) {
 }

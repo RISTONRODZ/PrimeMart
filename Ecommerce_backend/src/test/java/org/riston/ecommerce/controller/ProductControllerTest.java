@@ -32,7 +32,7 @@ class ProductControllerTest {
         product.setId(1L);
         product.setTitle("Nike T-Shirt");
         product.setDescription("Premium cotton t-shirt");
-        product.setColor("Red");
+        product.setColors(List.of("Red", "Blue"));
         product.setSellingPrice(800);
         product.setMrpPrice(1000);
         product.setDiscountPercent(20);
@@ -52,7 +52,8 @@ class ProductControllerTest {
             mockMvc.perform(get("/api/v1/products/1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.title").value("Nike T-Shirt"))
-                    .andExpect(jsonPath("$.sellingPrice").value(800));
+                    .andExpect(jsonPath("$.sellingPrice").value(800))
+                    .andExpect(jsonPath("$.color").value("Red, Blue"));
 
             verify(productService).findProductById(1L);
         }

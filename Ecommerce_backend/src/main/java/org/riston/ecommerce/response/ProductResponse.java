@@ -24,7 +24,7 @@ public record ProductResponse(
         @Schema(description = "Discount percentage", example = "33")
         int discountPercent,
 
-        @Schema(description = "Available color", example = "Blue")
+        @Schema(description = "Available colors (comma-separated)", example = "Blue, Red, Green")
         String color,
 
         @Schema(description = "List of product image URLs")
@@ -53,7 +53,7 @@ public record ProductResponse(
                 p.getSellingPrice(),
                 p.getMrpPrice(),
                 p.getDiscountPercent(),
-                p.getColor(),
+                (p.getColors() != null && !p.getColors().isEmpty()) ? String.join(", ", p.getColors()) : null,
                 p.getImages(),
                 (p.getCategory() != null) ? p.getCategory().getCategoryId() : "N/A",
                 (p.getSeller() != null) ? p.getSeller().getSellerName() : "Unknown",

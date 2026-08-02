@@ -80,7 +80,7 @@ const ProductForm = () => {
             mrpPrice: "",
             sellingPrice: "",
             quantity: "",
-            color: [] as string[],
+            colors: [] as string[],
             images: [] as string[],
             category: "",
             category2: "",
@@ -181,9 +181,9 @@ const ProductForm = () => {
                         <FormControl fullWidth required>
                             <InputLabel>Colors</InputLabel>
                             <Select
-                                name="color"
+                                name="colors"
                                 multiple
-                                value={formik.values.color}
+                                value={formik.values.colors}
                                 onChange={formik.handleChange}
                                 label="Colors"
                                 renderValue={(selected) => (

@@ -86,7 +86,7 @@ export default function ProductTable() {
                                     <TableCell align="right">{product.title}</TableCell>
                                     <TableCell align="right">{product.mrpPrice}</TableCell>
                                     <TableCell align="right">{product.sellingPrice}</TableCell>
-                                    <TableCell align="right">{product.color}</TableCell>
+                                    <TableCell align="right">{product.colors?.join(", ") || "N/A"}</TableCell>
                                     <TableCell align="right">{product.quantity}</TableCell>
                                     <TableCell align="right">
                                         <Button

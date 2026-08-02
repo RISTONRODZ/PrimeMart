@@ -15,7 +15,7 @@ export interface Product {
     sellingPrice: number;
     mrpPrice: number;
     discountPercent: number;
-    color: string;
+    colors: string[];
     images: string[];
     categoryName: string;
     sellerName: string;

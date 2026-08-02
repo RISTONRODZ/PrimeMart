@@ -47,7 +47,7 @@ ProductServiceImplTest {
         seller = new Seller();
         seller.setId(1L);
 
-        requestDto = new CreateProductRequestDto("Test Product", "Description", 1000, 800, List.of("img1.jpg"), "cat1", "cat2", "cat3", "S,M,L", "Red");
+        requestDto = new CreateProductRequestDto("Test Product", "Description", 1000, 800, List.of("img1.jpg"), "cat1", "cat2", "cat3", "S,M,L", List.of("Red", "Blue"));
     }
 
     @Test
@@ -87,7 +87,7 @@ ProductServiceImplTest {
         when(categoryRepository.findByCategoryId(any())).thenReturn(new Category());
         when(productRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        CreateProductRequestDto discountReq = new CreateProductRequestDto("Discount Test", "Desc", 200, 100, List.of("img.jpg"), "c1", "c2", "c3", "M", "Blue");
+        CreateProductRequestDto discountReq = new CreateProductRequestDto("Discount Test", "Desc", 200, 100, List.of("img.jpg"), "c1", "c2", "c3", "M", List.of("Blue", "Black"));
 
         Product result = productService.createProduct(discountReq, seller);
         assertThat(result.getDiscountPercent()).isEqualTo(50);

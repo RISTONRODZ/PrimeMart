@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-    public final CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final EmbeddingIngestionServiceImpl embeddingIngestionService;
 
@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(req.description());
         product.setCreatedAt(LocalDateTime.now());
         product.setTitle(req.title());
-        product.setColor(req.color());
+        product.setColors(req.colors());
         product.setSellingPrice(req.sellingPrice());
         product.setImages(req.images());
         product.setMrpPrice(req.mrpPrice());
@@ -127,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("discountPercent"), minDiscount));
             }
             if (colors != null && !colors.isEmpty()) {
-                predicates.add(cb.equal(root.get("color"), colors));
+                predicates.add(root.join("colors").in(colors));
             }
             if (size != null && !size.isEmpty()) {
                 predicates.add(cb.equal(root.get("sizes"), size));
@@ -157,7 +157,7 @@ public class ProductServiceImpl implements ProductService {
                     wordPredicates.add(cb.or(
                             cb.like(cb.lower(root.get("title")), likeWord),
                             cb.like(cb.lower(root.get("description")), likeWord),
-                            cb.like(cb.lower(root.get("color")), likeWord)
+                            cb.like(cb.lower(root.join("colors")), likeWord)
                     ));
                 }
                 predicates.add(cb.and(wordPredicates.toArray(new Predicate[0])));
@@ -167,7 +167,7 @@ public class ProductServiceImpl implements ProductService {
                 predicates.add(cb.equal(categoryJoin.get("categoryId"), category));
             }
             if (color != null && !color.isEmpty()) {
-                predicates.add(cb.equal(root.get("color"), color));
+                predicates.add(root.join("colors").in(color));
             }
             if (minPrice != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("sellingPrice"), minPrice));

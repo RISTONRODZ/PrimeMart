@@ -305,7 +305,7 @@ public class DataSeeder implements CommandLineRunner {
                 Product product = new Product();
                 product.setTitle(title);
                 product.setDescription(description);
-                product.setColor(color);
+                product.setColors(Collections.singletonList(color));
                 product.setSizes("S,M,L,XL");
                 product.setMrpPrice(mrp);
                 product.setSellingPrice(sellingPrice);

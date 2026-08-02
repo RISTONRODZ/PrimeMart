@@ -64,7 +64,7 @@ class SellerProductControllerTest {
         product.setMrpPrice(180000);
         product.setDiscountPercent(20);
         product.setQuantity(10);
-        product.setColor("Space Gray");
+        product.setColors(List.of("Space Gray", "Silver"));
         product.setImages(List.of("img1.jpg", "img2.jpg"));
         product.setCategory(category);
         product.setSeller(seller);
@@ -84,7 +84,7 @@ class SellerProductControllerTest {
         product.setMrpPrice(120000);
         product.setDiscountPercent(20);
         product.setQuantity(5);
-        product.setColor("Silver");
+        product.setColors(List.of("Silver", "Black"));
         product.setImages(List.of("updated.jpg"));
         product.setSizes("M,L");
         product.setNumRatings(0);
@@ -176,7 +176,7 @@ class SellerProductControllerTest {
                         "Computers",
                         "Laptops",
                         "M,L,XL",
-                        "Space Gray"
+                        List.of("Space Gray", "Silver")
                 );
 
         Product createdProduct = buildProduct(10L, seller);

@@ -16,7 +16,7 @@ public record OrderItemDto(
         @Schema(description = "URL of the product image")
         String productImage,
 
-        @Schema(description = "Color of the item", example = "Blue")
+        @Schema(description = "Colors of the item (comma-separated)", example = "Blue, Red")
         String color,
 
         @Schema(description = "Selected size", example = "10")
@@ -42,9 +42,14 @@ public record OrderItemDto(
 
         String mainImage = null;
         if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
-            mainImage = product.getImages().get(0);
+            mainImage = product.getImages().getFirst();
         }
 
-        return new OrderItemDto(entity.getId(), product != null ? product.getId() : null, product != null ? product.getTitle() : "Unknown Product", mainImage, product != null ? product.getColor() : null, entity.getSize(), entity.getQuantity(), entity.getMrpPrice(), entity.getSellingPrice());
+        String colors = null;
+        if (product != null && product.getColors() != null && !product.getColors().isEmpty()) {
+            colors = String.join(", ", product.getColors());
+        }
+
+        return new OrderItemDto(entity.getId(), product != null ? product.getId() : null, product != null ? product.getTitle() : "Unknown Product", mainImage, colors, entity.getSize(), entity.getQuantity(), entity.getMrpPrice(), entity.getSellingPrice());
     }
 }
