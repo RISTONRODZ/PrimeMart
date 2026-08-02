@@ -184,12 +184,27 @@ public class AuthServiceImpl implements AuthService {
             role = USER_ROLE.ROLE_ADMIN;
         } else {
             role = USER_ROLE.ROLE_CUSTOMER;
+            User existingUser = userRepository.findByEmail(cleanEmail);
+            if (existingUser == null) {
+                User newUser = new User();
+                newUser.setEmail(cleanEmail);
+                newUser.setFullName(cleanEmail.split("@")[0]);
+                newUser.setMobile("0000000000");
+                newUser.setPassword(passwordEncoder.encode(otp));
+                newUser.setRole(USER_ROLE.ROLE_CUSTOMER);
+                User savedUser = userRepository.save(newUser);
+
+                Cart cart = new Cart();
+                cart.setUser(savedUser);
+                cartRepository.save(cart);
+
+                log.info("Auto-created new user on first login: {}", cleanEmail);
+            }
         }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role.toString()));
         return new UsernamePasswordAuthenticationToken(cleanEmail, null, authorities);
     }
-
     @Override
     @Transactional
     public Seller registerSeller(SellerRequestDto request) {

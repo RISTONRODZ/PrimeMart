@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +28,9 @@ public class ProductServiceImpl implements ProductService {
     public final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final EmbeddingIngestionServiceImpl embeddingIngestionService;
+
+    @Value("${app.rag.enabled}")
+    private boolean ragEnabled;
 
     @Override
     @Transactional
@@ -53,7 +57,11 @@ public class ProductServiceImpl implements ProductService {
         product.setSizes(req.sizes());
         product.setDiscountPercent(calculateDiscountPercentage(req.mrpPrice(), req.sellingPrice()));
         Product savedProduct = productRepository.save(product);
-        embeddingIngestionService.ingestProducts(List.of(savedProduct));
+
+        if (ragEnabled) {
+            embeddingIngestionService.ingestProducts(List.of(savedProduct));
+        }
+
         return savedProduct;
     }
 

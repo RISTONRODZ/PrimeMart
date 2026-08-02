@@ -5,7 +5,7 @@ const ElectronicCategory = () => {
     const {home} = useAppSelector(store => store);
     return (
         <div>
-           <HomeCategoryTable data={home.homePageData?.electricCategories || []}/>
+           <HomeCategoryTable data={home.homePageData?.electricCategories || []} section="ELECTRIC"/>
         </div>
     );
 };

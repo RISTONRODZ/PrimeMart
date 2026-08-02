@@ -7,7 +7,7 @@ import {Button, TextField} from "@mui/material";
 
 const SignupForm = () => {
     const dispatch = useAppDispatch();
-    const [isOtpSent, setIsOtpSent] = useState(true);
+    const [isOtpSent, setIsOtpSent] = useState(false);
 
     const formik = useFormik({
         initialValues: { email: "", otp: "",
