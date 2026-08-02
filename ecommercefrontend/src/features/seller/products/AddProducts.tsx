@@ -37,6 +37,16 @@ interface CategoryItem {
 const colors = [
     { name: "White", hex: "#FFFFFF" },
     { name: "Black", hex: "#000000" },
+    { name: "Red", hex: "#FF0000" },
+    { name: "Blue", hex: "#0000FF" },
+    { name: "Green", hex: "#008000" },
+    { name: "Yellow", hex: "#FFFF00" },
+    { name: "Purple", hex: "#800080" },
+    { name: "Orange", hex: "#FFA500" },
+    { name: "Pink", hex: "#FFC0CB" },
+    { name: "Gray", hex: "#808080" },
+    { name: "Brown", hex: "#A52A2A" },
+    { name: "Beige", hex: "#F5F5DC" },
 ];
 
 const categoryTwo: Record<string, CategoryItem[]> = {
@@ -70,7 +80,7 @@ const ProductForm = () => {
             mrpPrice: "",
             sellingPrice: "",
             quantity: "",
-            color: "",
+            color: [] as string[],
             images: [] as string[],
             category: "",
             category2: "",
@@ -169,8 +179,23 @@ const ProductForm = () => {
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                         <FormControl fullWidth required>
-                            <InputLabel>Color</InputLabel>
-                            <Select name="color" value={formik.values.color} onChange={formik.handleChange} label="Color">
+                            <InputLabel>Colors</InputLabel>
+                            <Select
+                                name="color"
+                                multiple
+                                value={formik.values.color}
+                                onChange={formik.handleChange}
+                                label="Colors"
+                                renderValue={(selected) => (
+                                    <div className="flex flex-wrap gap-1">
+                                        {(selected as string[]).map((value) => (
+                                            <span key={value} className="px-2 py-1 bg-gray-200 rounded text-sm">
+                                                {value}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            >
                                 {colors.map((color) => (
                                     <MenuItem key={color.name} value={color.name}>
                                         <div className="flex gap-3">
