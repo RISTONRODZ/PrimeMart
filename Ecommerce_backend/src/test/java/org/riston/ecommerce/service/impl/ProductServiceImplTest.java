@@ -56,7 +56,6 @@ ProductServiceImplTest {
         when(productRepository.findByTitleAndSeller(anyString(), any())).thenReturn(null);
         when(categoryRepository.findByCategoryId(anyString())).thenReturn(new Category());
         when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArguments()[0]);
-        doNothing().when(embeddingIngestionService).ingestProducts(anyList());
         Product savedProduct = productService.createProduct(requestDto, seller);
 
         assertThat(savedProduct).isNotNull();
