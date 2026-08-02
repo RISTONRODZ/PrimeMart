@@ -1,0 +1,482 @@
+[01;34m.[0m
+├── docker-compose.yaml
+├── [01;34mEcommerce_backend[0m
+│   ├── Dockerfile
+│   ├── Ecommerce.ipr
+│   ├── Ecommerce.iws
+│   ├── HELP.md
+│   ├── [01;32mmvnw[0m
+│   ├── mvnw.cmd
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── pom.xml
+│   └── [01;34msrc[0m
+│       ├── [01;34mmain[0m
+│       │   ├── [01;34mjava[0m
+│       │   │   └── [01;34morg[0m
+│       │   │       └── [01;34mriston[0m
+│       │   │           └── [01;34mecommerce[0m
+│       │   │               ├── [01;34mannotation[0m
+│       │   │               │   └── ApiNotFoundResponse.java
+│       │   │               ├── [01;34mconfig[0m
+│       │   │               │   ├── AdminSeeder.java
+│       │   │               │   ├── AppConfig.java
+│       │   │               │   ├── CloudinaryConfig.java
+│       │   │               │   ├── DataSeeder.java
+│       │   │               │   ├── JwtAuthenticationEntryPoint.java
+│       │   │               │   ├── JWT_CONSTANT.java
+│       │   │               │   ├── JwtProvider.java
+│       │   │               │   ├── JwtTokenValidator.java
+│       │   │               │   ├── OpenApiConfig.java
+│       │   │               │   ├── RazorpayConfig.java
+│       │   │               │   └── SecurityBeanConfig.java
+│       │   │               ├── [01;34mcontroller[0m
+│       │   │               │   ├── AdminController.java
+│       │   │               │   ├── AdminCouponController.java
+│       │   │               │   ├── AiController.java
+│       │   │               │   ├── AuthController.java
+│       │   │               │   ├── CartController.java
+│       │   │               │   ├── CloudinaryController.java
+│       │   │               │   ├── DealController.java
+│       │   │               │   ├── HomeCategoryController.java
+│       │   │               │   ├── HomeController.java
+│       │   │               │   ├── OrderController.java
+│       │   │               │   ├── PaymentController.java
+│       │   │               │   ├── ProductController.java
+│       │   │               │   ├── ReviewController.java
+│       │   │               │   ├── SellerController.java
+│       │   │               │   ├── SellerOrderController.java
+│       │   │               │   ├── SellerProductController.java
+│       │   │               │   ├── TransactionController.java
+│       │   │               │   ├── UserController.java
+│       │   │               │   └── WishlistController.java
+│       │   │               ├── [01;34mdomain[0m
+│       │   │               │   ├── AccountStatus.java
+│       │   │               │   ├── HomeCategorySection.java
+│       │   │               │   ├── OrderStatus.java
+│       │   │               │   ├── PaymentMethod.java
+│       │   │               │   ├── PaymentOrderStatus.java
+│       │   │               │   ├── PaymentStatus.java
+│       │   │               │   └── USER_ROLE.java
+│       │   │               ├── EcommerceApplication.java
+│       │   │               ├── [01;34mexception[0m
+│       │   │               │   ├── CouponAlreadyUsedException.java
+│       │   │               │   ├── CouponException.java
+│       │   │               │   ├── CouponNotFoundException.java
+│       │   │               │   ├── GlobalExceptionHandler.java
+│       │   │               │   ├── GuardrailException.java
+│       │   │               │   ├── InvalidCouponException.java
+│       │   │               │   ├── InvalidOtpException.java
+│       │   │               │   ├── ItemNotFoundException.java
+│       │   │               │   ├── OrderItemNotFoundException.java
+│       │   │               │   ├── OrderNotFoundException.java
+│       │   │               │   ├── PaymentGatewayException.java
+│       │   │               │   ├── PaymentOrderNotFoundException.java
+│       │   │               │   ├── PaymentValidationException.java
+│       │   │               │   ├── ProductException.java
+│       │   │               │   ├── ResourceAccessDeniedException.java
+│       │   │               │   ├── ResourceNotFoundException.java
+│       │   │               │   ├── ReviewNotFoundException.java
+│       │   │               │   ├── SellerNotFoundException.java
+│       │   │               │   ├── UserNotFoundException.java
+│       │   │               │   └── WishlistNotFoundException.java
+│       │   │               ├── [01;34mmapper[0m
+│       │   │               │   ├── CartItemMapper.java
+│       │   │               │   ├── CouponMapper.java
+│       │   │               │   └── DealMapper.java
+│       │   │               ├── [01;34mmodel[0m
+│       │   │               │   ├── Address.java
+│       │   │               │   ├── BankDetails.java
+│       │   │               │   ├── BusinessDetails.java
+│       │   │               │   ├── CartItem.java
+│       │   │               │   ├── Cart.java
+│       │   │               │   ├── Category.java
+│       │   │               │   ├── Coupon.java
+│       │   │               │   ├── Deal.java
+│       │   │               │   ├── HomeCategory.java
+│       │   │               │   ├── Home.java
+│       │   │               │   ├── OrderItem.java
+│       │   │               │   ├── Order.java
+│       │   │               │   ├── PaymentDetails.java
+│       │   │               │   ├── PaymentOrder.java
+│       │   │               │   ├── Product.java
+│       │   │               │   ├── Review.java
+│       │   │               │   ├── Seller.java
+│       │   │               │   ├── SellerReport.java
+│       │   │               │   ├── Transaction.java
+│       │   │               │   ├── User.java
+│       │   │               │   ├── VerificationCode.java
+│       │   │               │   └── Wishlist.java
+│       │   │               ├── [01;34mrepository[0m
+│       │   │               │   ├── AddressRepository.java
+│       │   │               │   ├── CartItemRepository.java
+│       │   │               │   ├── CartRepository.java
+│       │   │               │   ├── CategoryRepository.java
+│       │   │               │   ├── CouponRepository.java
+│       │   │               │   ├── DealRepository.java
+│       │   │               │   ├── HomeCategoryRepository.java
+│       │   │               │   ├── OrderItemRepository.java
+│       │   │               │   ├── OrderRepository.java
+│       │   │               │   ├── PaymentOrderRepository.java
+│       │   │               │   ├── ProductRepository.java
+│       │   │               │   ├── ReviewRepository.java
+│       │   │               │   ├── SellerReportRepository.java
+│       │   │               │   ├── SellerRepository.java
+│       │   │               │   ├── TransactionRepository.java
+│       │   │               │   ├── UserRepository.java
+│       │   │               │   ├── VerificationCodeRepository.java
+│       │   │               │   └── WishlistRepository.java
+│       │   │               ├── [01;34mrequest[0m
+│       │   │               │   ├── AddItemRequestDto.java
+│       │   │               │   ├── CouponRequest.java
+│       │   │               │   ├── CreateProductRequestDto.java
+│       │   │               │   ├── CreateReviewRequestDto.java
+│       │   │               │   ├── DealRequestDto.java
+│       │   │               │   ├── LoginOtpRequestDto.java
+│       │   │               │   ├── LoginRequestDto.java
+│       │   │               │   ├── SellerRequestDto.java
+│       │   │               │   ├── SignupRequest.java
+│       │   │               │   └── UpdateCartItemRequest.java
+│       │   │               ├── [01;34mresponse[0m
+│       │   │               │   ├── ApiResponseDto.java
+│       │   │               │   ├── AuthResponseDto.java
+│       │   │               │   ├── CartItemDto.java
+│       │   │               │   ├── CouponResponseDto.java
+│       │   │               │   ├── DealDto.java
+│       │   │               │   ├── DealResponseDto.java
+│       │   │               │   ├── HomeCategoryDto.java
+│       │   │               │   ├── HomepageLayoutResponse.java
+│       │   │               │   ├── OrderDto.java
+│       │   │               │   ├── OrderItemDto.java
+│       │   │               │   ├── OrderResponse.java
+│       │   │               │   ├── PaymentLinkResponseDto.java
+│       │   │               │   ├── ProductResponse.java
+│       │   │               │   ├── ReviewResponseDto.java
+│       │   │               │   ├── SellerReportResponse.java
+│       │   │               │   ├── SellerResponseDto.java
+│       │   │               │   ├── SellerStatusResponse.java
+│       │   │               │   ├── ShippingAddressDto.java
+│       │   │               │   ├── TransactionResponseDto.java
+│       │   │               │   ├── UserCartResponse.java
+│       │   │               │   ├── UserResponseDto.java
+│       │   │               │   ├── UserSummaryDto.java
+│       │   │               │   └── WishlistResponseDto.java
+│       │   │               ├── [01;34mservice[0m
+│       │   │               │   ├── AuthService.java
+│       │   │               │   ├── CartItemService.java
+│       │   │               │   ├── CartService.java
+│       │   │               │   ├── CloudinaryService.java
+│       │   │               │   ├── CouponService.java
+│       │   │               │   ├── DealService.java
+│       │   │               │   ├── EmailService.java
+│       │   │               │   ├── EmbeddingIngestionService.java
+│       │   │               │   ├── HomeCategoryService.java
+│       │   │               │   ├── HomeService.java
+│       │   │               │   ├── [01;34mimpl[0m
+│       │   │               │   │   ├── AuthServiceImpl.java
+│       │   │               │   │   ├── CartItemServiceImpl.java
+│       │   │               │   │   ├── CartServiceImpl.java
+│       │   │               │   │   ├── CloudinaryServiceImpl.java
+│       │   │               │   │   ├── CouponServiceImpl.java
+│       │   │               │   │   ├── CustomUserServiceImpl.java
+│       │   │               │   │   ├── DealServiceImpl.java
+│       │   │               │   │   ├── EmailServiceImpl.java
+│       │   │               │   │   ├── EmbeddingIngestionServiceImpl.java
+│       │   │               │   │   ├── HomeCategoryServiceImpl.java
+│       │   │               │   │   ├── HomeServiceImpl.java
+│       │   │               │   │   ├── OrderServiceImpl.java
+│       │   │               │   │   ├── PaymentServiceImpl.java
+│       │   │               │   │   ├── ProductServiceImpl.java
+│       │   │               │   │   ├── RagDisabledServiceImpl.java
+│       │   │               │   │   ├── RagServiceImpl.java
+│       │   │               │   │   ├── ReviewServiceImpl.java
+│       │   │               │   │   ├── SellerReportServiceImpl.java
+│       │   │               │   │   ├── SellerServiceImpl.java
+│       │   │               │   │   ├── TransactionServiceImpl.java
+│       │   │               │   │   ├── UserServiceImpl.java
+│       │   │               │   │   └── WishlistServiceImpl.java
+│       │   │               │   ├── OrderService.java
+│       │   │               │   ├── PaymentService.java
+│       │   │               │   ├── ProductService.java
+│       │   │               │   ├── RagService.java
+│       │   │               │   ├── ReviewService.java
+│       │   │               │   ├── SellerReportService.java
+│       │   │               │   ├── SellerService.java
+│       │   │               │   ├── TransactionService.java
+│       │   │               │   ├── UserService.java
+│       │   │               │   └── WishlistService.java
+│       │   │               └── [01;34mutil[0m
+│       │   │                   └── OtpUtil.java
+│       │   └── [01;34mresources[0m
+│       │       ├── application.properties
+│       │       ├── [01;34mstatic[0m
+│       │       └── [01;34mtemplates[0m
+│       └── [01;34mtest[0m
+│           └── [01;34mjava[0m
+│               └── [01;34morg[0m
+│                   └── [01;34mriston[0m
+│                       └── [01;34mecommerce[0m
+│                           ├── [01;34mcontroller[0m
+│                           │   ├── AdminControllerTest.java
+│                           │   ├── AdminCouponControllerTest.java
+│                           │   ├── AuthControllerTest.java
+│                           │   ├── CartControllerTest.java
+│                           │   ├── CloudinaryControllerTest.java
+│                           │   ├── OrderControllerTest.java
+│                           │   ├── ProductControllerTest.java
+│                           │   ├── ReviewControllerTest.java
+│                           │   ├── SellerControllerTest.java
+│                           │   ├── SellerProductControllerTest.java
+│                           │   ├── TransactionControllerTest.java
+│                           │   └── UserControllerTest.java
+│                           ├── [01;34mrepository[0m
+│                           │   ├── CartRepositoryTest.java
+│                           │   ├── ProductRepositoryTest.java
+│                           │   ├── ReviewRepositoryTest.java
+│                           │   ├── SellerRepositoryTest.java
+│                           │   ├── TransactionRepositoryTest.java
+│                           │   ├── UserRepositoryTest.java
+│                           │   └── VerificationCodeRepositoryTest.java
+│                           └── [01;34mservice[0m
+│                               └── [01;34mimpl[0m
+│                                   ├── AuthServiceImplTest.java
+│                                   ├── CartServiceImplTest.java
+│                                   ├── CouponServiceImplTest.java
+│                                   ├── CustomUserServiceImplTest.java
+│                                   ├── OrderServiceImplTest.java
+│                                   ├── PaymentServiceImplTest.java
+│                                   ├── ProductServiceImplTest.java
+│                                   ├── ReviewServiceImplTest.java
+│                                   ├── SellerReportServiceImplTest.java
+│                                   ├── SellerServiceImplTest.java
+│                                   └── TransactionServiceImplTest.java
+├── [01;34mecommercefrontend[0m
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── [01;34mpublic[0m
+│   │   ├── [01;35mfavicon.svg[0m
+│   │   └── [01;35micons.svg[0m
+│   ├── README.md
+│   ├── [01;34msrc[0m
+│   │   ├── [01;34madmin[0m
+│   │   │   ├── [01;34mcomponents[0m
+│   │   │   │   ├── AdminDrawerList.tsx
+│   │   │   │   └── Transactionstable.tsx
+│   │   │   ├── [01;34mHomePage[0m
+│   │   │   │   ├── CreateDealForm.tsx
+│   │   │   │   ├── DealCategoryTable.tsx
+│   │   │   │   ├── DealTable.tsx
+│   │   │   │   ├── Deal.tsx
+│   │   │   │   ├── ElectronicCategory.tsx
+│   │   │   │   ├── GridTable.tsx
+│   │   │   │   ├── HomeCategoryFormDialog.tsx
+│   │   │   │   ├── HomeCategoryTable.tsx
+│   │   │   │   ├── ShopByCategory.tsx
+│   │   │   │   └── UpdateDealForm.tsx
+│   │   │   └── [01;34mpages[0m
+│   │   │       ├── [01;34mcoupon[0m
+│   │   │       │   ├── AddNewCouponForm.tsx
+│   │   │       │   └── Coupon.tsx
+│   │   │       ├── [01;34mdashboard[0m
+│   │   │       │   ├── AdminDashboardContent.tsx
+│   │   │       │   └── AdminDashboard.tsx
+│   │   │       └── [01;34mseller[0m
+│   │   │           └── SellerTable.tsx
+│   │   ├── [01;34mapp[0m
+│   │   │   ├── App.tsx
+│   │   │   └── [01;34mtheme[0m
+│   │   │       └── customTheme.tsx
+│   │   ├── App.css
+│   │   ├── AppRoutes.tsx
+│   │   ├── [01;34massets[0m
+│   │   │   ├── [01;35mbecome_a_seller.png[0m
+│   │   │   ├── [01;34mproducts[0m
+│   │   │   │   ├── [01;35mcamera.png[0m
+│   │   │   │   ├── [01;35mgaminglaptop.png[0m
+│   │   │   │   ├── [01;35mmobile.png[0m
+│   │   │   │   ├── [01;35mspeaker.png[0m
+│   │   │   │   └── [01;35mwatch.png[0m
+│   │   │   └── [01;35msignup_banner.png[0m
+│   │   ├── [01;34mcomponents[0m
+│   │   │   ├── [01;34maccount[0m
+│   │   │   │   ├── Account.tsx
+│   │   │   │   ├── AddressFormDialog.tsx
+│   │   │   │   ├── Address.tsx
+│   │   │   │   ├── OrderDetails.tsx
+│   │   │   │   ├── OrderItem.tsx
+│   │   │   │   ├── OrderStepper.tsx
+│   │   │   │   ├── Order.tsx
+│   │   │   │   ├── ProfileFieldCard.tsx
+│   │   │   │   ├── UserAddressCard.tsx
+│   │   │   │   └── UserDetails.tsx
+│   │   │   ├── [01;34mauth[0m
+│   │   │   │   ├── Auth.tsx
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   ├── ProtectedRoute.tsx
+│   │   │   │   └── SignupForm.tsx
+│   │   │   ├── [01;34mcart[0m
+│   │   │   │   ├── CartItem.tsx
+│   │   │   │   ├── Cart.tsx
+│   │   │   │   └── PricingCard.tsx
+│   │   │   ├── Chatwidget.tsx
+│   │   │   ├── [01;34mcheckout[0m
+│   │   │   │   ├── AddressCard.tsx
+│   │   │   │   ├── AddressForm.tsx
+│   │   │   │   ├── Checkout.tsx
+│   │   │   │   ├── PaymentSuccess.tsx
+│   │   │   │   └── PricingCard.tsx
+│   │   │   ├── [01;34mcoupon[0m
+│   │   │   │   └── Coupon.tsx
+│   │   │   ├── DrawerList.tsx
+│   │   │   ├── [01;34mfooter[0m
+│   │   │   │   ├── Aboutus.tsx
+│   │   │   │   ├── Contactsupport.tsx
+│   │   │   │   ├── FAQ.tsx
+│   │   │   │   ├── PrivacyPolicy.tsx
+│   │   │   │   ├── Shippinginfo.tsx
+│   │   │   │   └── TermsOfUse.tsx
+│   │   │   ├── [01;34mlayout[0m
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   ├── Logo.tsx
+│   │   │   │   └── Navbar.tsx
+│   │   │   ├── [01;34mnotfound[0m
+│   │   │   │   └── NotFound.tsx
+│   │   │   ├── [01;34mreview[0m
+│   │   │   │   ├── ReviewCard.tsx
+│   │   │   │   ├── ReviewForm.tsx
+│   │   │   │   ├── ReviewSummary.tsx
+│   │   │   │   └── Review.tsx
+│   │   │   ├── [01;34mui[0m
+│   │   │   │   └── Snackbar.tsx
+│   │   │   └── [01;34mwishlist[0m
+│   │   │       ├── WishlistProductCard.tsx
+│   │   │       └── Wishlist.tsx
+│   │   ├── [01;34mconfig[0m
+│   │   │   └── Api.ts
+│   │   ├── [01;34mfeatures[0m
+│   │   │   ├── [01;34mcustomer[0m
+│   │   │   │   ├── [01;34mdata[0m
+│   │   │   │   │   ├── [01;34mcategory[0m
+│   │   │   │   │   │   ├── [01;34mlevel three[0m
+│   │   │   │   │   │   │   ├── electronicsLevelThree.ts
+│   │   │   │   │   │   │   ├── furnitureLevelThree.ts
+│   │   │   │   │   │   │   ├── menLevelThree.ts
+│   │   │   │   │   │   │   └── womenLevelThree.ts
+│   │   │   │   │   │   ├── [01;34mlevel two[0m
+│   │   │   │   │   │   │   ├── electronicsLavelTwo.ts
+│   │   │   │   │   │   │   ├── furnitureLevleTwo.ts
+│   │   │   │   │   │   │   ├── menLevelTwo.ts
+│   │   │   │   │   │   │   └── womenLevelTwo.ts
+│   │   │   │   │   │   └── mainCategory.ts
+│   │   │   │   │   ├── [01;34mFilter[0m
+│   │   │   │   │   │   ├── brand.ts
+│   │   │   │   │   │   ├── color.ts
+│   │   │   │   │   │   ├── discount.ts
+│   │   │   │   │   │   └── price.ts
+│   │   │   │   │   └── HomeCategories.ts
+│   │   │   │   └── [01;34mhome[0m
+│   │   │   │       ├── BecomeASeller.tsx
+│   │   │   │       ├── [01;34mcategories[0m
+│   │   │   │       │   ├── CategorySheet.tsx
+│   │   │   │       │   └── [01;34melectric[0m
+│   │   │   │       │       ├── ElectricCategoryCard.tsx
+│   │   │   │       │       └── ElectricCategory.tsx
+│   │   │   │       ├── [01;34mdeal[0m
+│   │   │   │       │   ├── DealCard.tsx
+│   │   │   │       │   └── Deal.tsx
+│   │   │   │       ├── HomeCategoryGrid.tsx
+│   │   │   │       ├── Home.tsx
+│   │   │   │       ├── [01;34mproduct[0m
+│   │   │   │       │   ├── FilterSection.tsx
+│   │   │   │       │   ├── ProductCard.tsx
+│   │   │   │       │   ├── ProductDetails.tsx
+│   │   │   │       │   ├── Product.tsx
+│   │   │   │       │   ├── SearchResults.tsx
+│   │   │   │       │   ├── SimilarProductCard.tsx
+│   │   │   │       │   └── SimilarProduct.tsx
+│   │   │   │       ├── ShopByCategoryCard.tsx
+│   │   │   │       └── ShopByCategory.tsx
+│   │   │   ├── ScrollToTop.tsx
+│   │   │   └── [01;34mseller[0m
+│   │   │       ├── [01;34maccount[0m
+│   │   │       │   └── Profile.tsx
+│   │   │       ├── [01;34mbecome_seller_steps[0m
+│   │   │       │   ├── BecomeSellerFormStep1.tsx
+│   │   │       │   ├── BecomeSellerFormStep2.tsx
+│   │   │       │   ├── BecomeSellerFormStep3.tsx
+│   │   │       │   └── BecomeSellerFormStep4.tsx
+│   │   │       ├── [01;34mcomponents[0m
+│   │   │       │   └── SellerDrawerList.tsx
+│   │   │       ├── [01;34mlogin[0m
+│   │   │       │   ├── BecomeSeller.tsx
+│   │   │       │   ├── FormSchema.ts
+│   │   │       │   ├── SellerAccountForm.tsx
+│   │   │       │   ├── SellerLoginForm.tsx
+│   │   │       │   └── useSellerForm.tsx
+│   │   │       ├── [01;34morders[0m
+│   │   │       │   ├── Orders.tsx
+│   │   │       │   └── OrderTable.tsx
+│   │   │       ├── [01;34mpages[0m
+│   │   │       │   └── [01;34msellerdashbord[0m
+│   │   │       │       ├── Dashboard.tsx
+│   │   │       │       └── SellerDashboard.tsx
+│   │   │       ├── [01;34mpayment[0m
+│   │   │       │   ├── Payment.tsx
+│   │   │       │   └── TransactionTable.tsx
+│   │   │       └── [01;34mproducts[0m
+│   │   │           ├── AddProducts.tsx
+│   │   │           ├── Products.tsx
+│   │   │           └── ProductTable.tsx
+│   │   ├── index.css
+│   │   ├── main.tsx
+│   │   ├── RoleBasedRedirect.tsx
+│   │   ├── [01;34mstate[0m
+│   │   │   ├── [01;34madmin[0m
+│   │   │   │   ├── AdminSlice.ts
+│   │   │   │   ├── DealSlice.ts
+│   │   │   │   └── SellerSlice.ts
+│   │   │   ├── [01;34mcustomer[0m
+│   │   │   │   ├── CartSlice.ts
+│   │   │   │   ├── couponSlice.ts
+│   │   │   │   ├── CustomerSlice.ts
+│   │   │   │   ├── OrderSlice.ts
+│   │   │   │   ├── ProductSlice.ts
+│   │   │   │   ├── ReviewSlice.ts
+│   │   │   │   └── WishlistSlice.ts
+│   │   │   ├── hooks.ts
+│   │   │   ├── [01;34mseller[0m
+│   │   │   │   ├── SellerOrderSlice.ts
+│   │   │   │   ├── SellerProductSlice.ts
+│   │   │   │   └── SellerSlice.ts
+│   │   │   └── [01;34mslice[0m
+│   │   │       ├── AuthSlice.ts
+│   │   │       ├── Slice.ts
+│   │   │       ├── Store.ts
+│   │   │       └── TransactionSlice.ts
+│   │   ├── [01;34mtheme[0m
+│   │   │   └── customTheme.tsx
+│   │   ├── [01;34mtypes[0m
+│   │   │   ├── CartTypes.ts
+│   │   │   ├── CouponTypes.ts
+│   │   │   ├── DealTypes.ts
+│   │   │   ├── HomeCategory.ts
+│   │   │   ├── OrderTypes.ts
+│   │   │   ├── ProductTypes.ts
+│   │   │   ├── SellerTypes.ts
+│   │   │   ├── TransactionTypes.ts
+│   │   │   ├── UserTypes.ts
+│   │   │   └── WishlistTypes.ts
+│   │   └── [01;34mutil[0m
+│   │       ├── sumCartItemMrpPrice.ts
+│   │       └── UploadToCloudinary.tsx
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vercel.json
+│   └── vite.config.ts
+├── folder_structure.txt
+└── [01;34muntitled[0m
+
+91 directories, 389 files
