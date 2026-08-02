@@ -57,16 +57,16 @@ const HomeCategoryFormDialog = ({ open, onClose, onSaved, category, section }: P
         try {
             if (isEdit && category) {
                 await dispatch(updateHomeCategory({
-                    id: category.id,
-                    data: { 
-                        name, 
+                    id: category.id!,
+                    data: {
+                        name,
                         imageUrl,
                         categoryId: category.categoryId,
                         section: category.section,
                     },
                 })).unwrap();
             } else {
-                if (!categoryId.trim()) {
+                if (!categoryId.trim() && section !== "ELECTRIC_CATEGORIES") {
                     setError("Category ID is required.");
                     setSaving(false);
                     return;
