@@ -40,6 +40,58 @@ PrimeMart covers the full e-commerce lifecycle across three roles — customers,
 
 ---
 
+## System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Client Layer"]
+        Browser["Browser<br/>React 19 + TypeScript + Vite"]
+    end
+
+    subgraph Frontend["Frontend (Vercel)"]
+        RTK["Redux Toolkit<br/>(state + async thunks)"]
+        Axios["Axios API Client"]
+    end
+
+    subgraph Backend["Backend (Render / Docker) — Spring Boot, /api/v1"]
+        Security["Spring Security<br/>JWT Auth + Role-Based Access"]
+        RateLimit["Bucket4j<br/>Rate Limiting"]
+        Controllers["Controllers<br/>Auth · Cart · Order · Product · Seller · Admin · AI"]
+        Services["Service Layer<br/>Business Logic"]
+        RAG["Spring AI RAG Pipeline<br/>Retrieval + Chat Memory Advisor"]
+    end
+
+    subgraph AI["Local AI Infra"]
+        Ollama["Ollama<br/>qwen2.5:3b (chat)<br/>nomic-embed-text (embeddings)"]
+    end
+
+    subgraph Data["Data Layer"]
+        Postgres[("PostgreSQL 16<br/>+ pgvector")]
+    end
+
+    subgraph External["External Services"]
+        Razorpay["Razorpay<br/>Payment Gateway"]
+        Cloudinary["Cloudinary<br/>Image Storage"]
+        Brevo["Brevo<br/>SMTP Email (OTP)"]
+    end
+
+    Browser --> RTK --> Axios
+    Axios -->|"HTTPS + JWT"| Security
+    Security --> RateLimit --> Controllers
+    Controllers --> Services
+    Services --> RAG
+    Services -->|"JPA / JDBC"| Postgres
+    RAG <-->|"embeddings + chat"| Ollama
+    RAG -->|"vector store"| Postgres
+    Services -->|"payment link / verify"| Razorpay
+    Services -->|"image upload"| Cloudinary
+    Services -->|"send OTP / notifications"| Brevo
+```
+
+**Request flow:** the React SPA sends authenticated requests through Axios; Spring Security validates the JWT and enforces role-based access before Bucket4j applies rate limiting; controllers delegate to the service layer, which either persists via JPA/JDBC to PostgreSQL, calls the local RAG pipeline (Ollama + pgvector) for AI chat, or integrates with Razorpay, Cloudinary, and Brevo for payments, media, and email respectively.
+
+---
+
 ## Tech Stack
 
 **Backend**
@@ -223,6 +275,7 @@ GitHub Actions runs backend tests on every PR, scoped to `Ecommerce_backend/` vi
 ## Author
 
 Built by **[Riston Rodrigues](https://www.linkedin.com/in/ristonrodrigues/)**
+
 ## Contact
 
 [ristonrodz1@gmail.com](mailto:ristonrodz1@gmail.com)
