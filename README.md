@@ -28,9 +28,9 @@ A multi-tenant e-commerce platform with full customer, seller, and admin workflo
 
 ## Razorpay Payment Demo
 
-![Razorpay checkout demo](./docs/screenshots/razorpay.com_payment-link_plink_TCwbXKd0RMqL8D_razorpay_screenshot.png)
+![Razorpay checkout demo](./docs/screenshots/razorpay_payments_2x.gif)
 
-*End-to-end checkout flow — cart → Razorpay payment gateway → order confirmation — with server-side payment verification and order/payment status tracking.*
+*End-to-end checkout flow — cart → Razorpay payment gateway → order confirmation — with server-side payment verification and order/payment status tracking.* (The max payable amount is caped to 50000 in Test mode)
 
 ---
 
