@@ -27,7 +27,7 @@ const PaymentSuccess = () => {
 
     const orderId = urlOrderId ?? getQueryParam('orderId') ?? state.orderId;
     const paymentId = getQueryParam('paymentId') ?? getQueryParam('razorpay_payment_id') ?? state.paymentId;
-    const paymentLinkId = getQueryParam('razorpay_payment_link_id') ?? getQueryParam('paymentLinkId');
+    const paymentLinkId = getQueryParam('razorpay_payment_link_id') ?? getQueryParam('paymentLinkId') ?? getQueryParam('razorpay_order_id');
 
     const [orderDetails, setOrderDetails] = useState({
         amount: state.amount,

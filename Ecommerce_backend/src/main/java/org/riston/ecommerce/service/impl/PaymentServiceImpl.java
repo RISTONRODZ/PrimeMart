@@ -1,13 +1,11 @@
 package org.riston.ecommerce.service.impl;
 
 import com.razorpay.Payment;
-import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.riston.ecommerce.domain.PaymentOrderStatus;
 import org.riston.ecommerce.domain.PaymentStatus;
@@ -37,9 +35,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final SellerService sellerService;
     private final SellerReportService sellerReportService;
 
-    @Value("${razorpay.max.amount:1000}")
-    private long maxAmount;
-
     @Override
     @Transactional
     public PaymentOrder createOrder(User user, Set<Order> orders) {
@@ -54,11 +49,6 @@ public class PaymentServiceImpl implements PaymentService {
         if (amount <= 0) {
             log.error("Invalid payment amount: {}", amount);
             throw new RuntimeException("Invalid payment amount: " + amount);
-        }
-
-        if (amount > maxAmount) {
-            log.warn("Amount {} exceeds maximum allowed amount {}. Adjusting to {} for test mode", amount, maxAmount, maxAmount);
-            amount = maxAmount;
         }
 
         PaymentOrder paymentOrder = new PaymentOrder();
@@ -179,53 +169,77 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentLink createRazorpayPaymentLink(User user, Long amount, Long orderId) {
-        log.info("Creating Razorpay payment link for orderId: {}, amount: {} rupees", orderId, amount);
+    public JSONObject createRazorpayPaymentLink(User user, Long amount, Long orderId) {
+        log.info("Creating Razorpay order for orderId: {}, amount: {} rupees", orderId, amount);
+        log.info("Current successUrl configuration: {}", successUrl);
         
         if (amount == null || amount <= 0) {
             log.error("Invalid payment amount: {} for orderId: {}", amount, orderId);
             throw new PaymentValidationException("Invalid payment amount: " + amount);
         }
 
+        final long RAZORPAY_MAX_AMOUNT_RUPEES = 50000L;
+        if (amount > RAZORPAY_MAX_AMOUNT_RUPEES) {
+            log.warn("Amount {} rupees exceeds Razorpay's maximum limit of {} rupees. Capping to maximum.", 
+                      amount, RAZORPAY_MAX_AMOUNT_RUPEES);
+            amount = RAZORPAY_MAX_AMOUNT_RUPEES;
+        }
+
         try {
             Long amountInPaise = amount * 100;
             log.info("Converting amount to paise: {} rupees = {} paise", amount, amountInPaise);
 
-            JSONObject paymentLinkRequest = buildPaymentLinkRequest(user, amountInPaise, orderId);
-            log.debug("Payment link request payload: {}", paymentLinkRequest);
-
-            log.info("Calling Razorpay API to create payment link...");
-            PaymentLink paymentLink = razorpayClient.paymentLink.create(paymentLinkRequest);
+            JSONObject orderRequest = new JSONObject();
+            orderRequest.put("amount", amountInPaise);
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "order_" + orderId);
             
-            log.info("Razorpay payment link created. ID: {}, Short URL: {}", 
-                    paymentLink.get("id"), paymentLink.get("short_url"));
+            log.debug("Order request payload: {}", orderRequest);
+
+            log.info("Calling Razorpay API to create order...");
+            com.razorpay.Order order = razorpayClient.orders.create(orderRequest);
+            
+//            log.info("Razorpay order created. ID: {}", order.get("id"));
             
             PaymentOrder paymentOrder = getPaymentOrderById(orderId);
-
-            paymentOrder.setPaymentLinkId(paymentLink.get("id"));
-
+            paymentOrder.setPaymentLinkId(order.get("id"));
+            paymentOrder.setAmount(amount);
             paymentOrderRepository.save(paymentOrder);
 
-            log.info("Payment link created successfully. paymentOrderId={}, paymentLinkId={}",
-                    paymentOrder.getId(), paymentLink.get("id"));
+            log.info("Order created successfully. paymentOrderId={}, razorpayOrderId={}",
+                    paymentOrder.getId(), order.get("id"));
 
-            return paymentLink;
+            // Return order details for frontend checkout
+            JSONObject response = new JSONObject();
+            response.put("order_id", (String) order.get("id"));
+            response.put("amount", amountInPaise);
+            response.put("currency", "INR");
+            response.put("name", "Ecommerce Store");
+            response.put("description", "Payment for order #" + orderId);
+            
+            JSONObject customer = new JSONObject();
+            customer.put("name", user.getFullName());
+            if (user.getEmail() != null) {
+                customer.put("email", user.getEmail());
+            }
+            response.put("customer", customer);
+            
+            String callbackUrl = successUrl.endsWith("/") ? 
+                successUrl + "payment-success/" + paymentOrder.getId() : 
+                successUrl + "/payment-success/" + paymentOrder.getId();
+            log.info("Callback URL constructed: {}", callbackUrl);
+            response.put("callback_url", callbackUrl);
+            
+            return response;
 
         } catch (RazorpayException e) {
-            log.error("Razorpay API error while creating payment link for paymentOrderId={}. Error: {}", 
+            log.error("Razorpay API error while creating order for paymentOrderId={}. Error: {}", 
                     orderId, e.getMessage(), e);
-            
-            // For test mode, create a mock payment link to allow flow to continue
-            if (e.getMessage() != null && e.getMessage().contains("amount exceeds maximum")) {
-                log.warn("Razorpay amount limit exceeded. Creating mock payment link for test mode.");
-                return createMockPaymentLink(orderId, amount);
-            }
-            
-            throw new PaymentGatewayException("Failed to create payment link", e);
+            throw new PaymentGatewayException("Failed to create order", e);
         } catch (Exception e) {
-            log.error("Unexpected error while creating payment link for paymentOrderId={}. Error: {}", 
+            log.error("Unexpected error while creating order for paymentOrderId={}. Error: {}", 
                     orderId, e.getMessage(), e);
-            throw new PaymentGatewayException("Failed to generate payment payload structure", e);
+            throw new PaymentGatewayException("Failed to generate order payload structure", e);
         }
     }
 
@@ -241,58 +255,6 @@ public class PaymentServiceImpl implements PaymentService {
 
             sellerReportService.updateSellerReport(report);
             log.info("Report updated for seller: {}", seller.getId());
-        }
-    }
-
-    private JSONObject buildPaymentLinkRequest(User user, Long amountInPaise, Long orderId) throws JSONException {
-        JSONObject paymentLinkRequest = new JSONObject();
-
-        paymentLinkRequest.put("amount", amountInPaise);
-        paymentLinkRequest.put("currency", "INR");
-
-        paymentLinkRequest.put("callback_url", successUrl + "/" + orderId);
-        paymentLinkRequest.put("callback_method", "get");
-
-        JSONObject customer = new JSONObject();
-        customer.put("name", user.getFullName());
-
-        if (user.getEmail() != null) {
-            customer.put("email", user.getEmail());
-        }
-        paymentLinkRequest.put("customer", customer);
-
-        JSONObject notify = new JSONObject();
-        notify.put("email", true);
-        notify.put("sms", true);
-        paymentLinkRequest.put("notify", notify);
-
-        return paymentLinkRequest;
-    }
-
-    private PaymentLink createMockPaymentLink(Long orderId, Long amount) {
-        log.info("Creating mock payment link for test mode. orderId: {}, amount: {} rupees", orderId, amount);
-        
-        try {
-            JSONObject mockPaymentLink = new JSONObject();
-            String mockLinkId = "pay_mock_" + orderId + "_" + System.currentTimeMillis();
-            String mockShortUrl = successUrl + "/" + orderId + "?mock_payment=true";
-            
-            mockPaymentLink.put("id", mockLinkId);
-            mockPaymentLink.put("short_url", mockShortUrl);
-            mockPaymentLink.put("amount", amount * 100);
-            mockPaymentLink.put("currency", "INR");
-            mockPaymentLink.put("status", "created");
-            
-            PaymentOrder paymentOrder = getPaymentOrderById(orderId);
-            paymentOrder.setPaymentLinkId(mockLinkId);
-            paymentOrderRepository.save(paymentOrder);
-            
-            log.info("Mock payment link created. Link ID: {}, Short URL: {}", mockLinkId, mockShortUrl);
-            
-            return new PaymentLink(mockPaymentLink);
-        } catch (Exception e) {
-            log.error("Failed to create mock payment link for orderId: {}", orderId, e);
-            throw new PaymentGatewayException("Failed to create mock payment link", e);
         }
     }
 }

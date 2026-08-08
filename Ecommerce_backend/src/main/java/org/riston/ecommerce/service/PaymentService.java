@@ -1,6 +1,6 @@
 package org.riston.ecommerce.service;
 
-import com.razorpay.PaymentLink;
+import org.json.JSONObject;
 import org.riston.ecommerce.model.Order;
 import org.riston.ecommerce.model.PaymentOrder;
 import org.riston.ecommerce.model.User;
@@ -17,6 +17,6 @@ public interface PaymentService {
     boolean proceedPaymentOrder(PaymentOrder paymentOrder,
                                 String paymentId);
 
-    PaymentLink createRazorpayPaymentLink(User user, Long amount, Long orderId);
+    JSONObject createRazorpayPaymentLink(User user, Long amount, Long orderId);
     void updateSellerReports(PaymentOrder paymentOrder);
 }

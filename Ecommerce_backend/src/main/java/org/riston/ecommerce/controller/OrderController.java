@@ -1,6 +1,5 @@
 package org.riston.ecommerce.controller;
 
-import com.razorpay.PaymentLink;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,7 +8,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.riston.ecommerce.annotation.ApiNotFoundResponse;
+import org.riston.ecommerce.exception.PaymentGatewayException;
 import org.riston.ecommerce.model.*;
 import org.riston.ecommerce.repository.PaymentOrderRepository;
 import org.riston.ecommerce.response.ApiResponseDto;
@@ -25,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 @RestController
@@ -71,18 +72,35 @@ public class OrderController {
         PaymentOrder paymentOrder = paymentService.createOrder(user, orders);
         log.info("Payment order created with ID: {}", paymentOrder.getId());
 
-        PaymentLink payment = paymentService.createRazorpayPaymentLink(user, paymentOrder.getAmount(), paymentOrder.getId());
-        log.info("Razorpay payment link created successfully");
+        JSONObject paymentOrderDetails;
+        try {
+            paymentOrderDetails = paymentService.createRazorpayPaymentLink(user, paymentOrder.getAmount(), paymentOrder.getId());
+            log.info("Razorpay order created successfully");
+        } catch (Exception e) {
+            log.error("Failed to create Razorpay order", e);
+            throw new PaymentGatewayException("Failed to create payment order", e);
+        }
 
-        PaymentLinkResponseDto res = new PaymentLinkResponseDto(
-                Objects.toString(payment.get("short_url"), null),
-                Objects.toString(payment.get("id"), null)
+        String orderId = paymentOrderDetails.optString("order_id", null);
+        paymentOrder.setPaymentLinkId(orderId);
+        paymentOrderRepository.save(paymentOrder);
+        log.info("Payment order updated with Razorpay order ID: {}", orderId);
+
+        JSONObject customerJson = paymentOrderDetails.optJSONObject("customer");
+        PaymentLinkResponseDto.CustomerDto customer = new PaymentLinkResponseDto.CustomerDto(
+                customerJson != null ? customerJson.optString("name", null) : null,
+                customerJson != null ? customerJson.optString("email", null) : null
         );
 
-        paymentOrder.setPaymentLinkId(Objects.toString(payment.get("id"), null));
-
-        paymentOrderRepository.save(paymentOrder);
-        log.info("Payment order updated with payment link ID: {}", paymentOrder.getPaymentLinkId());
+        PaymentLinkResponseDto res = new PaymentLinkResponseDto(
+                orderId,
+                paymentOrderDetails.optLong("amount", 0L),
+                paymentOrderDetails.optString("currency", "INR"),
+                paymentOrderDetails.optString("name", "Ecommerce Store"),
+                paymentOrderDetails.optString("description", "Payment"),
+                customer,
+                paymentOrderDetails.optString("callback_url", null)
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponseDto.success("Order created successfully", res));
     }

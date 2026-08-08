@@ -1,7 +1,7 @@
 package org.riston.ecommerce.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.razorpay.PaymentLink;
+import org.json.JSONObject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -130,8 +130,13 @@ class OrderControllerTest {
             Set<Order> orders = Set.of(order);
             PaymentOrder paymentOrder = samplePaymentOrder(7L, user);
 
-            PaymentLink mockPaymentLink = mock(PaymentLink.class);
-            when(mockPaymentLink.get(anyString())).thenReturn("https://rzp.io/i/abc123");
+            JSONObject mockPaymentLink = new JSONObject();
+            mockPaymentLink.put("order_id", "order_123");
+            mockPaymentLink.put("amount", 399900L);
+            mockPaymentLink.put("currency", "INR");
+            mockPaymentLink.put("name", "Ecommerce Store");
+            mockPaymentLink.put("description", "Payment");
+            mockPaymentLink.put("callback_url", "http://localhost:3000/payment-success/7");
 
             when(userService.findUserByJwtToken(anyString())).thenReturn(user);
             when(cartService.findUserCart(any(User.class))).thenReturn(cart);
@@ -161,8 +166,13 @@ class OrderControllerTest {
             Set<Order> orders = Set.of(order);
             PaymentOrder paymentOrder = samplePaymentOrder(7L, user);
 
-            PaymentLink mockPaymentLink = mock(PaymentLink.class);
-            when(mockPaymentLink.get(anyString())).thenReturn("plink_xyz789");
+            JSONObject mockPaymentLink = new JSONObject();
+            mockPaymentLink.put("order_id", "order_xyz789");
+            mockPaymentLink.put("amount", 399900L);
+            mockPaymentLink.put("currency", "INR");
+            mockPaymentLink.put("name", "Ecommerce Store");
+            mockPaymentLink.put("description", "Payment");
+            mockPaymentLink.put("callback_url", "http://localhost:3000/payment-success/7");
 
             when(userService.findUserByJwtToken(anyString())).thenReturn(user);
             when(cartService.findUserCart(any(User.class))).thenReturn(cart);
