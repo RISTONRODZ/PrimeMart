@@ -2,7 +2,6 @@ import {createAsyncThunk, createSlice, type PayloadAction} from "@reduxjs/toolki
 import {api} from "../../config/Api.ts";
 import type {Address} from "../../types/UserTypes.ts";
 import type {Order, OrderItem, OrderState} from "../../types/OrderTypes.ts";
-import axios from "axios";
 
 const initialState: OrderState = {
     orders: [],
@@ -83,7 +82,7 @@ export const fetchOrderItemById = createAsyncThunk<
 
 export const paymentSuccess = createAsyncThunk<
     any,
-    { paymentId: string; jwt: string,paymentLinkId:string },
+    { paymentId: string; jwt: string, paymentLinkId:string },
     { rejectValue: string }
 >('orders/paymentSuccess', async ({ paymentId, jwt, paymentLinkId }, { rejectWithValue }) => {
     try {

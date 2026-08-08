@@ -4,6 +4,8 @@ import AddressForm from "./AddressForm.tsx";
 import PricingCard from "./PricingCard.tsx";
 import { Close } from "@mui/icons-material";
 import type { Address } from "../../types/UserTypes.ts";
+import { useAppDispatch, useAppSelector } from "../../state/hooks.ts";
+import { fetchUserCart } from "../../state/customer/CartSlice.ts";
 
 const AddressModal = ({
                           isOpen,
@@ -19,7 +21,7 @@ const AddressModal = ({
     return (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="w-full max-w-lg max-h-[90vh] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 flex-shrink-0">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0">
                     <h2 className="text-xl font-bold text-slate-800">Add New Address</h2>
                     <button
                         onClick={onClose}
@@ -42,6 +44,8 @@ const AddressModal = ({
 };
 
 const Checkout = () => {
+    const dispatch = useAppDispatch();
+    const cart = useAppSelector(store => store.cart.cart);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [addresses, setAddresses] = useState<Address[]>(() => {
         const saved = localStorage.getItem("savedAddresses");
@@ -59,6 +63,10 @@ const Checkout = () => {
     useEffect(() => {
         localStorage.setItem("selectedAddressIndex", JSON.stringify(selectedIndex));
     }, [selectedIndex]);
+
+    useEffect(() => {
+        dispatch(fetchUserCart(localStorage.getItem("jwt") || ""));
+    }, [dispatch]);
 
     const handleAddressSave = (address: Address) => setAddresses([...addresses, address]);
     const handleAddressDelete = (indexToDelete: number) => {
@@ -112,9 +120,9 @@ const Checkout = () => {
                     <div className="lg:col-span-5 xl:col-span-4">
                         <div className="lg:sticky lg:top-8">
                             <PricingCard
-                                title="Standard Plan"
-                                price={1000}
-                                features={["Free Priority Shipping", "Exclusive 10% Discount", "24/7 Support Access"]}
+                                title="Order Summary"
+                                price={cart?.totalSellingPrice || 0}
+                                features={["Free Priority Shipping", "Secure Payment", "24/7 Support Access"]}
                                 isAddressSelected={selectedIndex !== null}
                                 selectedAddress={selectedIndex !== null ? addresses[selectedIndex] : null}
                             />

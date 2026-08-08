@@ -1,9 +1,11 @@
 package org.riston.ecommerce.service.impl;
 
+import com.razorpay.OrderClient;
 import com.razorpay.Payment;
-import com.razorpay.PaymentLink;
+import com.razorpay.PaymentClient;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,9 +33,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.Optional;
 import java.util.Set;
 
-import com.razorpay.PaymentClient;
-import com.razorpay.PaymentLinkClient;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -46,24 +45,23 @@ public class PaymentServiceImplTest {
     @Mock
     private RazorpayClient razorpayClient;
     @Mock
+    private PaymentClient paymentClient;
+    @Mock
+    private OrderClient orderClient;
+    @Mock
     private TransactionService transactionService;
     @Mock
     private SellerService sellerService;
     @Mock
     private SellerReportService sellerReportService;
-    @Mock
-    private PaymentClient payments;
-    @Mock
-    private PaymentLinkClient paymentLink;
     @InjectMocks
     private PaymentServiceImpl paymentService;
 
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(paymentService, "successUrl", "http://localhost:3000/payment-success");
-        ReflectionTestUtils.setField(paymentService, "maxAmount", 10000L);
-        razorpayClient.payments = this.payments;
-        razorpayClient.paymentLink = this.paymentLink;
+        ReflectionTestUtils.setField(razorpayClient, "payments", paymentClient);
+        ReflectionTestUtils.setField(razorpayClient, "orders", orderClient);
     }
 
     @Test
@@ -197,7 +195,7 @@ public class PaymentServiceImplTest {
         when(mockPayment.get("currency")).thenReturn("INR");
         when(mockPayment.get("amount")).thenReturn(50000L);
 
-        when(payments.fetch("pay_123")).thenReturn(mockPayment);
+        when(paymentClient.fetch("pay_123")).thenReturn(mockPayment);
 
         boolean result = paymentService.proceedPaymentOrder(paymentOrder, "pay_123");
 
@@ -216,7 +214,7 @@ public class PaymentServiceImplTest {
         Payment mockPayment = mock(Payment.class);
         when(mockPayment.get("status")).thenReturn("authorized");
 
-        when(payments.fetch("pay_123")).thenReturn(mockPayment);
+        when(paymentClient.fetch("pay_123")).thenReturn(mockPayment);
 
         boolean result = paymentService.proceedPaymentOrder(paymentOrder, "pay_123");
 
@@ -234,7 +232,7 @@ public class PaymentServiceImplTest {
         when(mockPayment.get("status")).thenReturn("captured");
         when(mockPayment.get("currency")).thenReturn("USD");
 
-        when(payments.fetch("pay_123")).thenReturn(mockPayment);
+        when(paymentClient.fetch("pay_123")).thenReturn(mockPayment);
 
         assertThrows(PaymentValidationException.class, () ->
                 paymentService.proceedPaymentOrder(paymentOrder, "pay_123")
@@ -254,7 +252,7 @@ public class PaymentServiceImplTest {
         when(mockPayment.get("currency")).thenReturn("INR");
         when(mockPayment.get("amount")).thenReturn(50000L);
 
-        when(payments.fetch("pay_123")).thenReturn(mockPayment);
+        when(paymentClient.fetch("pay_123")).thenReturn(mockPayment);
 
         assertThrows(PaymentValidationException.class, () ->
                 paymentService.proceedPaymentOrder(paymentOrder, "pay_123")
@@ -268,7 +266,7 @@ public class PaymentServiceImplTest {
         PaymentOrder paymentOrder = new PaymentOrder();
         paymentOrder.setStatus(PaymentOrderStatus.PENDING);
 
-        when(payments.fetch("pay_123")).thenThrow(new RazorpayException("API Failure"));
+        when(paymentClient.fetch("pay_123")).thenThrow(new RazorpayException("API Failure"));
 
         assertThrows(PaymentGatewayException.class, () ->
                 paymentService.proceedPaymentOrder(paymentOrder, "pay_123")
@@ -276,8 +274,8 @@ public class PaymentServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should successfully construct a payload request and create an external payment link")
-    void createRazorpayPaymentLink_Success() throws RazorpayException {
+    @DisplayName("Should successfully construct a payload request and create an external order")
+    void createRazorpayPaymentLink_Success() throws RazorpayException, JSONException {
         User user = new User();
         user.setFullName("John Doe");
         user.setEmail("johndoe@gmail.com");
@@ -285,22 +283,22 @@ public class PaymentServiceImplTest {
         PaymentOrder paymentOrder = new PaymentOrder();
         paymentOrder.setId(10L);
 
-        PaymentLink mockLink = mock(PaymentLink.class);
-        when(mockLink.get("id")).thenReturn("plink_98765");
+        com.razorpay.Order mockOrder = mock(com.razorpay.Order.class);
+        when(mockOrder.get("id")).thenReturn("order_98765");
 
-        when(paymentLink.create(any(JSONObject.class))).thenReturn(mockLink);
+        when(orderClient.create(any(JSONObject.class))).thenReturn(mockOrder);
         when(paymentOrderRepository.findById(10L)).thenReturn(Optional.of(paymentOrder));
 
-        PaymentLink result = paymentService.createRazorpayPaymentLink(user, 1500L, 10L);
+        JSONObject result = paymentService.createRazorpayPaymentLink(user, 1500L, 10L);
 
         assertNotNull(result);
-        assertEquals("plink_98765", result.get("id"));
-        assertEquals("plink_98765", paymentOrder.getPaymentLinkId());
+        assertEquals("order_98765", result.getString("order_id"));
+        assertEquals("order_98765", paymentOrder.getPaymentLinkId());
         verify(paymentOrderRepository, times(1)).save(paymentOrder);
     }
 
     @Test
-    @DisplayName("Should throw PaymentValidationException when initiating link creation with negative amount")
+    @DisplayName("Should throw PaymentValidationException when initiating order creation with negative amount")
     void createRazorpayPaymentLink_InvalidAmount_ThrowsValidationException() {
         User user = new User();
         assertThrows(PaymentValidationException.class, () ->
@@ -309,12 +307,12 @@ public class PaymentServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw PaymentGatewayException when Razorpay link creation fails")
+    @DisplayName("Should throw PaymentGatewayException when Razorpay order creation fails")
     void createRazorpayPaymentLink_RazorpayException_ThrowsGatewayException() throws RazorpayException {
         User user = new User();
         user.setFullName("John Doe");
 
-        when(paymentLink.create(any(JSONObject.class))).thenThrow(new RazorpayException("Link creation failed"));
+        when(orderClient.create(any(JSONObject.class))).thenThrow(new RazorpayException("Order creation failed"));
 
         assertThrows(PaymentGatewayException.class, () ->
                 paymentService.createRazorpayPaymentLink(user, 1500L, 10L)
