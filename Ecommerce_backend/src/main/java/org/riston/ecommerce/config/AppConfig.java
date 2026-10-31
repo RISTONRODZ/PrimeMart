@@ -45,6 +45,7 @@ public class AppConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/admin/deals").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/home-categories").permitAll()
                         .requestMatchers("/api/v1/auth/**", "/api/v1/home", "/api/v1/home-page").permitAll()
+                        .requestMatchers("/api/v1/system/**").permitAll()
                         .requestMatchers("/api/v1/seller/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews").permitAll()
                         .requestMatchers("/api/v1/ai/**").permitAll()
